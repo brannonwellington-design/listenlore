@@ -688,3 +688,189 @@ button.recRow:hover {
     line-height: 44px;
   }
 }
+
+/* ---- constellation view (Paper dark night sky) ---- */
+.skyWrap {
+  position: relative;
+  margin: 24px 0 96px 0;
+  background: #130f06;
+  border-radius: 16px;
+  overflow: hidden;
+}
+.skyLegend {
+  position: absolute;
+  top: 16px;
+  left: 20px;
+  right: 20px;
+  display: flex;
+  gap: 24px;
+  align-items: center;
+  font-size: 12px;
+  line-height: 16px;
+  color: #9e9b94;
+  pointer-events: none;
+  z-index: 2;
+}
+.skyLegend > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.skyHint {
+  margin-left: auto;
+}
+.skyDotMilestone {
+  width: 12px;
+  height: 12px;
+  border-radius: 6px;
+  background: #3354ff;
+  display: inline-block;
+}
+.skyDotMoment {
+  width: 8px;
+  height: 8px;
+  border-radius: 4px;
+  border: 1px solid #f9f4eb;
+  display: inline-block;
+}
+.sky {
+  display: block;
+  width: 100%;
+  height: min(76vh, 760px);
+  cursor: grab;
+  touch-action: none;
+}
+.sky:active {
+  cursor: grabbing;
+}
+.skyYearLine {
+  stroke: #30291d;
+  stroke-width: 1;
+}
+.skyYearText {
+  fill: #504e49;
+  font-size: 20px;
+  font-variant-numeric: tabular-nums;
+}
+.skyEdge {
+  stroke: #f9f4eb;
+  stroke-opacity: 0.14;
+  stroke-width: 1;
+}
+.skyEdgeActive {
+  stroke: #3354ff;
+  stroke-opacity: 0.8;
+  stroke-width: 1.5;
+}
+.skyNode {
+  cursor: pointer;
+}
+.skyMilestone {
+  fill: #201c13;
+  stroke: #3354ff;
+  stroke-width: 2;
+}
+.skyMilestoneUpcoming {
+  fill: #3354ff;
+  stroke: #3354ff;
+  stroke-width: 2;
+}
+.skyPulse {
+  fill: none;
+  stroke: #3354ff;
+  stroke-opacity: 0.35;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .skyPulse {
+    animation: skypulse 2.8s ease-out infinite;
+    transform-origin: center;
+    transform-box: fill-box;
+  }
+  @keyframes skypulse {
+    0% {
+      transform: scale(0.85);
+      stroke-opacity: 0.45;
+    }
+    100% {
+      transform: scale(1.5);
+      stroke-opacity: 0;
+    }
+  }
+}
+.skyLabel {
+  fill: #f9f4eb;
+  font-size: 12px;
+  text-anchor: middle;
+  paint-order: stroke;
+  stroke: #130f06;
+  stroke-width: 4px;
+  pointer-events: none;
+}
+.skyMomentRing {
+  fill: #130f06;
+  stroke: #9e9b94;
+  stroke-width: 1;
+}
+.skyMomentDot {
+  fill: #f9f4eb;
+}
+.skyCard {
+  position: absolute;
+  right: 20px;
+  bottom: 20px;
+  width: 300px;
+  background: #201c13;
+  border: 1px solid #30291d;
+  border-radius: 12px;
+  padding: 20px;
+  color: #f9f4eb;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  z-index: 2;
+}
+.skyCardClose {
+  position: absolute;
+  top: 8px;
+  right: 12px;
+  color: #9e9b94;
+  font-size: 16px;
+}
+.skyCardKicker {
+  font-size: 12px;
+  line-height: 16px;
+  color: #9e9b94;
+}
+.skyCardTitle {
+  font-size: 18px;
+  line-height: 24px;
+}
+.skyCardBody {
+  font-size: 14px;
+  line-height: 20px;
+  color: #9e9b94;
+}
+.skyCardLink {
+  font-size: 14px;
+  line-height: 20px;
+  color: #3354ff;
+}
+
+@media (max-width: 760px) {
+  .skyWrap {
+    margin: 16px -16px 48px -16px;
+    border-radius: 0;
+  }
+  .skyCard {
+    left: 16px;
+    right: 16px;
+    width: auto;
+  }
+  .skyLegend {
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .skyHint {
+    margin-left: 0;
+  }
+}

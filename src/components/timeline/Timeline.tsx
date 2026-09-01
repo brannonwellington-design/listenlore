@@ -5,20 +5,24 @@ import { useEffect, useRef, useState } from "react";
 import type { TimelineData } from "@/lib/types";
 import s from "../timeline.module.css";
 import AlbumView from "./AlbumView";
+import ConstellationView from "./ConstellationView";
 import RecordView from "./RecordView";
 import RegisterView from "./RegisterView";
 import type { ViewerInfo } from "./shared";
 
-type ViewMode = "register" | "record" | "album";
+type ViewMode = "register" | "record" | "album" | "constellation";
 
 const VIEW_LABELS: Record<ViewMode, string> = {
   register: "Register",
   record: "Record",
   album: "Album",
+  constellation: "Constellation",
 };
 
 function isView(v: string | null): v is ViewMode {
-  return v === "register" || v === "record" || v === "album";
+  return (
+    v === "register" || v === "record" || v === "album" || v === "constellation"
+  );
 }
 
 function scrollToMoment(id: string) {
@@ -149,6 +153,7 @@ export default function Timeline({
         {view === "register" && <RegisterView data={data} viewer={viewer} />}
         {view === "record" && <RecordView data={data} viewer={viewer} />}
         {view === "album" && <AlbumView data={data} />}
+        {view === "constellation" && <ConstellationView data={data} />}
       </div>
     </div>
   );
