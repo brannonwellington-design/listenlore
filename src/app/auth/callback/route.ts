@@ -46,11 +46,35 @@ export async function GET(request: NextRequest) {
         .eq("id", existing.id);
     }
   } else {
-    await service.from("people").insert({
-      full_name: fullName,
-      email,
-      auth_user_id: data.user.id,
+    // No email match — this person may already exist as an unclaimed row
+    // created by someone tagging them before their first sign-in. Claim it
+    // when exactly one unclaimed row matches their name (full name, or
+    // unique first name); ambiguity falls through to a fresh row that an
+    // admin can merge later.
+    const { data: unclaimed } = await service
+      .from("people")
+      .select("id, full_name")
+      .is("auth_user_id", null)
+      .is("email", null);
+    const wanted = fullName.trim().toLowerCase();
+    const first = wanted.split(" ")[0];
+    const matches = (unclaimed ?? []).filter((p) => {
+      const n = p.full_name.trim().toLowerCase();
+      return n === wanted || n === first;
     });
+
+    if (matches.length === 1) {
+      await service
+        .from("people")
+        .update({ full_name: fullName, email, auth_user_id: data.user.id })
+        .eq("id", matches[0].id);
+    } else {
+      await service.from("people").insert({
+        full_name: fullName,
+        email,
+        auth_user_id: data.user.id,
+      });
+    }
   }
 
   return NextResponse.redirect(`${origin}${next.startsWith("/") ? next : "/"}`);
