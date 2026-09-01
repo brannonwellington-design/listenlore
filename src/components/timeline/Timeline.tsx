@@ -16,7 +16,7 @@ const VIEW_LABELS: Record<ViewMode, string> = {
   register: "Register",
   record: "Record",
   album: "Album",
-  constellation: "Constellation",
+  constellation: "Nodes",
 };
 
 function isView(v: string | null): v is ViewMode {

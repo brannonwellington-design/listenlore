@@ -223,7 +223,7 @@ export default function ConstellationView({ data }: { data: TimelineData }) {
         <span>
           <span className={s.skyDotMoment} /> Moments
         </span>
-        <span className={s.skyHint}>Drag to pan · scroll to zoom · click a star</span>
+        <span className={s.skyHint}>Drag to pan · scroll to zoom · click a node</span>
       </div>
       <svg
         ref={svgRef}
@@ -235,7 +235,7 @@ export default function ConstellationView({ data }: { data: TimelineData }) {
         onPointerUp={onPointerUp}
         onPointerLeave={onPointerUp}
         role="img"
-        aria-label="Constellation of milestones and moments"
+        aria-label="Connected graph of milestones and moments"
       >
         <defs>
           {nodes
@@ -273,7 +273,7 @@ export default function ConstellationView({ data }: { data: TimelineData }) {
               />
             );
           })}
-          {nodes.map((n) => (
+          {nodes.map((n, i) => (
             <g
               key={n.id}
               transform={`translate(${n.x} ${n.y})`}
@@ -283,6 +283,10 @@ export default function ConstellationView({ data }: { data: TimelineData }) {
                 setSelected(selected?.id === n.id ? null : n);
               }}
             >
+              <g
+                className={s.nodeLive}
+                style={{ animationDelay: `${-((i % 9) * 0.9)}s` }}
+              >
               {n.kind === "milestone" ? (
                 <>
                   {n.upcoming && <circle r={n.r + 8} className={s.skyPulse} />}
@@ -307,6 +311,7 @@ export default function ConstellationView({ data }: { data: TimelineData }) {
               ) : (
                 <circle r={5} className={s.skyMomentDot} />
               )}
+              </g>
             </g>
           ))}
           {nodes
