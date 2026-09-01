@@ -1,7 +1,9 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import AddPhotos from "@/components/AddPhotos";
 import { getViewer } from "@/lib/auth";
 import { serviceClient } from "@/lib/supabase/service";
+import { MAX_PHOTOS_PER_MOMENT } from "@/lib/upload";
 
 export const dynamic = "force-dynamic";
 
@@ -128,6 +130,14 @@ export default async function MomentPage({
         >
           {moment.body}
         </p>
+      )}
+      {canEdit && (
+        <div style={{ marginTop: 24 }}>
+          <AddPhotos
+            momentId={id}
+            remaining={MAX_PHOTOS_PER_MOMENT - mediaRows.length}
+          />
+        </div>
       )}
       <div style={{ display: "flex", flexDirection: "column", gap: 24, marginTop: 40 }}>
         {mediaRows.map((m) => {

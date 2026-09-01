@@ -4,6 +4,8 @@ import { useActionState } from "react";
 import s from "./form.module.css";
 import PhotoPicker from "./PhotoPicker";
 import TagPicker from "./TagPicker";
+import { usePhotoUploads } from "./usePhotoUploads";
+import { MAX_PHOTOS_PER_MOMENT } from "@/lib/upload";
 
 export interface Option {
   id: string;
@@ -41,6 +43,7 @@ export default function MomentForm({
   submitLabel: string;
 }) {
   const [state, formAction, pending] = useActionState(action, null);
+  const uploads = usePhotoUploads(MAX_PHOTOS_PER_MOMENT);
 
   return (
     <form action={formAction} className={s.form}>
@@ -144,12 +147,20 @@ export default function MomentForm({
 
       <TagPicker people={people} defaults={defaults.tagged} />
 
-      <PhotoPicker />
+      <PhotoPicker uploads={uploads} maxCount={MAX_PHOTOS_PER_MOMENT} />
 
       {state?.error && <p className={s.error}>{state.error}</p>}
 
-      <button type="submit" disabled={pending} className={s.submit}>
-        {pending ? "Saving…" : submitLabel}
+      <button
+        type="submit"
+        disabled={pending || uploads.pending}
+        className={s.submit}
+      >
+        {uploads.pending
+          ? "Uploading photos…"
+          : pending
+            ? "Saving…"
+            : submitLabel}
       </button>
     </form>
   );

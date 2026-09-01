@@ -14,13 +14,25 @@ interface Tag {
 export default function TagPicker({
   people,
   defaults = [],
+  onChange,
 }: {
   people: Option[];
   defaults?: string[];
+  onChange?: (selection: { ids: string[]; newNames: string[] }) => void;
 }) {
-  const [tags, setTags] = useState<Tag[]>(
+  const [tags, setTagsRaw] = useState<Tag[]>(
     people.filter((p) => defaults.includes(p.id)).map((p) => ({ id: p.id, label: p.label }))
   );
+  const setTags = (update: (prev: Tag[]) => Tag[]) => {
+    setTagsRaw((prev) => {
+      const next = update(prev);
+      onChange?.({
+        ids: next.filter((t) => t.id).map((t) => t.id!),
+        newNames: next.filter((t) => !t.id).map((t) => t.label),
+      });
+      return next;
+    });
+  };
   const [query, setQuery] = useState("");
   const [open, setOpen] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);

@@ -143,3 +143,9 @@
 .comboItem:hover {
   background: var(--surface-secondary);
 }
+
+.previewStatus {
+  font-size: 10px;
+  line-height: 16px;
+  color: var(--content-secondary);
+}

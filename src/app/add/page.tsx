@@ -1,28 +1,11 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getViewer } from "@/lib/auth";
-import { serviceClient } from "@/lib/supabase/service";
+import { formOptions } from "@/lib/form-options";
 import MomentForm from "@/components/MomentForm";
 import { createMoment } from "./actions";
 
 export const dynamic = "force-dynamic";
-
-async function formOptions() {
-  const service = serviceClient();
-  const [categories, milestones, people] = await Promise.all([
-    service.from("categories").select("id, label").order("sort"),
-    service.from("milestones").select("id, title, date_start").order("date_start", { ascending: true, nullsFirst: false }),
-    service.from("people").select("id, full_name").order("full_name"),
-  ]);
-  return {
-    categories: (categories.data ?? []).map((c) => ({ id: c.id, label: c.label })),
-    milestones: (milestones.data ?? []).map((m) => ({
-      id: m.id,
-      label: m.date_start ? `${m.title} (${m.date_start.slice(0, 7)})` : m.title,
-    })),
-    people: (people.data ?? []).map((p) => ({ id: p.id, label: p.full_name })),
-  };
-}
 
 export default async function AddMomentPage() {
   const viewer = await getViewer();
@@ -43,12 +26,18 @@ export default async function AddMomentPage() {
           fontSize: 16,
           lineHeight: "24px",
           color: "var(--content-secondary)",
-          margin: "16px 0 40px 0",
+          margin: "16px 0 8px 0",
           maxWidth: 480,
         }}
       >
         Posting as {viewer.name}. It goes live on the timeline right away, and
         you can edit or remove it whenever.
+      </p>
+      <p style={{ fontSize: 14, lineHeight: "20px", margin: "0 0 40px 0" }}>
+        Adding a lot at once?{" "}
+        <Link href="/add/bulk" style={{ color: "var(--content-brand)" }}>
+          Switch to bulk mode →
+        </Link>
       </p>
       <MomentForm
         action={createMoment}

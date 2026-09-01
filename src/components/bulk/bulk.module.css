@@ -1,0 +1,225 @@
+.dropZone {
+  border: 2px dashed var(--surface-tertiary);
+  border-radius: 12px;
+  background: var(--surface-highlight);
+  padding: 64px 32px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  cursor: pointer;
+}
+.dropZoneActive {
+  border-color: var(--content-brand);
+  background: var(--surface-brand-secondary);
+}
+.dropTitle {
+  font-size: 24px;
+  line-height: 28px;
+}
+.dropNote {
+  font-size: 14px;
+  line-height: 20px;
+  color: var(--content-secondary);
+  max-width: 400px;
+}
+
+.choice {
+  display: flex;
+  gap: 24px;
+  margin-top: 24px;
+}
+.choiceBtn {
+  flex: 1;
+  border: 1px solid var(--surface-tertiary);
+  border-radius: 12px;
+  background: var(--surface-highlight);
+  padding: 32px 24px;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.choiceBtn:hover {
+  border-color: var(--content-brand);
+}
+.choiceTitle {
+  font-size: 18px;
+  line-height: 24px;
+}
+.choiceNote {
+  font-size: 14px;
+  line-height: 20px;
+  color: var(--content-secondary);
+}
+
+.defaultsBar {
+  background: var(--surface-highlight);
+  border: 1px solid var(--surface-tertiary);
+  border-radius: 12px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: 24px 0;
+}
+.defaultsTitle {
+  font-size: 14px;
+  line-height: 20px;
+}
+.defaultsNote {
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--content-secondary);
+}
+.defaultsRow {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  align-items: flex-end;
+}
+.defaultsField {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 160px;
+  flex: 1;
+}
+.applyBtn {
+  background: var(--surface-secondary);
+  color: var(--content-primary);
+  font-size: 14px;
+  line-height: 20px;
+  padding: 10px 16px;
+  border-radius: 8px;
+  flex: none;
+}
+.applyBtn:hover {
+  background: var(--surface-tertiary);
+}
+
+.toolbar {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+.toolBtn {
+  font-size: 14px;
+  line-height: 20px;
+  color: var(--content-brand);
+}
+.toolBtn:disabled {
+  color: var(--content-disabled);
+}
+.toolCount {
+  font-size: 14px;
+  line-height: 20px;
+  color: var(--content-secondary);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 24px;
+}
+.card {
+  background: var(--surface-highlight);
+  border: 1px solid var(--surface-tertiary);
+  border-radius: 12px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.cardSelected {
+  border-color: var(--content-brand);
+  outline: 1px solid var(--content-brand);
+}
+.cardHead {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--content-secondary);
+}
+.cardHead label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.cardRemove {
+  margin-left: auto;
+  color: var(--content-secondary);
+  font-size: 12px;
+  text-decoration: underline;
+}
+.cardPhotos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.cardPhoto {
+  position: relative;
+}
+.cardPhotoImg {
+  width: 72px;
+  height: 72px;
+  object-fit: cover;
+  border-radius: 4px;
+  display: block;
+}
+.cardPhotoDim {
+  opacity: 0.55;
+}
+.cardPhotoRemove {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  width: 20px;
+  height: 20px;
+  border-radius: 10px;
+  background: var(--surface-inverse-primary);
+  color: var(--content-inverse-primary);
+  font-size: 12px;
+  line-height: 20px;
+  text-align: center;
+}
+.cardProgress {
+  font-size: 10px;
+  line-height: 16px;
+  color: var(--content-secondary);
+  text-align: center;
+}
+.split {
+  align-self: flex-start;
+  font-size: 12px;
+  color: var(--content-brand);
+  text-decoration: underline;
+}
+
+.footer {
+  position: sticky;
+  bottom: 0;
+  background: var(--surface-primary);
+  border-top: 1px solid var(--surface-tertiary);
+  padding: 16px 0;
+  margin-top: 32px;
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.footerNote {
+  font-size: 14px;
+  line-height: 20px;
+  color: var(--content-secondary);
+}
+.error {
+  font-size: 14px;
+  line-height: 20px;
+  color: #b82214;
+}

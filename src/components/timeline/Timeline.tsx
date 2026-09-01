@@ -25,12 +25,18 @@ function isView(v: string | null): v is ViewMode {
   );
 }
 
-function scrollToMoment(id: string) {
-  const el = document.querySelector(`[data-moment-id="${id}"]`);
-  if (!el) return;
+function scrollToMoment(ids: string) {
+  const list = ids.split(",").filter(Boolean);
+  let first: Element | null = null;
+  for (const id of list) {
+    const el = document.querySelector(`[data-moment-id="${id}"]`);
+    if (!el) continue;
+    if (!first) first = el;
+    el.classList.add(s.justAdded);
+  }
+  if (!first) return;
   const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  el.scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "center" });
-  el.classList.add(s.justAdded);
+  first.scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "center" });
 }
 
 export default function Timeline({
