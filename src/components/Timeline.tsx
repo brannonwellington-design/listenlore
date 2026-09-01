@@ -109,13 +109,12 @@ export default function Timeline({
           <span className={s.wordmarkSlash}>/</span>
           <span className={s.wordmarkSub}>Lore</span>
         </div>
-        <div style={{ display: "flex", alignItems: "center", gap: 24 }}>
-          <div className={s.switcher} role="tablist" aria-label="Timeline view">
+        <div className={s.headerActions}>
+          <div className={s.switcher} aria-label="Timeline view">
             {(Object.keys(VIEW_LABELS) as ViewMode[]).map((v) => (
               <button
                 key={v}
-                role="tab"
-                aria-selected={view === v}
+                aria-pressed={view === v}
                 className={`${s.switchBtn} ${view === v ? s.switchBtnActive : ""}`}
                 onClick={() => pick(v)}
               >
@@ -123,22 +122,22 @@ export default function Timeline({
               </button>
             ))}
           </div>
+          <Link href="/add" className={s.addBtn}>
+            Add a Moment
+          </Link>
           {viewer ? (
-            <div style={{ display: "flex", alignItems: "center", gap: 16, fontSize: 14 }}>
-              <Link href="/add">Add a Moment</Link>
-              <form action="/auth/signout" method="post">
-                <button
-                  type="submit"
-                  style={{ color: "var(--content-disabled)", fontSize: 12 }}
-                  title={`Signed in as ${viewer.name}`}
-                >
-                  Sign out
-                </button>
-              </form>
-            </div>
+            <form action="/auth/signout" method="post">
+              <button
+                type="submit"
+                className={s.authNote}
+                title={`Signed in as ${viewer.name}`}
+              >
+                Sign out
+              </button>
+            </form>
           ) : (
-            <Link href="/login" style={{ fontSize: 14 }}>
-              Sign in to add moments
+            <Link href="/login" className={s.authNote}>
+              Sign in
             </Link>
           )}
         </div>
@@ -195,12 +194,16 @@ function RegisterMilestone({ ms, viewer }: { ms: Milestone; viewer: ViewerInfo |
             Upcoming{ms.location ? ` · ${ms.location}` : ""}
           </div>
         </div>
-        <div className={s.bandBody}>
+        <div className={`${s.bandBody} ${s.bandBodyWide}`}>
           <h2 className={s.bandTitle}>{ms.title}</h2>
           {ms.blurb && <p className={s.upcomingBlurb}>{ms.blurb}</p>}
-        </div>
-        <div style={{ gridColumn: "10 / 13", display: "flex", justifyContent: "flex-end" }}>
-          <span className={s.cta}>Add your moment</span>
+          {ms.moments.length > 0 && (
+            <div className={s.momentRail}>
+              {ms.moments.map((m) => (
+                <MomentRow key={m.id} m={m} viewer={viewer} />
+              ))}
+            </div>
+          )}
         </div>
       </div>
     );
@@ -326,14 +329,22 @@ function RegisterView({ data, viewer }: { data: TimelineData; viewer: ViewerInfo
         <section style={{ marginTop: 96 }}>
           <h3 className={s.sectionTitle}>Awaiting Their Place in Time</h3>
           <p className={s.sectionNote}>
-            Milestones we know happened — dates coming soon.
+            Milestones we know happened — dates coming soon. Their moments are
+            already gathering.
           </p>
-          <div className={s.awaitList}>
-            {undated.map((ms) => (
-              <span key={ms.id} className={s.awaitChip}>
-                {ms.title}
-              </span>
+          {undated
+            .filter((ms) => ms.moments.length > 0)
+            .map((ms) => (
+              <RegisterMilestone key={ms.id} ms={ms} viewer={viewer} />
             ))}
+          <div className={s.awaitList}>
+            {undated
+              .filter((ms) => ms.moments.length === 0)
+              .map((ms) => (
+                <span key={ms.id} className={s.awaitChip}>
+                  {ms.title}
+                </span>
+              ))}
           </div>
         </section>
       )}
@@ -352,25 +363,30 @@ function RecordRow({ ms, viewer }: { ms: Milestone; viewer: ViewerInfo | null })
       : fmtDate(ms)
     : "—";
 
-  return (
-    <div className={open ? s.recExpanded : undefined}>
-      <button
-        className={`grid12 ${s.recRow} ${ms.upcoming ? s.recUpcoming : ""}`}
-        onClick={() => canOpen && setOpen(!open)}
-        aria-expanded={canOpen ? open : undefined}
-      >
-        <span className={`${s.recDate} num`}>{dateCell}</span>
+  const rowContent = (
+    <>
+      <span className={`${s.recDate} num`}>{dateCell}</span>
         <span className={s.recCat}>{ms.upcoming ? "Upcoming" : ms.category}</span>
         <span className={s.recTitle}>{ms.title}</span>
         <span className={s.recLoc}>{ms.location}</span>
         <span className={s.recCount}>
-          {ms.upcoming
-            ? "Add yours →"
-            : ms.moments.length > 0
-              ? `${ms.moments.length} moment${ms.moments.length > 1 ? "s" : ""} ${open ? "↑" : "↓"}`
-              : ""}
+          {ms.moments.length > 0
+            ? `${ms.moments.length} moment${ms.moments.length > 1 ? "s" : ""} ${open ? "↑" : "↓"}`
+            : ""}
         </span>
-      </button>
+    </>
+  );
+  const rowClass = `grid12 ${s.recRow} ${ms.upcoming ? s.recUpcoming : ""}`;
+
+  return (
+    <div className={open ? s.recExpanded : undefined}>
+      {canOpen ? (
+        <button className={rowClass} onClick={() => setOpen(!open)} aria-expanded={open}>
+          {rowContent}
+        </button>
+      ) : (
+        <div className={rowClass}>{rowContent}</div>
+      )}
       {open && (
         <div className={`grid12 ${s.recMoments}`}>
           <div className={s.recMomentList}>
@@ -543,10 +559,7 @@ function AlbumView({ data }: { data: TimelineData }) {
             {fmtDate(ms)} · Upcoming
           </div>
           <h2 className={s.albumInviteTitle}>{ms.title}</h2>
-          <p className={s.albumInviteLead}>
-            This page is waiting for your moments. Bring back stories.
-          </p>
-          <span className={s.albumInviteCta}>Add your moment</span>
+          {ms.blurb && <p className={s.albumInviteLead}>{ms.blurb}</p>}
         </div>
       ))}
     </div>

@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { createClient as createSupabase } from "@supabase/supabase-js";
 import { getViewer } from "@/lib/auth";
 import MomentForm from "@/components/MomentForm";
+import ConfirmSubmit from "@/components/ConfirmSubmit";
 import { updateMoment, deleteMedia, deleteMoment } from "@/app/add/actions";
 
 export const dynamic = "force-dynamic";
@@ -104,9 +105,12 @@ export default async function EditMomentPage({
         style={{ marginTop: 48, borderTop: "1px solid var(--surface-tertiary)", paddingTop: 24 }}
       >
         <input type="hidden" name="moment_id" value={id} />
-        <button type="submit" style={{ fontSize: 14, color: "#B82214" }}>
+        <ConfirmSubmit
+          message="Delete this moment and its photos for good? This can’t be undone."
+          style={{ fontSize: 14, color: "#B82214" }}
+        >
           Delete this moment permanently
-        </button>
+        </ConfirmSubmit>
       </form>
     </div>
   );
