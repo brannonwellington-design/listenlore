@@ -74,6 +74,17 @@ Launch target: **live before Sept 8, 2026** (Hawaii offsite, Sept 8–11).
 - **Sept 7** — polish, seed Hawaii milestone, launch.
 - **Post-launch** — node view, voice-over, study→moment pipeline.
 
+## Deployment
+
+- Vercel project `listenlore` (`prj_3p8nvxND5MH4wQM06qyNmRs0qvXv`) on the Listen
+  Labs team; production branch is `claude/listen-labs-planning-iq847x`, so every
+  push auto-deploys. Live at https://listenlore.preview.listenlabs.com.
+- Requires env vars on Vercel (`NEXT_PUBLIC_SUPABASE_URL`,
+  `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SECRET_KEY`) — the page 500s
+  without them by design; no data can render or leak.
+- Deployment Protection (Vercel Authentication, all deployments) must be enabled
+  in the dashboard — Claude's access was denied for that setting.
+
 ## Open items
 
 1. **Network policy (blocker):** session environment must allow `*.supabase.co`,
