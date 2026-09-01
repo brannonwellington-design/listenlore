@@ -2,6 +2,8 @@
 
 import { useActionState } from "react";
 import s from "./form.module.css";
+import PhotoPicker from "./PhotoPicker";
+import TagPicker from "./TagPicker";
 
 export interface Option {
   id: string;
@@ -140,33 +142,9 @@ export default function MomentForm({
         </label>
       </div>
 
-      <fieldset className={s.fieldset}>
-        <legend className={s.label}>Who was part of it? (optional)</legend>
-        <div className={s.tagGrid}>
-          {people.map((p) => (
-            <label key={p.id} className={s.tag}>
-              <input
-                type="checkbox"
-                name="tagged"
-                value={p.id}
-                defaultChecked={defaults.tagged?.includes(p.id)}
-              />
-              <span>{p.label}</span>
-            </label>
-          ))}
-        </div>
-      </fieldset>
+      <TagPicker people={people} defaults={defaults.tagged} />
 
-      <label className={s.field}>
-        <span className={s.label}>Photos (optional — up to 6, JPEG/PNG/WebP/GIF)</span>
-        <input
-          type="file"
-          name="photos"
-          accept="image/jpeg,image/png,image/webp,image/gif"
-          multiple
-          className={s.input}
-        />
-      </label>
+      <PhotoPicker />
 
       {state?.error && <p className={s.error}>{state.error}</p>}
 

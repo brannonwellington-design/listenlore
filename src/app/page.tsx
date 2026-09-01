@@ -1,4 +1,4 @@
-import Timeline from "@/components/Timeline";
+import Timeline from "@/components/timeline/Timeline";
 import { getViewer } from "@/lib/auth";
 import { getTimelineData } from "@/lib/data";
 

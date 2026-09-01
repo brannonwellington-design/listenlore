@@ -10,6 +10,8 @@ export interface MediaItem {
   url: string;
   caption: string | null;
   sort: number;
+  width: number | null;
+  height: number | null;
 }
 
 export interface Moment {

@@ -1,6 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { createClient as createSupabase } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
+import { serviceClient } from "@/lib/supabase/service";
 import { ALLOWED_DOMAIN } from "@/lib/auth";
 
 export async function GET(request: NextRequest) {
@@ -26,11 +26,7 @@ export async function GET(request: NextRequest) {
 
   // Link (or create) this user's people row so authorship and tagging
   // resolve to one identity. Seeded rows match on email.
-  const service = createSupabase(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SECRET_KEY!,
-    { auth: { persistSession: false } }
-  );
+  const service = serviceClient();
   const fullName =
     (data.user.user_metadata?.full_name as string) ??
     (data.user.user_metadata?.name as string) ??

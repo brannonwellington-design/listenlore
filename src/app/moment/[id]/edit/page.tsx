@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { createClient as createSupabase } from "@supabase/supabase-js";
 import { getViewer } from "@/lib/auth";
+import { serviceClient } from "@/lib/supabase/service";
 import MomentForm from "@/components/MomentForm";
 import ConfirmSubmit from "@/components/ConfirmSubmit";
 import { updateMoment, deleteMedia, deleteMoment } from "@/app/add/actions";
@@ -17,11 +17,7 @@ export default async function EditMomentPage({
   const viewer = await getViewer();
   if (!viewer) redirect(`/login?next=/moment/${id}/edit`);
 
-  const service = createSupabase(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SECRET_KEY!,
-    { auth: { persistSession: false } }
-  );
+  const service = serviceClient();
 
   const [{ data: moment }, categories, milestones, people, tags, media] =
     await Promise.all([

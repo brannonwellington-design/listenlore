@@ -1,5 +1,5 @@
 import "server-only";
-import { createClient } from "@supabase/supabase-js";
+import { serviceClient } from "./supabase/service";
 import type {
   DatePrecision,
   MediaItem,
@@ -8,31 +8,10 @@ import type {
   TimelineData,
 } from "./types";
 
-// In environments that route egress through an HTTP proxy (the Claude Code
-// dev sandbox), Node's fetch ignores HTTPS_PROXY — undici's dispatcher makes
-// it comply. Vercel sets no HTTPS_PROXY, so this is inert in production.
-function proxyFetch(): typeof fetch | undefined {
-  const proxy = process.env.HTTPS_PROXY ?? process.env.https_proxy;
-  if (!proxy) return undefined;
-  // eslint-disable-next-line @typescript-eslint/no-require-imports
-  const { ProxyAgent, fetch: undiciFetch } = require("undici");
-  const dispatcher = new ProxyAgent(proxy);
-  return ((input: RequestInfo | URL, init?: RequestInit) =>
-    undiciFetch(input as never, { ...(init as object), dispatcher })) as unknown as typeof fetch;
-}
 
-// Server-side client with the secret key: reads bypass RLS. Fine while the
-// whole deployment sits behind the Vercel/Rippling wall; swaps to per-user
-// sessions when Supabase auth lands.
-function serviceClient() {
-  return createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SECRET_KEY!,
-    { auth: { persistSession: false }, global: { fetch: proxyFetch() } }
-  );
-}
-
-const SIGNED_URL_TTL = 60 * 60 * 8; // 8 hours; pages re-render fresh URLs
+// A week: long enough that a tab left open across the offsite still
+// shows photos; pages re-render fresh URLs on every request anyway.
+const SIGNED_URL_TTL = 60 * 60 * 24 * 7;
 
 interface MediaRow {
   id: string;
@@ -42,6 +21,8 @@ interface MediaRow {
   storage_path: string;
   caption: string | null;
   sort: number;
+  width: number | null;
+  height: number | null;
 }
 
 export async function getTimelineData(): Promise<TimelineData> {
@@ -58,7 +39,7 @@ export async function getTimelineData(): Promise<TimelineData> {
         .select("id, title, body, milestone_id, event_date, date_precision, location, created_by, categories(label), author:people!moments_author_person_id_fkey(full_name)"),
       db
         .from("media")
-        .select("id, owner_type, milestone_id, moment_id, storage_path, caption, sort")
+        .select("id, owner_type, milestone_id, moment_id, storage_path, caption, sort, width, height")
         .order("sort"),
       db.from("people").select("id, full_name"),
       db.from("moment_people").select("moment_id, person_id"),
@@ -84,13 +65,26 @@ export async function getTimelineData(): Promise<TimelineData> {
     }
   }
 
+  // Group media once instead of filtering the whole list per owner.
+  const mediaByOwner = new Map<string, MediaItem[]>();
+  for (const m of mediaRows) {
+    const ownerId = m.owner_type === "milestone" ? m.milestone_id : m.moment_id;
+    const url = signedByPath.get(m.storage_path);
+    if (!ownerId || !url) continue;
+    const key = `${m.owner_type}:${ownerId}`;
+    const list = mediaByOwner.get(key) ?? [];
+    list.push({
+      id: m.id,
+      url,
+      caption: m.caption,
+      sort: m.sort,
+      width: m.width,
+      height: m.height,
+    });
+    mediaByOwner.set(key, list);
+  }
   const mediaFor = (kind: "milestone" | "moment", id: string): MediaItem[] =>
-    mediaRows
-      .filter((m) => m.owner_type === kind && (kind === "milestone" ? m.milestone_id : m.moment_id) === id)
-      .flatMap((m) => {
-        const url = signedByPath.get(m.storage_path);
-        return url ? [{ id: m.id, url, caption: m.caption, sort: m.sort }] : [];
-      });
+    mediaByOwner.get(`${kind}:${id}`) ?? [];
 
   const personName = new Map(
     (peopleRes.data ?? []).map((p) => [p.id as string, p.full_name as string])
@@ -126,6 +120,17 @@ export async function getTimelineData(): Promise<TimelineData> {
     media: mediaFor("moment", m.id as string),
   }));
 
+  const momentsByMilestone = new Map<string, Moment[]>();
+  for (const m of moments) {
+    if (!m.milestone_id) continue;
+    const list = momentsByMilestone.get(m.milestone_id) ?? [];
+    list.push(m);
+    momentsByMilestone.set(m.milestone_id, list);
+  }
+  for (const list of momentsByMilestone.values()) {
+    list.sort((a, b) => (a.event_date ?? "").localeCompare(b.event_date ?? ""));
+  }
+
   const today = new Date().toISOString().slice(0, 10);
   const milestones: Milestone[] = (milestonesRes.data ?? []).map((ms) => ({
     id: ms.id as string,
@@ -138,9 +143,7 @@ export async function getTimelineData(): Promise<TimelineData> {
     date_precision: ms.date_precision as DatePrecision,
     location: (ms.location as string) ?? null,
     media: mediaFor("milestone", ms.id as string),
-    moments: moments
-      .filter((m) => m.milestone_id === ms.id)
-      .sort((a, b) => (a.event_date ?? "").localeCompare(b.event_date ?? "")),
+    moments: momentsByMilestone.get(ms.id as string) ?? [],
     upcoming: !!ms.date_start && ms.date_start > today,
   }));
 

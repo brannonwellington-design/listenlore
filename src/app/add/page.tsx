@@ -1,18 +1,14 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { createClient as createSupabase } from "@supabase/supabase-js";
 import { getViewer } from "@/lib/auth";
+import { serviceClient } from "@/lib/supabase/service";
 import MomentForm from "@/components/MomentForm";
 import { createMoment } from "./actions";
 
 export const dynamic = "force-dynamic";
 
 async function formOptions() {
-  const service = createSupabase(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SECRET_KEY!,
-    { auth: { persistSession: false } }
-  );
+  const service = serviceClient();
   const [categories, milestones, people] = await Promise.all([
     service.from("categories").select("id, label").order("sort"),
     service.from("milestones").select("id, title, date_start").order("date_start", { ascending: true, nullsFirst: false }),

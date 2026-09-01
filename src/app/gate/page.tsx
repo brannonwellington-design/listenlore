@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { cookies } from "next/headers";
 import { GATE_COOKIE, gateHash } from "@/lib/gate";
+import PasscodeInput from "@/components/PasscodeInput";
 
 async function unlock(formData: FormData) {
   "use server";
@@ -45,21 +46,7 @@ export default async function GatePage({
           This timeline is for Listen Labs. Enter the team passcode to continue.
         </p>
         <form action={unlock} style={{ display: "flex", gap: 8 }}>
-          <input
-            type="password"
-            name="passcode"
-            autoFocus
-            aria-label="Passcode"
-            style={{
-              flex: 1,
-              font: "inherit",
-              padding: "12px 16px",
-              border: "1px solid var(--surface-tertiary)",
-              borderRadius: 8,
-              background: "var(--surface-highlight)",
-              color: "var(--content-primary)",
-            }}
-          />
+          <PasscodeInput />
           <button
             type="submit"
             style={{
@@ -77,6 +64,9 @@ export default async function GatePage({
             That passcode isn’t right — try again.
           </p>
         )}
+        <p style={{ fontSize: 12, lineHeight: "16px", color: "var(--content-secondary)" }}>
+          This device stays unlocked for 30 days.
+        </p>
       </div>
     </div>
   );

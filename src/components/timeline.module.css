@@ -39,7 +39,13 @@
 .authNote {
   font-size: 12px;
   line-height: 16px;
-  color: var(--content-disabled);
+  color: var(--content-secondary);
+}
+.authNoteBtn {
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--content-secondary);
+  text-decoration: underline;
 }
 .switcher {
   display: flex;
@@ -123,7 +129,7 @@
 .metaApprox {
   font-size: 12px;
   line-height: 16px;
-  color: var(--content-disabled);
+  color: var(--content-secondary);
 }
 
 /* ---- register view ---- */
@@ -162,7 +168,6 @@
 }
 .bandPhoto {
   width: 100%;
-  height: 264px;
   object-fit: cover;
   border-radius: 8px;
 }
@@ -193,7 +198,18 @@
 .momentByline {
   font-size: 12px;
   line-height: 16px;
-  color: var(--content-disabled);
+  color: var(--content-secondary);
+}
+.momentTitleLink {
+  color: inherit;
+}
+.momentTitleLink:hover {
+  text-decoration: underline;
+}
+.editLink {
+  font-size: 12px;
+  color: var(--content-secondary);
+  text-decoration: underline;
 }
 .momentGrid {
   display: grid;
@@ -212,7 +228,6 @@
 }
 .momentCardPhoto {
   width: 100%;
-  height: 192px;
   object-fit: cover;
   border-radius: 4px;
 }
@@ -308,7 +323,7 @@ button.recRow:hover {
   grid-column: 2 / 4;
   font-size: 12px;
   line-height: 20px;
-  color: var(--content-disabled);
+  color: var(--content-secondary);
 }
 .recTitle {
   grid-column: 4 / 9;
@@ -417,14 +432,13 @@ button.recRow:hover {
 }
 .albumPhoto {
   width: 100%;
-  height: 432px;
   object-fit: cover;
   border-radius: 12px;
 }
 .albumCaption {
   font-size: 12px;
   line-height: 16px;
-  color: var(--content-disabled);
+  color: var(--content-secondary);
   margin-top: 12px;
 }
 .albumText {
@@ -470,6 +484,38 @@ button.recRow:hover {
   object-fit: cover;
   border-radius: 8px;
 }
+.albumStripText {
+  width: 120px;
+  height: 120px;
+  border: 1px solid var(--surface-tertiary);
+  border-radius: 8px;
+  background: var(--surface-highlight);
+  color: var(--content-primary);
+  font-size: 12px;
+  line-height: 16px;
+  padding: 12px;
+  display: flex;
+  align-items: center;
+  text-align: center;
+  overflow: hidden;
+}
+.albumStripText:hover {
+  text-decoration: none;
+  border-color: var(--content-brand);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .justAdded {
+    animation: justadded 2.4s ease 1;
+  }
+  @keyframes justadded {
+    0% {
+      background: var(--surface-brand-secondary);
+    }
+    100% {
+      background: transparent;
+    }
+  }
+}
 .albumInvite {
   background: var(--surface-brand-primary);
   border-radius: 16px;
@@ -481,7 +527,7 @@ button.recRow:hover {
 .albumInviteKicker {
   font-size: 14px;
   line-height: 20px;
-  color: var(--content-brand-contrast-secondary);
+  color: var(--surface-brand-secondary);
 }
 .albumInviteTitle {
   font-size: 64px;
@@ -492,7 +538,7 @@ button.recRow:hover {
 .albumInviteLead {
   font-size: 18px;
   line-height: 28px;
-  color: var(--content-brand-contrast-secondary);
+  color: var(--surface-brand-secondary);
   max-width: 440px;
   margin: 20px auto 0 auto;
 }
@@ -552,16 +598,10 @@ button.recRow:hover {
   .bandFigure {
     order: -1;
   }
-  .bandPhoto {
-    height: 216px;
-  }
   .momentGrid {
     grid-template-columns: 1fr;
     gap: 16px;
     margin-top: 16px;
-  }
-  .momentCardPhoto {
-    height: 216px;
   }
   .upcomingPanel {
     padding: 24px;
@@ -630,7 +670,6 @@ button.recRow:hover {
     order: -1;
   }
   .albumPhoto {
-    height: 280px;
     border-radius: 8px;
   }
   .albumYear {

@@ -2,8 +2,9 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { createClient as createSupabase } from "@supabase/supabase-js";
+import { imageSize } from "image-size";
 import { createClient } from "@/lib/supabase/server";
+import { serviceClient } from "@/lib/supabase/service";
 import { getViewer } from "@/lib/auth";
 
 const IMAGE_TYPES: Record<string, string> = {
@@ -14,14 +15,6 @@ const IMAGE_TYPES: Record<string, string> = {
 };
 const MAX_FILES = 6;
 const MAX_FILE_BYTES = 10 * 1024 * 1024;
-
-function serviceClient() {
-  return createSupabase(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SECRET_KEY!,
-    { auth: { persistSession: false } }
-  );
-}
 
 function readFields(formData: FormData) {
   const title = String(formData.get("title") ?? "").trim();
@@ -35,6 +28,10 @@ function readFields(formData: FormData) {
     .getAll("tagged")
     .map(String)
     .filter((v) => v.length > 0);
+  const taggedNew = formData
+    .getAll("tagged_new")
+    .map((v) => String(v).trim())
+    .filter((v) => v.length > 1 && v.length <= 80);
   return {
     title,
     body,
@@ -46,7 +43,36 @@ function readFields(formData: FormData) {
       ? precision
       : "approx",
     tagged,
+    taggedNew,
   };
+}
+
+// Resolve typed-in names to people rows, creating any that don't exist,
+// and return the full set of person ids to tag.
+async function resolveTagged(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  ids: string[],
+  newNames: string[]
+): Promise<string[]> {
+  const all = new Set(ids);
+  for (const name of newNames) {
+    const { data: existing } = await supabase
+      .from("people")
+      .select("id")
+      .ilike("full_name", name)
+      .maybeSingle();
+    if (existing) {
+      all.add(existing.id);
+      continue;
+    }
+    const { data: created } = await supabase
+      .from("people")
+      .insert({ full_name: name })
+      .select("id")
+      .single();
+    if (created) all.add(created.id);
+  }
+  return [...all];
 }
 
 function collectFiles(formData: FormData): File[] {
@@ -66,25 +92,37 @@ function validateFiles(files: File[]): string | null {
   return null;
 }
 
+interface Uploaded {
+  storage_path: string;
+  sort: number;
+  width: number | null;
+  height: number | null;
+}
+
 async function uploadFiles(
   momentId: string,
   files: File[],
   startSort: number
-): Promise<{ storage_path: string; sort: number }[]> {
+): Promise<Uploaded[]> {
   const service = serviceClient();
-  const out: { storage_path: string; sort: number }[] = [];
+  const out: Uploaded[] = [];
   for (let i = 0; i < files.length; i++) {
     const f = files[i];
     const ext = IMAGE_TYPES[f.type];
     const path = `moments/${momentId}/${Date.now()}-${i}.${ext}`;
+    const buffer = Buffer.from(await f.arrayBuffer());
+    let width: number | null = null;
+    let height: number | null = null;
+    try {
+      const dim = imageSize(buffer);
+      width = dim.width ?? null;
+      height = dim.height ?? null;
+    } catch {}
     const { error } = await service.storage
       .from("media")
-      .upload(path, Buffer.from(await f.arrayBuffer()), {
-        contentType: f.type,
-        upsert: false,
-      });
+      .upload(path, buffer, { contentType: f.type, upsert: false });
     if (error) throw new Error(`Photo upload failed: ${error.message}`);
-    out.push({ storage_path: path, sort: startSort + i });
+    out.push({ storage_path: path, sort: startSort + i, width, height });
   }
   return out;
 }
@@ -130,10 +168,11 @@ export async function createMoment(
     return { error: `Couldn’t save the moment: ${momentError?.message}` };
   }
 
-  if (fields.tagged.length > 0) {
+  const taggedIds = await resolveTagged(supabase, fields.tagged, fields.taggedNew);
+  if (taggedIds.length > 0) {
     await supabase
       .from("moment_people")
-      .insert(fields.tagged.map((person_id) => ({ moment_id: moment.id, person_id })));
+      .insert(taggedIds.map((person_id) => ({ moment_id: moment.id, person_id })));
   }
 
   if (files.length > 0) {
@@ -144,13 +183,15 @@ export async function createMoment(
         moment_id: moment.id,
         storage_path: u.storage_path,
         sort: u.sort,
+        width: u.width,
+        height: u.height,
         created_by: viewer.userId,
       }))
     );
   }
 
   revalidatePath("/");
-  redirect("/");
+  redirect(`/?added=${moment.id}`);
 }
 
 export async function updateMoment(
@@ -190,10 +231,11 @@ export async function updateMoment(
   if (!updated) return { error: "You can only edit your own moments." };
 
   await supabase.from("moment_people").delete().eq("moment_id", momentId);
-  if (fields.tagged.length > 0) {
+  const taggedIds = await resolveTagged(supabase, fields.tagged, fields.taggedNew);
+  if (taggedIds.length > 0) {
     await supabase
       .from("moment_people")
-      .insert(fields.tagged.map((person_id) => ({ moment_id: momentId, person_id })));
+      .insert(taggedIds.map((person_id) => ({ moment_id: momentId, person_id })));
   }
 
   if (files.length > 0) {
@@ -208,13 +250,15 @@ export async function updateMoment(
         moment_id: momentId,
         storage_path: u.storage_path,
         sort: u.sort,
+        width: u.width,
+        height: u.height,
         created_by: viewer.userId,
       }))
     );
   }
 
   revalidatePath("/");
-  redirect("/");
+  redirect(`/?added=${momentId}`);
 }
 
 export async function deleteMoment(formData: FormData) {
