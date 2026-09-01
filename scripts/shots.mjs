@@ -1,0 +1,15 @@
+import { chromium } from "playwright-core";
+const browser = await chromium.launch({ executablePath: "/opt/pw-browsers/chromium", args: ["--no-sandbox"] });
+const page = await browser.newPage({ viewport: { width: 1440, height: 1000 } });
+await page.goto("http://localhost:3100/", { waitUntil: "networkidle", timeout: 60000 });
+await page.screenshot({ path: "/tmp/claude-0/-home-user-listenlore/291a6c63-79a0-5a85-ae0b-a83cf1bb6ff0/scratchpad/view_register.png", fullPage: true });
+await page.getByRole("tab", { name: "Record" }).click();
+await page.waitForTimeout(400);
+await page.getByText("4 moments").click();
+await page.waitForTimeout(300);
+await page.screenshot({ path: "/tmp/claude-0/-home-user-listenlore/291a6c63-79a0-5a85-ae0b-a83cf1bb6ff0/scratchpad/view_record.png", fullPage: true });
+await page.getByRole("tab", { name: "Album" }).click();
+await page.waitForTimeout(600);
+await page.screenshot({ path: "/tmp/claude-0/-home-user-listenlore/291a6c63-79a0-5a85-ae0b-a83cf1bb6ff0/scratchpad/view_album.png", fullPage: true });
+await browser.close();
+console.log("done");

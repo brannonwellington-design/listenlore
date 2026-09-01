@@ -1,49 +1,117 @@
+/* Listen Labs brand tokens — Paper theme, light mode (v1 is light-only). */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+  --content-primary: #120f08;
+  --content-secondary: #6b6861;
+  --content-disabled: #b6b4af;
+  --content-brand: #0021cc;
+  --content-brand-contrast: #f9f4eb;
+  --content-brand-contrast-secondary: #9ca3c9;
+  --surface-highlight: #fbf9f4;
+  --surface-primary: #f9f4eb;
+  --surface-secondary: #eee8dd;
+  --surface-tertiary: #e2dccf;
+  --surface-brand-primary: #0021cc;
+  --surface-brand-secondary: #d9ddf2;
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  /* Müller-Brockmann grid */
+  --gutter: 24px;
+  --margin: 96px;
+  --maxw: 1440px;
 }
 
 html {
-  height: 100%;
-}
-
-html,
-body {
-  max-width: 100vw;
-  overflow-x: hidden;
-}
-
-body {
-  min-height: 100%;
-  display: flex;
-  flex-direction: column;
-  color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  color-scheme: light;
 }
 
 * {
   box-sizing: border-box;
-  padding: 0;
+}
+
+body {
   margin: 0;
+  background: var(--surface-primary);
+  color: var(--content-primary);
+  font-family: var(--font-inter), system-ui, sans-serif;
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 24px;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3 {
+  margin: 0;
+  font-weight: 400;
+  text-wrap: balance;
+}
+
+p {
+  margin: 0;
+  text-wrap: pretty;
 }
 
 a {
-  color: inherit;
+  color: var(--content-brand);
   text-decoration: none;
 }
+a:hover {
+  text-decoration: underline;
+}
 
-@media (prefers-color-scheme: dark) {
-  html {
-    color-scheme: dark;
+button {
+  font: inherit;
+  border: none;
+  background: none;
+  cursor: pointer;
+  color: inherit;
+  padding: 0;
+}
+
+:focus-visible {
+  outline: 2px solid var(--content-brand);
+  outline-offset: 2px;
+}
+
+img {
+  max-width: 100%;
+  display: block;
+}
+
+.wrap {
+  max-width: var(--maxw);
+  margin: 0 auto;
+  padding: 0 var(--margin);
+}
+
+.grid12 {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  column-gap: var(--gutter);
+}
+
+.num {
+  font-variant-numeric: tabular-nums;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .viewfade {
+    animation: viewfade 0.24s ease;
+  }
+  @keyframes viewfade {
+    from {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+}
+
+@media (max-width: 1100px) {
+  :root {
+    --margin: 32px;
   }
 }
