@@ -1,9 +1,19 @@
 import Timeline from "@/components/Timeline";
+import { getViewer } from "@/lib/auth";
 import { getTimelineData } from "@/lib/data";
 
 export const dynamic = "force-dynamic";
 
 export default async function Home() {
-  const data = await getTimelineData();
-  return <Timeline data={data} />;
+  const [data, viewer] = await Promise.all([getTimelineData(), getViewer()]);
+  return (
+    <Timeline
+      data={data}
+      viewer={
+        viewer
+          ? { userId: viewer.userId, name: viewer.name, isAdmin: viewer.isAdmin }
+          : null
+      }
+    />
+  );
 }

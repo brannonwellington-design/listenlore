@@ -23,6 +23,7 @@ export interface Moment {
   event_date: string | null;
   date_precision: DatePrecision;
   location: string | null;
+  created_by: string | null;
   media: MediaItem[];
 }
 

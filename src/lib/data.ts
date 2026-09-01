@@ -55,7 +55,7 @@ export async function getTimelineData(): Promise<TimelineData> {
         .eq("published", true),
       db
         .from("moments")
-        .select("id, title, body, milestone_id, event_date, date_precision, location, categories(label), author:people!moments_author_person_id_fkey(full_name)"),
+        .select("id, title, body, milestone_id, event_date, date_precision, location, created_by, categories(label), author:people!moments_author_person_id_fkey(full_name)"),
       db
         .from("media")
         .select("id, owner_type, milestone_id, moment_id, storage_path, caption, sort")
@@ -122,6 +122,7 @@ export async function getTimelineData(): Promise<TimelineData> {
     event_date: (m.event_date as string) ?? null,
     date_precision: m.date_precision as DatePrecision,
     location: (m.location as string) ?? null,
+    created_by: (m.created_by as string) ?? null,
     media: mediaFor("moment", m.id as string),
   }));
 

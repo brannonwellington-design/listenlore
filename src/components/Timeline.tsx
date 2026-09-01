@@ -1,8 +1,19 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import type { Milestone, Moment, TimelineData } from "@/lib/types";
 import s from "./timeline.module.css";
+
+export interface ViewerInfo {
+  userId: string;
+  name: string;
+  isAdmin: boolean;
+}
+
+function canEdit(viewer: ViewerInfo | null, m: Moment): boolean {
+  return !!viewer && (viewer.isAdmin || m.created_by === viewer.userId);
+}
 
 type ViewMode = "register" | "record" | "album";
 
@@ -65,7 +76,13 @@ function groupByYear(milestones: Milestone[]) {
 
 /* ------------------------------------------------------------------ */
 
-export default function Timeline({ data }: { data: TimelineData }) {
+export default function Timeline({
+  data,
+  viewer,
+}: {
+  data: TimelineData;
+  viewer: ViewerInfo | null;
+}) {
   const [view, setView] = useState<ViewMode>("register");
 
   useEffect(() => {
@@ -92,23 +109,43 @@ export default function Timeline({ data }: { data: TimelineData }) {
           <span className={s.wordmarkSlash}>/</span>
           <span className={s.wordmarkSub}>Lore</span>
         </div>
-        <div className={s.switcher} role="tablist" aria-label="Timeline view">
-          {(Object.keys(VIEW_LABELS) as ViewMode[]).map((v) => (
-            <button
-              key={v}
-              role="tab"
-              aria-selected={view === v}
-              className={`${s.switchBtn} ${view === v ? s.switchBtnActive : ""}`}
-              onClick={() => pick(v)}
-            >
-              {VIEW_LABELS[v]}
-            </button>
-          ))}
+        <div style={{ display: "flex", alignItems: "center", gap: 24 }}>
+          <div className={s.switcher} role="tablist" aria-label="Timeline view">
+            {(Object.keys(VIEW_LABELS) as ViewMode[]).map((v) => (
+              <button
+                key={v}
+                role="tab"
+                aria-selected={view === v}
+                className={`${s.switchBtn} ${view === v ? s.switchBtnActive : ""}`}
+                onClick={() => pick(v)}
+              >
+                {VIEW_LABELS[v]}
+              </button>
+            ))}
+          </div>
+          {viewer ? (
+            <div style={{ display: "flex", alignItems: "center", gap: 16, fontSize: 14 }}>
+              <Link href="/add">Add a Moment</Link>
+              <form action="/auth/signout" method="post">
+                <button
+                  type="submit"
+                  style={{ color: "var(--content-disabled)", fontSize: 12 }}
+                  title={`Signed in as ${viewer.name}`}
+                >
+                  Sign out
+                </button>
+              </form>
+            </div>
+          ) : (
+            <Link href="/login" style={{ fontSize: 14 }}>
+              Sign in to add moments
+            </Link>
+          )}
         </div>
       </header>
       <div key={view} className="viewfade">
-        {view === "register" && <RegisterView data={data} />}
-        {view === "record" && <RecordView data={data} />}
+        {view === "register" && <RegisterView data={data} viewer={viewer} />}
+        {view === "record" && <RecordView data={data} viewer={viewer} />}
         {view === "album" && <AlbumView data={data} />}
       </div>
     </div>
@@ -117,7 +154,19 @@ export default function Timeline({ data }: { data: TimelineData }) {
 
 /* ---- A · The Register ------------------------------------------- */
 
-function MomentRow({ m }: { m: Moment }) {
+function EditLink({ viewer, m }: { viewer: ViewerInfo | null; m: Moment }) {
+  if (!canEdit(viewer, m)) return null;
+  return (
+    <Link
+      href={`/moment/${m.id}/edit`}
+      style={{ fontSize: 12, color: "var(--content-disabled)" }}
+    >
+      Edit
+    </Link>
+  );
+}
+
+function MomentRow({ m, viewer }: { m: Moment; viewer: ViewerInfo | null }) {
   return (
     <div className={s.momentRow}>
       {m.media[0] && (
@@ -125,13 +174,15 @@ function MomentRow({ m }: { m: Moment }) {
       )}
       <div>
         <div className={s.momentTitle}>{m.title}</div>
-        <div className={s.momentByline}>{byline(m)}</div>
+        <div className={s.momentByline}>
+          {byline(m)} <EditLink viewer={viewer} m={m} />
+        </div>
       </div>
     </div>
   );
 }
 
-function RegisterMilestone({ ms }: { ms: Milestone }) {
+function RegisterMilestone({ ms, viewer }: { ms: Milestone; viewer: ViewerInfo | null }) {
   const expanded = ms.moments.length > 1;
   const hero = ms.media[0] ?? ms.moments.find((m) => m.media.length > 0)?.media[0];
 
@@ -177,7 +228,9 @@ function RegisterMilestone({ ms }: { ms: Milestone }) {
                   <img className={s.momentCardPhoto} src={m.media[0].url} alt="" loading="lazy" />
                 )}
                 <div className={s.momentCardTitle}>{m.title}</div>
-                <div className={s.momentByline}>{byline(m)}</div>
+                <div className={s.momentByline}>
+                  {byline(m)} <EditLink viewer={viewer} m={m} />
+                </div>
               </div>
             ))}
           </div>
@@ -185,7 +238,7 @@ function RegisterMilestone({ ms }: { ms: Milestone }) {
           ms.moments.length > 0 && (
             <div className={s.momentRail}>
               {ms.moments.map((m) => (
-                <MomentRow key={m.id} m={m} />
+                <MomentRow key={m.id} m={m} viewer={viewer} />
               ))}
             </div>
           )
@@ -200,7 +253,7 @@ function RegisterMilestone({ ms }: { ms: Milestone }) {
   );
 }
 
-function RegisterView({ data }: { data: TimelineData }) {
+function RegisterView({ data, viewer }: { data: TimelineData; viewer: ViewerInfo | null }) {
   const years = groupByYear(data.milestones);
   const undated = data.milestones.filter((m) => !m.date_start);
 
@@ -239,7 +292,7 @@ function RegisterView({ data }: { data: TimelineData }) {
             <div className={`${s.yearNumeral} num`}>{year}</div>
           </div>
           {milestones.map((ms) => (
-            <RegisterMilestone key={ms.id} ms={ms} />
+            <RegisterMilestone key={ms.id} ms={ms} viewer={viewer} />
           ))}
         </section>
       ))}
@@ -259,7 +312,9 @@ function RegisterView({ data }: { data: TimelineData }) {
                 )}
                 <div>
                   <div className={s.momentCardTitle}>{m.title}</div>
-                  <div className={s.momentByline}>{byline(m)}</div>
+                  <div className={s.momentByline}>
+                    {byline(m)} <EditLink viewer={viewer} m={m} />
+                  </div>
                 </div>
               </div>
             ))}
@@ -288,7 +343,7 @@ function RegisterView({ data }: { data: TimelineData }) {
 
 /* ---- B · The Record ---------------------------------------------- */
 
-function RecordRow({ ms }: { ms: Milestone }) {
+function RecordRow({ ms, viewer }: { ms: Milestone; viewer: ViewerInfo | null }) {
   const [open, setOpen] = useState(false);
   const canOpen = ms.moments.length > 0;
   const dateCell = ms.date_start
@@ -320,7 +375,7 @@ function RecordRow({ ms }: { ms: Milestone }) {
         <div className={`grid12 ${s.recMoments}`}>
           <div className={s.recMomentList}>
             {ms.moments.map((m) => (
-              <MomentRow key={m.id} m={m} />
+              <MomentRow key={m.id} m={m} viewer={viewer} />
             ))}
           </div>
         </div>
@@ -329,7 +384,7 @@ function RecordRow({ ms }: { ms: Milestone }) {
   );
 }
 
-function RecordView({ data }: { data: TimelineData }) {
+function RecordView({ data, viewer }: { data: TimelineData; viewer: ViewerInfo | null }) {
   const years = groupByYear(data.milestones);
   const undated = data.milestones.filter((m) => !m.date_start);
 
@@ -353,7 +408,7 @@ function RecordView({ data }: { data: TimelineData }) {
             <div className={`${s.recYearNumeral} num`}>{year}</div>
           </div>
           {milestones.map((ms) => (
-            <RecordRow key={ms.id} ms={ms} />
+            <RecordRow key={ms.id} ms={ms} viewer={viewer} />
           ))}
         </section>
       ))}
@@ -364,7 +419,7 @@ function RecordView({ data }: { data: TimelineData }) {
             <div className={s.recYearNumeral}>Undated</div>
           </div>
           {undated.map((ms) => (
-            <RecordRow key={ms.id} ms={ms} />
+            <RecordRow key={ms.id} ms={ms} viewer={viewer} />
           ))}
         </section>
       )}
