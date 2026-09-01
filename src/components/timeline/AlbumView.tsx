@@ -1,7 +1,7 @@
 import Link from "next/link";
 import type { Milestone, TimelineData } from "@/lib/types";
 import s from "../timeline.module.css";
-import { aspect, fmtDate, groupByYear } from "./shared";
+import { aspect, excerpt, fmtDate, groupByYear } from "./shared";
 
 function AlbumEntry({ ms, side }: { ms: Milestone; side: "left" | "right" }) {
   const hero = ms.media[0] ?? ms.moments.find((m) => m.media.length > 0)?.media[0];
@@ -79,8 +79,14 @@ function AlbumEntry({ ms, side }: { ms: Milestone; side: "left" | "right" }) {
                 key={m.id}
                 href={`/moment/${m.id}`}
                 className={s.albumStripText}
+                title={m.title}
               >
-                {m.title}
+                <span className={s.albumStripQuote}>
+                  {excerpt(m, 120) ?? m.title}
+                </span>
+                {excerpt(m) && (
+                  <span className={s.albumStripCaption}>{m.title}</span>
+                )}
               </Link>
             )
           )}

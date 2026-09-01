@@ -5,6 +5,7 @@ import {
   aspect,
   byline,
   EditLink,
+  excerpt,
   fmtDate,
   groupByYear,
   MomentRow,
@@ -65,7 +66,7 @@ function RegisterMilestone({
           <div className={s.momentGrid}>
             {ms.moments.map((m) => (
               <div key={m.id} className={s.momentCard} data-moment-id={m.id}>
-                {m.media[0] && (
+                {m.media[0] ? (
                   <Link href={`/moment/${m.id}`}>
                     <img
                       className={s.momentCardPhoto}
@@ -75,6 +76,14 @@ function RegisterMilestone({
                       loading="lazy"
                     />
                   </Link>
+                ) : (
+                  excerpt(m, 220) && (
+                    <Link href={`/moment/${m.id}`} className={s.momentTitleLink}>
+                      <div className={s.quoteBlock}>
+                        <div className={s.quoteClamp}>{excerpt(m, 220)}</div>
+                      </div>
+                    </Link>
+                  )
                 )}
                 <Link href={`/moment/${m.id}`} className={s.momentTitleLink}>
                   <span className={s.momentCardTitle}>{m.title}</span>
@@ -179,6 +188,11 @@ export default function RegisterView({
                   <Link href={`/moment/${m.id}`} className={s.momentTitleLink}>
                     <span className={s.momentCardTitle}>{m.title}</span>
                   </Link>
+                  {excerpt(m) && (
+                    <Link href={`/moment/${m.id}`} className={s.momentTitleLink}>
+                      <div className={s.momentExcerpt}>{excerpt(m)}</div>
+                    </Link>
+                  )}
                   <div className={s.momentByline}>
                     {byline(m)} <EditLink viewer={viewer} m={m} />
                   </div>

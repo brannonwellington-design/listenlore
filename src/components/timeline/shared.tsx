@@ -100,6 +100,15 @@ export function EditLink({
   );
 }
 
+// The visible slice of a text-only moment's story: the words are the
+// payload, so they earn the space a photo would get.
+export function excerpt(m: Moment, maxChars = 160): string | null {
+  if (m.media.length > 0 || !m.body) return null;
+  const text = m.body.trim().replace(/\s+/g, " ");
+  if (!text) return null;
+  return text.length > maxChars ? `${text.slice(0, maxChars).trimEnd()}…` : text;
+}
+
 export function MomentRow({
   m,
   viewer,
@@ -107,6 +116,7 @@ export function MomentRow({
   m: Moment;
   viewer: ViewerInfo | null;
 }) {
+  const quote = excerpt(m);
   return (
     <div className={s.momentRow} data-moment-id={m.id}>
       {m.media[0] && (
@@ -118,6 +128,11 @@ export function MomentRow({
         <Link href={`/moment/${m.id}`} className={s.momentTitleLink}>
           <span className={s.momentTitle}>{m.title}</span>
         </Link>
+        {quote && (
+          <Link href={`/moment/${m.id}`} className={s.momentTitleLink}>
+            <div className={s.momentExcerpt}>{quote}</div>
+          </Link>
+        )}
         <div className={s.momentByline}>
           {byline(m)} <EditLink viewer={viewer} m={m} />
         </div>
