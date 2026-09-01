@@ -65,3 +65,10 @@
 .submit:disabled {
   opacity: 0.6;
 }
+
+@media (max-width: 640px) {
+  .row {
+    flex-direction: column;
+    gap: 24px;
+  }
+}

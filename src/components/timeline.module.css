@@ -493,3 +493,156 @@
   border-radius: 8px;
   margin-top: 32px;
 }
+
+/* ---- phones ---- */
+@media (max-width: 760px) {
+  .header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+    padding: 24px 0;
+  }
+  .hero {
+    padding: 48px 0 32px 0;
+  }
+  .heroTitle {
+    font-size: 40px;
+    line-height: 44px;
+  }
+  .heroLead {
+    font-size: 16px;
+    line-height: 24px;
+    margin-top: 16px;
+  }
+  .heroStats {
+    margin-top: 24px;
+  }
+  .yearBand {
+    padding: 40px 0 16px 0;
+  }
+  .yearNumeral {
+    font-size: 56px;
+    line-height: 56px;
+  }
+
+  /* stacked bands: every 12-col grid becomes a column flow */
+  .band,
+  .upcomingPanel,
+  .hero {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+  .band {
+    padding: 32px 0;
+  }
+  .bandMeta {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 4px 12px;
+    align-items: baseline;
+  }
+  .bandTitle {
+    font-size: 24px;
+    line-height: 28px;
+  }
+  .bandFigure {
+    order: -1;
+  }
+  .bandPhoto {
+    height: 216px;
+  }
+  .momentGrid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+    margin-top: 16px;
+  }
+  .momentCardPhoto {
+    height: 216px;
+  }
+  .upcomingPanel {
+    padding: 24px;
+    margin-top: 40px;
+    align-items: flex-start;
+  }
+  .floatGrid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  /* record view rows reflow */
+  .recRow {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 12px;
+    align-items: baseline;
+  }
+  .recTitle {
+    width: 100%;
+    order: -1;
+    font-size: 16px;
+  }
+  .recMoments {
+    display: block;
+  }
+  .recMomentList {
+    display: flex;
+  }
+  .recYear {
+    padding: 40px 0 8px 0;
+  }
+
+  /* album view: single column, no spine */
+  .albumSpine,
+  .albumDot {
+    display: none;
+  }
+  .albumHero {
+    padding: 64px 0 48px 0;
+  }
+  .albumTitle {
+    font-size: 56px;
+    line-height: 60px;
+  }
+  .albumEntry {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding-bottom: 56px;
+  }
+  .albumText {
+    padding-top: 8px;
+  }
+  .albumTextLeft {
+    text-align: left;
+  }
+  .albumTextLeft .albumBlurb {
+    margin-left: 0;
+  }
+  .albumEntryTitle {
+    font-size: 32px;
+    line-height: 36px;
+  }
+  .albumFigure {
+    order: -1;
+  }
+  .albumPhoto {
+    height: 280px;
+    border-radius: 8px;
+  }
+  .albumYear {
+    padding-bottom: 32px;
+  }
+  .albumStrip {
+    flex-wrap: wrap;
+    padding-bottom: 56px;
+  }
+  .albumInvite {
+    padding: 40px 24px;
+    margin-bottom: 48px;
+  }
+  .albumInviteTitle {
+    font-size: 40px;
+    line-height: 44px;
+  }
+}

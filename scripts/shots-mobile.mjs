@@ -1,0 +1,16 @@
+import { chromium } from "playwright-core";
+const browser = await chromium.launch({ executablePath: "/opt/pw-browsers/chromium", args: ["--no-sandbox"] });
+const page = await browser.newPage({ viewport: { width: 390, height: 844 } });
+await page.goto("http://localhost:3100/", { waitUntil: "domcontentloaded", timeout: 60000 });
+await page.waitForSelector("text=The Story So Far", { timeout: 30000 });
+await page.screenshot({ path: "/tmp/claude-0/-home-user-listenlore/291a6c63-79a0-5a85-ae0b-a83cf1bb6ff0/scratchpad/m_register.png", fullPage: true });
+const tabs = await page.locator("[role=tab]").count();
+console.log("tabs found:", tabs);
+await page.locator("[role=tab]", { hasText: "Record" }).click({ timeout: 15000 });
+await page.waitForTimeout(500);
+await page.screenshot({ path: "/tmp/claude-0/-home-user-listenlore/291a6c63-79a0-5a85-ae0b-a83cf1bb6ff0/scratchpad/m_record.png", fullPage: true });
+await page.locator("[role=tab]", { hasText: "Album" }).click({ timeout: 15000 });
+await page.waitForTimeout(700);
+await page.screenshot({ path: "/tmp/claude-0/-home-user-listenlore/291a6c63-79a0-5a85-ae0b-a83cf1bb6ff0/scratchpad/m_album.png", fullPage: true });
+await browser.close();
+console.log("done");
