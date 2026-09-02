@@ -25,11 +25,16 @@ interface Node {
   milestone?: Milestone;
   moment?: Moment;
   personMoments?: Moment[];
+  personAuthored?: Moment[];
 }
 
 interface Edge {
   from: string;
   to: string;
+  // Authored ("uploaded by") ties render as faint dotted lines and sit out
+  // of the spring simulation, so a prolific poster doesn't drag the whole
+  // layout toward themselves.
+  soft?: boolean;
 }
 
 // Deterministic pseudo-random so the sky looks the same on every visit.
@@ -120,23 +125,42 @@ function buildSky(data: TimelineData): { nodes: Node[]; edges: Edge[] } {
     });
   });
 
-  // People are nodes too: each person connects to the moments they're
-  // tagged in, anchored at the center of gravity of those moments.
-  const byPerson = new Map<string, { name: string; momentNodes: Node[]; moments: Moment[] }>();
+  // People are nodes too: connected to moments they're tagged in (dashed)
+  // and moments they posted (faint dotted). Node size grows with how much
+  // of the archive they've contributed, so the big uploaders are visible
+  // at a glance.
+  interface PersonAgg {
+    name: string;
+    taggedNodes: Node[];
+    tagged: Moment[];
+    authoredNodes: Node[];
+    authored: Moment[];
+  }
+  const byPerson = new Map<string, PersonAgg>();
+  const agg = (name: string): PersonAgg => {
+    const entry =
+      byPerson.get(name) ??
+      { name, taggedNodes: [], tagged: [], authoredNodes: [], authored: [] };
+    byPerson.set(name, entry);
+    return entry;
+  };
   for (const n of nodes) {
     if (n.kind !== "moment" || !n.moment) continue;
     for (const name of n.moment.tagged) {
-      const entry = byPerson.get(name) ?? { name, momentNodes: [], moments: [] };
-      entry.momentNodes.push(n);
-      entry.moments.push(n.moment);
-      byPerson.set(name, entry);
+      const entry = agg(name);
+      entry.taggedNodes.push(n);
+      entry.tagged.push(n.moment);
+    }
+    if (n.moment.author) {
+      const entry = agg(n.moment.author);
+      entry.authoredNodes.push(n);
+      entry.authored.push(n.moment);
     }
   }
   for (const p of byPerson.values()) {
-    const ax =
-      p.momentNodes.reduce((sum, n) => sum + n.ax, 0) / p.momentNodes.length;
-    const ay =
-      p.momentNodes.reduce((sum, n) => sum + n.ay, 0) / p.momentNodes.length;
+    const connected = [...p.taggedNodes, ...p.authoredNodes];
+    const ax = connected.reduce((sum, n) => sum + n.ax, 0) / connected.length;
+    const ay = connected.reduce((sum, n) => sum + n.ay, 0) / connected.length;
     const id = `person:${p.name}`;
     nodes.push({
       id,
@@ -145,17 +169,23 @@ function buildSky(data: TimelineData): { nodes: Node[]; edges: Edge[] } {
       y: ay + (rand() - 0.5) * 80,
       ax,
       ay,
-      r: 13,
+      r: Math.min(12 + (p.authored.length + p.tagged.length) * 0.5, 22),
       label: p.name,
-      personMoments: p.moments,
+      personMoments: p.tagged,
+      personAuthored: p.authored,
     });
-    for (const n of p.momentNodes) edges.push({ from: id, to: n.id });
+    const taggedIds = new Set(p.taggedNodes.map((n) => n.id));
+    for (const n of p.taggedNodes) edges.push({ from: id, to: n.id });
+    for (const n of p.authoredNodes) {
+      if (!taggedIds.has(n.id)) edges.push({ from: id, to: n.id, soft: true });
+    }
   }
 
   // Relax: springs to anchors and along edges, pairwise separation.
   const byId = new Map(nodes.map((n) => [n.id, n]));
   for (let t = 0; t < 260; t++) {
     for (const e of edges) {
+      if (e.soft) continue;
       const a = byId.get(e.from)!;
       const b = byId.get(e.to)!;
       const dx = b.x - a.x;
@@ -305,9 +335,11 @@ export default function ConstellationView({ data }: { data: TimelineData }) {
                 className={
                   selected && (selected.id === a.id || selected.id === b.id)
                     ? s.skyEdgeActive
-                    : a.kind === "person" || b.kind === "person"
-                      ? s.skyEdgePerson
-                      : s.skyEdge
+                    : e.soft
+                      ? s.skyEdgeAuthor
+                      : a.kind === "person" || b.kind === "person"
+                        ? s.skyEdgePerson
+                        : s.skyEdge
                 }
               />
             );
@@ -409,28 +441,44 @@ export default function ConstellationView({ data }: { data: TimelineData }) {
                 {selected.milestone.moments.length === 1 ? "" : "s"} attached
               </div>
             </>
-          ) : selected.kind === "person" && selected.personMoments ? (
-            <>
-              <div className={s.skyCardTitle}>{selected.label}</div>
-              <div className={s.skyCardKicker}>
-                Tagged in {selected.personMoments.length} moment
-                {selected.personMoments.length === 1 ? "" : "s"}
-              </div>
-              {selected.personMoments.slice(0, 5).map((m) => (
-                <Link
-                  key={m.id}
-                  href={`/moment/${m.id}`}
-                  className={s.skyCardLink}
-                >
-                  {m.title} →
-                </Link>
-              ))}
-              {selected.personMoments.length > 5 && (
-                <div className={s.skyCardKicker}>
-                  and {selected.personMoments.length - 5} more
-                </div>
-              )}
-            </>
+          ) : selected.kind === "person" ? (
+            (() => {
+              const tagged = selected.personMoments ?? [];
+              const authored = selected.personAuthored ?? [];
+              const seen = new Set<string>();
+              const all = [...authored, ...tagged].filter((m) =>
+                seen.has(m.id) ? false : (seen.add(m.id), true)
+              );
+              return (
+                <>
+                  <div className={s.skyCardTitle}>{selected.label}</div>
+                  <div className={s.skyCardKicker}>
+                    {[
+                      authored.length > 0
+                        ? `Posted ${authored.length} moment${authored.length === 1 ? "" : "s"}`
+                        : null,
+                      tagged.length > 0 ? `tagged in ${tagged.length}` : null,
+                    ]
+                      .filter(Boolean)
+                      .join(" · ")}
+                  </div>
+                  {all.slice(0, 5).map((m) => (
+                    <Link
+                      key={m.id}
+                      href={`/moment/${m.id}`}
+                      className={s.skyCardLink}
+                    >
+                      {m.title} →
+                    </Link>
+                  ))}
+                  {all.length > 5 && (
+                    <div className={s.skyCardKicker}>
+                      and {all.length - 5} more
+                    </div>
+                  )}
+                </>
+              );
+            })()
           ) : selected.moment ? (
             <>
               <Link

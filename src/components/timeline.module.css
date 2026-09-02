@@ -1101,6 +1101,14 @@ button.recRow:hover {
   stroke-width: 1;
   stroke-dasharray: 3 4;
 }
+/* "posted by" ties: barely-there dots until the person is selected */
+.skyEdgeAuthor {
+  stroke: var(--content-brand);
+  stroke-opacity: 0.1;
+  stroke-width: 1;
+  stroke-dasharray: 1 5;
+  stroke-linecap: round;
+}
 .skyDotPerson {
   width: 10px;
   height: 10px;
