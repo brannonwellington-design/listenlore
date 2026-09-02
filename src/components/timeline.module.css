@@ -1079,6 +1079,36 @@ button.recRow:hover {
   stroke: var(--content-secondary);
   stroke-width: 1;
 }
+/* people: cream coin with an ink initial, tethered by soft dashed lines */
+.skyPerson {
+  fill: var(--surface-primary);
+  stroke: var(--content-primary);
+  stroke-width: 1.5;
+}
+.skyPersonInitial {
+  fill: var(--content-primary);
+  font-size: 13px;
+  text-anchor: middle;
+  pointer-events: none;
+}
+.skyPersonLabel {
+  font-size: 11px;
+  fill: var(--content-secondary);
+}
+.skyEdgePerson {
+  stroke: var(--content-primary);
+  stroke-opacity: 0.12;
+  stroke-width: 1;
+  stroke-dasharray: 3 4;
+}
+.skyDotPerson {
+  width: 10px;
+  height: 10px;
+  border-radius: 6px;
+  border: 1px solid var(--content-primary);
+  background: var(--surface-primary);
+  display: inline-block;
+}
 .skyMomentDot {
   fill: var(--content-primary);
 }

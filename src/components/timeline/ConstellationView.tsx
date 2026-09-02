@@ -12,7 +12,7 @@ const PAD = 96;
 
 interface Node {
   id: string;
-  kind: "milestone" | "moment";
+  kind: "milestone" | "moment" | "person";
   floating?: boolean;
   x: number;
   y: number;
@@ -24,6 +24,7 @@ interface Node {
   upcoming?: boolean;
   milestone?: Milestone;
   moment?: Moment;
+  personMoments?: Moment[];
 }
 
 interface Edge {
@@ -119,6 +120,38 @@ function buildSky(data: TimelineData): { nodes: Node[]; edges: Edge[] } {
     });
   });
 
+  // People are nodes too: each person connects to the moments they're
+  // tagged in, anchored at the center of gravity of those moments.
+  const byPerson = new Map<string, { name: string; momentNodes: Node[]; moments: Moment[] }>();
+  for (const n of nodes) {
+    if (n.kind !== "moment" || !n.moment) continue;
+    for (const name of n.moment.tagged) {
+      const entry = byPerson.get(name) ?? { name, momentNodes: [], moments: [] };
+      entry.momentNodes.push(n);
+      entry.moments.push(n.moment);
+      byPerson.set(name, entry);
+    }
+  }
+  for (const p of byPerson.values()) {
+    const ax =
+      p.momentNodes.reduce((sum, n) => sum + n.ax, 0) / p.momentNodes.length;
+    const ay =
+      p.momentNodes.reduce((sum, n) => sum + n.ay, 0) / p.momentNodes.length;
+    const id = `person:${p.name}`;
+    nodes.push({
+      id,
+      kind: "person",
+      x: ax + (rand() - 0.5) * 80,
+      y: ay + (rand() - 0.5) * 80,
+      ax,
+      ay,
+      r: 13,
+      label: p.name,
+      personMoments: p.moments,
+    });
+    for (const n of p.momentNodes) edges.push({ from: id, to: n.id });
+  }
+
   // Relax: springs to anchors and along edges, pairwise separation.
   const byId = new Map(nodes.map((n) => [n.id, n]));
   for (let t = 0; t < 260; t++) {
@@ -153,8 +186,9 @@ function buildSky(data: TimelineData): { nodes: Node[]; edges: Edge[] } {
           b.y += dy * f * wb;
         }
       }
-      const pullX = a.kind === "milestone" ? 0.045 : a.floating ? 0.03 : 0.008;
-      const pullY = a.floating ? 0.08 : 0.02;
+      const pullX =
+        a.kind === "milestone" ? 0.045 : a.kind === "person" ? 0.015 : a.floating ? 0.03 : 0.008;
+      const pullY = a.kind === "person" ? 0.015 : a.floating ? 0.08 : 0.02;
       a.x += (a.ax - a.x) * pullX;
       a.y += (a.ay - a.y) * pullY;
       a.x = Math.min(Math.max(a.x, a.r + 12), W - a.r - 12);
@@ -223,6 +257,9 @@ export default function ConstellationView({ data }: { data: TimelineData }) {
         <span>
           <span className={s.skyDotMoment} /> Moments
         </span>
+        <span>
+          <span className={s.skyDotPerson} /> People
+        </span>
         <span className={s.skyHint}>Drag to pan · scroll to zoom · click a node</span>
       </div>
       <svg
@@ -268,7 +305,9 @@ export default function ConstellationView({ data }: { data: TimelineData }) {
                 className={
                   selected && (selected.id === a.id || selected.id === b.id)
                     ? s.skyEdgeActive
-                    : s.skyEdge
+                    : a.kind === "person" || b.kind === "person"
+                      ? s.skyEdgePerson
+                      : s.skyEdge
                 }
               />
             );
@@ -294,6 +333,13 @@ export default function ConstellationView({ data }: { data: TimelineData }) {
                     r={n.r}
                     className={n.upcoming ? s.skyMilestoneUpcoming : s.skyMilestone}
                   />
+                </>
+              ) : n.kind === "person" ? (
+                <>
+                  <circle r={n.r} className={s.skyPerson} />
+                  <text y={4.5} className={s.skyPersonInitial}>
+                    {n.label.slice(0, 1)}
+                  </text>
                 </>
               ) : n.img ? (
                 <>
@@ -326,6 +372,18 @@ export default function ConstellationView({ data }: { data: TimelineData }) {
                 {n.label}
               </text>
             ))}
+          {nodes
+            .filter((n) => n.kind === "person")
+            .map((n) => (
+              <text
+                key={`label-${n.id}`}
+                x={n.x}
+                y={n.y + n.r + 16}
+                className={`${s.skyLabel} ${s.skyPersonLabel}`}
+              >
+                {n.label}
+              </text>
+            ))}
         </g>
       </svg>
       {selected && (
@@ -350,6 +408,28 @@ export default function ConstellationView({ data }: { data: TimelineData }) {
                 {selected.milestone.moments.length} moment
                 {selected.milestone.moments.length === 1 ? "" : "s"} attached
               </div>
+            </>
+          ) : selected.kind === "person" && selected.personMoments ? (
+            <>
+              <div className={s.skyCardTitle}>{selected.label}</div>
+              <div className={s.skyCardKicker}>
+                Tagged in {selected.personMoments.length} moment
+                {selected.personMoments.length === 1 ? "" : "s"}
+              </div>
+              {selected.personMoments.slice(0, 5).map((m) => (
+                <Link
+                  key={m.id}
+                  href={`/moment/${m.id}`}
+                  className={s.skyCardLink}
+                >
+                  {m.title} →
+                </Link>
+              ))}
+              {selected.personMoments.length > 5 && (
+                <div className={s.skyCardKicker}>
+                  and {selected.personMoments.length - 5} more
+                </div>
+              )}
             </>
           ) : selected.moment ? (
             <>
