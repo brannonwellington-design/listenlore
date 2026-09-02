@@ -26,11 +26,12 @@ export default async function EditMomentPage({
       service.from("milestones").select("id, title, date_start").order("date_start", { ascending: true, nullsFirst: false }),
       service.from("people").select("id, full_name").order("full_name"),
       service.from("moment_people").select("person_id").eq("moment_id", id),
-      service.from("media").select("id, storage_path").eq("moment_id", id).order("sort"),
+      service.from("media").select("id, storage_path, created_by").eq("moment_id", id).order("sort"),
     ]);
 
   if (!moment) redirect("/");
-  if (!viewer.isAdmin && moment.created_by !== viewer.userId) redirect("/");
+  // Anyone signed in may edit; destructive actions stay with the poster/admin.
+  const canDelete = viewer.isAdmin || moment.created_by === viewer.userId;
 
   const signedThumbs = new Map<string, string>();
   const mediaRows = media.data ?? [];
@@ -64,12 +65,14 @@ export default async function EditMomentPage({
                     style={{ width: 96, height: 96, objectFit: "cover", borderRadius: 4 }}
                   />
                 )}
-                <form action={deleteMedia}>
-                  <input type="hidden" name="media_id" value={m.id} />
-                  <button type="submit" style={{ fontSize: 12, color: "#B82214" }}>
-                    Remove
-                  </button>
-                </form>
+                {(viewer.isAdmin || m.created_by === viewer.userId) && (
+                  <form action={deleteMedia}>
+                    <input type="hidden" name="media_id" value={m.id} />
+                    <button type="submit" style={{ fontSize: 12, color: "#B82214" }}>
+                      Remove
+                    </button>
+                  </form>
+                )}
               </div>
             ))}
           </div>
@@ -96,18 +99,20 @@ export default async function EditMomentPage({
         }}
         submitLabel="Save changes"
       />
-      <form
-        action={deleteMoment}
-        style={{ marginTop: 48, borderTop: "1px solid var(--surface-tertiary)", paddingTop: 24 }}
-      >
-        <input type="hidden" name="moment_id" value={id} />
-        <ConfirmSubmit
-          message="Delete this moment and its photos for good? This can’t be undone."
-          style={{ fontSize: 14, color: "#B82214" }}
+      {canDelete && (
+        <form
+          action={deleteMoment}
+          style={{ marginTop: 48, borderTop: "1px solid var(--surface-tertiary)", paddingTop: 24 }}
         >
-          Delete this moment permanently
-        </ConfirmSubmit>
-      </form>
+          <input type="hidden" name="moment_id" value={id} />
+          <ConfirmSubmit
+            message="Delete this moment and its photos for good? This can’t be undone."
+            style={{ fontSize: 14, color: "#B82214" }}
+          >
+            Delete this moment permanently
+          </ConfirmSubmit>
+        </form>
+      )}
     </div>
   );
 }

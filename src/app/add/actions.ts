@@ -259,7 +259,7 @@ export async function updateMoment(
 
   const supabase = await createClient();
 
-  // RLS restricts this update to the owner or an admin.
+  // Shared editing: RLS lets any signed-in employee update a moment.
   const { data: updated, error: updateError } = await supabase
     .from("moments")
     .update({
@@ -275,7 +275,7 @@ export async function updateMoment(
     .select("id")
     .maybeSingle();
   if (updateError) return { error: `Couldn’t save: ${updateError.message}` };
-  if (!updated) return { error: "You can only edit your own moments." };
+  if (!updated) return { error: "That moment no longer exists." };
 
   await supabase.from("moment_people").delete().eq("moment_id", momentId);
   const taggedIds = await resolveTagged(supabase, fields.tagged, fields.taggedNew);
@@ -401,7 +401,7 @@ export async function createMoments(
 }
 
 // ---------------------------------------------------------------------------
-// Adding photos to an existing moment (owner or admin only)
+// Adding photos to an existing moment (any signed-in employee)
 // ---------------------------------------------------------------------------
 
 export async function addPhotosToMoment(
@@ -420,12 +420,10 @@ export async function addPhotosToMoment(
   const supabase = await createClient();
   const { data: moment } = await supabase
     .from("moments")
-    .select("id, created_by")
+    .select("id")
     .eq("id", momentId)
     .maybeSingle();
-  if (!moment || (!viewer.isAdmin && moment.created_by !== viewer.userId)) {
-    return { error: "You can only add photos to your own moments." };
-  }
+  if (!moment) return { error: "That moment no longer exists." };
 
   const { count } = await supabase
     .from("media")

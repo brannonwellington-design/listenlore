@@ -8,8 +8,10 @@ export interface ViewerInfo {
   isAdmin: boolean;
 }
 
-export function canEdit(viewer: ViewerInfo | null, m: Moment): boolean {
-  return !!viewer && (viewer.isAdmin || m.created_by === viewer.userId);
+// Shared editing: any signed-in employee may edit any moment. Deleting one
+// (or its photos) remains the poster's and admins' call — see canDelete.
+export function canEdit(viewer: ViewerInfo | null): boolean {
+  return !!viewer;
 }
 
 export const MONTHS = [
@@ -88,7 +90,7 @@ export function EditLink({
   viewer: ViewerInfo | null;
   m: Moment;
 }) {
-  if (!canEdit(viewer, m)) return null;
+  if (!canEdit(viewer)) return null;
   return (
     <Link
       href={`/moment/${m.id}/edit`}

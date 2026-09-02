@@ -73,8 +73,7 @@ export default async function MomentPage({
     .map((t) => one(t.people as Rel)?.full_name)
     .filter((n): n is string => !!n && n !== author);
   const date = fmt(moment.event_date, moment.date_precision);
-  const canEdit =
-    !!viewer && (viewer.isAdmin || moment.created_by === viewer.userId);
+  const canEdit = !!viewer;
 
   const metaBits = [
     author,
