@@ -4,7 +4,7 @@ import { useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import type { Milestone, Moment, TimelineData } from "@/lib/types";
 import s from "../timeline.module.css";
-import { byline, fmtDate } from "./shared";
+import { byline, CategoryChip, fmtDate } from "./shared";
 
 const W = 1280;
 const H = 720;
@@ -339,7 +339,8 @@ export default function ConstellationView({ data }: { data: TimelineData }) {
                 {fmtDate(selected.milestone)}
                 {selected.milestone.location
                   ? ` · ${selected.milestone.location}`
-                  : ""}
+                  : ""}{" "}
+                <CategoryChip label={selected.milestone.category} />
               </div>
               <div className={s.skyCardTitle}>{selected.milestone.title}</div>
               {selected.milestone.blurb && (
@@ -352,8 +353,16 @@ export default function ConstellationView({ data }: { data: TimelineData }) {
             </>
           ) : selected.moment ? (
             <>
-              <div className={s.skyCardTitle}>{selected.moment.title}</div>
-              <div className={s.skyCardKicker}>{byline(selected.moment)}</div>
+              <Link
+                href={`/moment/${selected.moment.id}`}
+                className={s.momentTitleLink}
+              >
+                <div className={s.skyCardTitle}>{selected.moment.title}</div>
+              </Link>
+              <div className={s.skyCardKicker}>
+                {byline(selected.moment)}{" "}
+                <CategoryChip label={selected.moment.category} />
+              </div>
               <Link href={`/moment/${selected.moment.id}`} className={s.skyCardLink}>
                 Open this moment →
               </Link>

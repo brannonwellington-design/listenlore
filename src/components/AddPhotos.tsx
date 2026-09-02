@@ -2,7 +2,6 @@
 
 import { useActionState, useEffect, useState } from "react";
 import { addPhotosToMoment } from "@/app/add/actions";
-import { MAX_PHOTOS_PER_MOMENT } from "@/lib/upload";
 import s from "./form.module.css";
 import PhotoPicker from "./PhotoPicker";
 import { usePhotoUploads } from "./usePhotoUploads";

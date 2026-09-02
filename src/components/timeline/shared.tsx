@@ -1,5 +1,5 @@
 import Link from "next/link";
-import type { MediaItem, Milestone, Moment } from "@/lib/types";
+import type { MediaItem, Milestone, Moment, TimelineData } from "@/lib/types";
 import s from "../timeline.module.css";
 
 export interface ViewerInfo {
@@ -57,8 +57,77 @@ export function byline(m: Moment): string {
   }
   const d = fmtMomentDate(m);
   if (d) bits.push(d);
+  if (m.location) bits.push(m.location);
   if (m.media.length > 1) bits.push(`${m.media.length} photos`);
   return bits.join(" · ");
+}
+
+// The category chip is the one piece of meta that reads as a mark, not a
+// sentence — same treatment on every item in every view.
+export function CategoryChip({ label }: { label: string | null }) {
+  if (!label) return null;
+  return <span className={s.catChip}>{label}</span>;
+}
+
+// One linear stream: milestones and free-floating moments share the same
+// chronological spine instead of the moments pooling at the bottom.
+export type TimelineEntry =
+  | { kind: "milestone"; ms: Milestone }
+  | { kind: "moment"; m: Moment };
+
+export function groupTimelineByYear(
+  data: TimelineData
+): [string, TimelineEntry[]][] {
+  const dated: { date: string; order: number; entry: TimelineEntry }[] = [];
+  for (const ms of data.milestones) {
+    if (ms.date_start) {
+      dated.push({ date: ms.date_start, order: 0, entry: { kind: "milestone", ms } });
+    }
+  }
+  for (const m of data.floatingMoments) {
+    if (m.event_date) {
+      dated.push({ date: m.event_date, order: 1, entry: { kind: "moment", m } });
+    }
+  }
+  dated.sort((a, b) => a.date.localeCompare(b.date) || a.order - b.order);
+  const years = new Map<string, TimelineEntry[]>();
+  for (const e of dated) {
+    const y = e.date.slice(0, 4);
+    years.set(y, [...(years.get(y) ?? []), e.entry]);
+  }
+  return [...years.entries()];
+}
+
+export function undatedFloating(data: TimelineData): Moment[] {
+  return data.floatingMoments.filter((m) => !m.event_date);
+}
+
+// Consecutive free-floating moments merge into one cluster so the views keep
+// rhythm: milestones get big beats, the chatter between them gets density.
+export type ClusteredEntry =
+  | { kind: "milestone"; ms: Milestone }
+  | { kind: "moments"; moments: Moment[] };
+
+export function clusterEntries(entries: TimelineEntry[]): ClusteredEntry[] {
+  const out: ClusteredEntry[] = [];
+  for (const e of entries) {
+    const last = out[out.length - 1];
+    if (e.kind === "milestone") {
+      out.push({ kind: "milestone", ms: e.ms });
+    } else if (last?.kind === "moments") {
+      last.moments.push(e.m);
+    } else {
+      out.push({ kind: "moments", moments: [e.m] });
+    }
+  }
+  return out;
+}
+
+// A cluster's date label: one shared label, or the span it covers.
+export function clusterDateLabel(moments: Moment[]): string {
+  const labels = [...new Set(moments.map((m) => fmtMomentDate(m) ?? "Undated"))];
+  if (labels.length === 1) return labels[0];
+  return `${labels[0]} – ${labels[labels.length - 1]}`;
 }
 
 export function groupByYear(milestones: Milestone[]) {
@@ -111,6 +180,48 @@ export function excerpt(m: Moment, maxChars = 160): string | null {
   return text.length > maxChars ? `${text.slice(0, maxChars).trimEnd()}…` : text;
 }
 
+// The one card for a moment in a grid: photo or quote up top, then title
+// and the full meta line. Used by milestone grids and floating clusters alike.
+export function MomentCard({
+  m,
+  viewer,
+}: {
+  m: Moment;
+  viewer: ViewerInfo | null;
+}) {
+  const quote = excerpt(m, 220);
+  return (
+    <div className={s.momentCard} data-moment-id={m.id}>
+      {m.media[0] ? (
+        <Link href={`/moment/${m.id}`}>
+          <img
+            className={s.momentCardPhoto}
+            style={{ aspectRatio: aspect(m.media[0]) }}
+            src={m.media[0].url}
+            alt=""
+            loading="lazy"
+          />
+        </Link>
+      ) : (
+        quote && (
+          <Link href={`/moment/${m.id}`} className={s.momentTitleLink}>
+            <div className={s.quoteBlock}>
+              <div className={s.quoteClamp}>{quote}</div>
+            </div>
+          </Link>
+        )
+      )}
+      <Link href={`/moment/${m.id}`} className={s.momentTitleLink}>
+        <span className={s.momentCardTitle}>{m.title}</span>
+      </Link>
+      <div className={s.momentByline}>
+        <CategoryChip label={m.category} /> {byline(m)}{" "}
+        <EditLink viewer={viewer} m={m} />
+      </div>
+    </div>
+  );
+}
+
 export function MomentRow({
   m,
   viewer,
@@ -136,7 +247,8 @@ export function MomentRow({
           </Link>
         )}
         <div className={s.momentByline}>
-          {byline(m)} <EditLink viewer={viewer} m={m} />
+          <CategoryChip label={m.category} /> {byline(m)}{" "}
+          <EditLink viewer={viewer} m={m} />
         </div>
       </div>
     </div>
