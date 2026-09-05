@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 import s from "./form.module.css";
 import PhotoPicker from "./PhotoPicker";
 import TagPicker from "./TagPicker";
@@ -10,6 +10,7 @@ import { MAX_PHOTOS_PER_MOMENT } from "@/lib/upload";
 export interface Option {
   id: string;
   label: string;
+  categoryId?: string | null;
 }
 
 export interface MomentDefaults {
@@ -44,6 +45,10 @@ export default function MomentForm({
 }) {
   const [state, formAction, pending] = useActionState(action, null);
   const uploads = usePhotoUploads(MAX_PHOTOS_PER_MOMENT);
+  const [categoryId, setCategoryId] = useState(defaults.category_id ?? "");
+  const shownMilestones = categoryId
+    ? milestones.filter((m) => !m.categoryId || m.categoryId === categoryId)
+    : milestones;
 
   return (
     <form action={formAction} className={s.form}>
@@ -80,7 +85,8 @@ export default function MomentForm({
           <span className={s.label}>Category</span>
           <select
             name="category_id"
-            defaultValue={defaults.category_id ?? ""}
+            value={categoryId}
+            onChange={(e) => setCategoryId(e.target.value)}
             className={s.input}
           >
             <option value="">Pick one…</option>
@@ -99,8 +105,8 @@ export default function MomentForm({
             defaultValue={defaults.milestone_id ?? ""}
             className={s.input}
           >
-            <option value="">No — it stands on its own</option>
-            {milestones.map((m) => (
+            <option value="">No, it stands on its own</option>
+            {shownMilestones.map((m) => (
               <option key={m.id} value={m.id}>
                 {m.label}
               </option>
@@ -111,10 +117,11 @@ export default function MomentForm({
 
       <div className={s.row}>
         <label className={s.field}>
-          <span className={s.label}>When (optional)</span>
+          <span className={s.label}>When</span>
           <input
             type="date"
             name="event_date"
+            required
             defaultValue={defaults.event_date}
             className={s.input}
           />

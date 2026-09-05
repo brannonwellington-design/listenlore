@@ -220,6 +220,8 @@ export async function createMoment(
 
   const fields = readFields(formData);
   if (!fields.title) return { error: "Give your moment a title." };
+  if (!fields.event_date)
+    return { error: "Add a date, even a rough one, so it lands on the timeline." };
 
   const photos = parseUploaded(formData.getAll("uploaded").map(String), viewer);
   if (photos === null) return { error: "Photo upload data looked wrong — re-add the photos." };
