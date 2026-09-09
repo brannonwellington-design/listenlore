@@ -9,6 +9,7 @@ export async function formOptions() {
     service
       .from("milestones")
       .select("id, title, date_start, category_id")
+      .eq("published", true)
       .order("title", { ascending: true }),
     service.from("people").select("id, full_name").order("full_name"),
   ]);
