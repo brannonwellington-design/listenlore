@@ -46,9 +46,24 @@ export default function MomentForm({
   const [state, formAction, pending] = useActionState(action, null);
   const uploads = usePhotoUploads(MAX_PHOTOS_PER_MOMENT);
   const [categoryId, setCategoryId] = useState(defaults.category_id ?? "");
+  const [milestoneId, setMilestoneId] = useState(defaults.milestone_id ?? "");
   const shownMilestones = categoryId
     ? milestones.filter((m) => !m.categoryId || m.categoryId === categoryId)
     : milestones;
+
+  // Category and milestone stay consistent in both directions: picking a
+  // milestone fills in its category; changing the category drops a
+  // milestone that doesn't belong to it.
+  function pickCategory(next: string) {
+    setCategoryId(next);
+    const ms = milestones.find((m) => m.id === milestoneId);
+    if (next && ms?.categoryId && ms.categoryId !== next) setMilestoneId("");
+  }
+  function pickMilestone(next: string) {
+    setMilestoneId(next);
+    const ms = milestones.find((m) => m.id === next);
+    if (ms?.categoryId) setCategoryId(ms.categoryId);
+  }
 
   return (
     <form action={formAction} className={s.form}>
@@ -86,7 +101,7 @@ export default function MomentForm({
           <select
             name="category_id"
             value={categoryId}
-            onChange={(e) => setCategoryId(e.target.value)}
+            onChange={(e) => pickCategory(e.target.value)}
             className={s.input}
           >
             <option value="">Pick one…</option>
@@ -102,7 +117,8 @@ export default function MomentForm({
           <span className={s.label}>Part of a milestone? (optional)</span>
           <select
             name="milestone_id"
-            defaultValue={defaults.milestone_id ?? ""}
+            value={milestoneId}
+            onChange={(e) => pickMilestone(e.target.value)}
             className={s.input}
           >
             <option value="">No, it stands on its own</option>
