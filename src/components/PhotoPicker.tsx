@@ -18,7 +18,7 @@ export default function PhotoPicker({
   return (
     <div className={s.field}>
       <span className={s.label}>
-        Photos (optional — up to {maxCount}, JPEG/PNG/WebP/GIF)
+        Photos (optional — up to {maxCount}, JPEG/PNG/WebP/GIF/HEIC)
       </span>
       {uploads.entries.length > 0 && (
         <div className={s.previewGrid}>
@@ -52,7 +52,7 @@ export default function PhotoPicker({
       )}
       <input
         type="file"
-        accept={Object.keys(ACCEPTED_IMAGE_TYPES).join(",")}
+        accept={`${Object.keys(ACCEPTED_IMAGE_TYPES).join(",")},image/heic,image/heif,.heic,.heif`}
         multiple
         className={s.input}
         onChange={(e) => {

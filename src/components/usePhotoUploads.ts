@@ -19,6 +19,31 @@ export interface UploadEntry {
   uploaded?: UploadedPhoto;
 }
 
+// iPhone photos arrive as HEIC, which browsers can pick but storage
+// shouldn't keep — convert to JPEG in the browser before the normal
+// pipeline. The converter (wasm) loads lazily, only when a HEIC shows up.
+function isHeic(file: File): boolean {
+  return (
+    /image\/hei[cf]/i.test(file.type) || /\.hei[cf]$/i.test(file.name)
+  );
+}
+
+async function heicToJpeg(file: File): Promise<File | null> {
+  try {
+    const { default: heic2any } = await import("heic2any");
+    const out = await heic2any({
+      blob: file,
+      toType: "image/jpeg",
+      quality: 0.9,
+    });
+    const blob = Array.isArray(out) ? out[0] : out;
+    const name = `${file.name.replace(/\.hei[cf]$/i, "")}.jpg`;
+    return new File([blob], name, { type: "image/jpeg" });
+  } catch {
+    return null;
+  }
+}
+
 // Owns the whole client upload pipeline: validate, mint tickets, PUT
 // directly to storage with progress, and expose the finished photo refs.
 export function usePhotoUploads(maxCount: number) {
@@ -39,14 +64,24 @@ export function usePhotoUploads(maxCount: number) {
 
       const current = entries.length;
       const accepted: File[] = [];
-      for (const file of Array.from(files)) {
+      for (let file of Array.from(files)) {
         if (current + accepted.length >= maxCount) {
           setWarning(`Up to ${maxCount} photos here — the rest were left out.`);
           break;
         }
+        if (isHeic(file)) {
+          const converted = await heicToJpeg(file);
+          if (!converted) {
+            setWarning(
+              `Couldn’t convert “${file.name}” — try exporting it as JPEG.`
+            );
+            continue;
+          }
+          file = converted;
+        }
         if (!ACCEPTED_IMAGE_TYPES[file.type]) {
           setWarning(
-            `“${file.name}” isn’t a supported image (JPEG, PNG, WebP, or GIF — iPhone HEIC photos need exporting as JPEG).`
+            `“${file.name}” isn’t a supported image (JPEG, PNG, WebP, GIF, or HEIC).`
           );
           continue;
         }

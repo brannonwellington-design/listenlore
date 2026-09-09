@@ -235,7 +235,7 @@ export default function BulkComposer({
             <input
               ref={fileInput}
               type="file"
-              accept={Object.keys(ACCEPTED_IMAGE_TYPES).join(",")}
+              accept={`${Object.keys(ACCEPTED_IMAGE_TYPES).join(",")},image/heic,image/heif,.heic,.heif`}
               multiple
               hidden
               onChange={(e) => {
@@ -384,7 +384,7 @@ export default function BulkComposer({
         <input
           ref={fileInput}
           type="file"
-          accept={Object.keys(ACCEPTED_IMAGE_TYPES).join(",")}
+          accept={`${Object.keys(ACCEPTED_IMAGE_TYPES).join(",")},image/heic,image/heif,.heic,.heif`}
           multiple
           hidden
           onChange={(e) => {
