@@ -119,7 +119,7 @@ export default async function MilestonePage({
       {milestone.moments.length > 0 && (
         <div style={{ marginTop: 48 }}>
           <h2 style={{ fontSize: 24, lineHeight: "28px" }}>
-            Moments from this milestone
+            Moments
           </h2>
           <div className={s.momentGrid} style={{ gridTemplateColumns: "repeat(3, minmax(0, 1fr))" }}>
             {milestone.moments.map((m) => (
