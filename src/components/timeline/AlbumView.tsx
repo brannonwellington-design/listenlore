@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
 import type { MediaItem, Milestone, Moment, TimelineData } from "@/lib/types";
 import s from "../timeline.module.css";
 import {
@@ -14,16 +13,6 @@ import {
   groupTimelineByYear,
   type ClusteredEntry,
 } from "./shared";
-
-// Two motion registers over the same grid. Editorial: parallax photos,
-// staggered reveals, the spine filling as you read. Cinematic: all of
-// that, plus the year numeral pinned faintly behind its entries and the
-// big beats breaking the grid as full-bleed spreads.
-export type MotionMode = "editorial" | "cinematic";
-
-function isMode(v: string | null): v is MotionMode {
-  return v === "editorial" || v === "cinematic";
-}
 
 // Photo frames take fixed heights that are multiples of the leading, so
 // every image's top and bottom land on the baseline. Orientation picks
@@ -133,8 +122,8 @@ function AlbumEntry({ ms, side }: { ms: Milestone; side: "left" | "right" }) {
   );
 }
 
-// The big beats in cinematic mode: the photo takes the whole width and the
-// grid comes back for the words, set low on the picture.
+// The big beats: the photo takes the whole width and the grid comes back
+// for the words, set low on the picture.
 function AlbumSpread({ ms }: { ms: Milestone }) {
   const hero = ms.media[0] ?? ms.moments.find((m) => m.media.length > 0)?.media[0];
   const heroMoment = ms.moments.find((m) => m.media[0]?.id === hero?.id);
@@ -307,34 +296,6 @@ function isBigBeat(ms: Milestone): boolean {
 }
 
 export default function AlbumView({ data }: { data: TimelineData }) {
-  const [mode, setMode] = useState<MotionMode>("editorial");
-
-  // ?motion= wins, then the remembered choice. Deferred a frame so the
-  // first client render matches the server HTML.
-  useEffect(() => {
-    const fromUrl = new URLSearchParams(window.location.search).get("motion");
-    requestAnimationFrame(() => {
-      if (isMode(fromUrl)) {
-        setMode(fromUrl);
-        return;
-      }
-      try {
-        const saved = window.localStorage.getItem("lore-motion");
-        if (isMode(saved)) setMode(saved);
-      } catch {}
-    });
-  }, []);
-
-  const pickMode = (m: MotionMode) => {
-    setMode(m);
-    try {
-      window.localStorage.setItem("lore-motion", m);
-    } catch {}
-    const params = new URLSearchParams(window.location.search);
-    params.set("motion", m);
-    window.history.replaceState(null, "", `?${params.toString()}`);
-  };
-
   const years: [string, ClusteredEntry[]][] = groupTimelineByYear(data)
     .map(
       ([year, entries]) =>
@@ -360,22 +321,9 @@ export default function AlbumView({ data }: { data: TimelineData }) {
     years.length > 0 ? Number(years[years.length - 1][0]) - Number(years[0][0]) + 1 : 0;
 
   return (
-    <div className={s.album} data-motion={mode}>
+    <div className={s.album}>
       <div className={`grid12 ${s.albumHero}`}>
         <div className={s.albumKicker}>Listen Labs, Remembered</div>
-        <div className={s.motionPick} aria-label="Motion">
-          <span className={s.motionPickLabel}>Motion</span>
-          {(["editorial", "cinematic"] as MotionMode[]).map((m) => (
-            <button
-              key={m}
-              aria-pressed={mode === m}
-              className={`${s.motionBtn} ${mode === m ? s.motionBtnActive : ""}`}
-              onClick={() => pickMode(m)}
-            >
-              {m === "editorial" ? "Editorial" : "Cinematic"}
-            </button>
-          ))}
-        </div>
         <h1 className={s.albumTitle} data-optical="">
           Lore
         </h1>
@@ -413,7 +361,7 @@ export default function AlbumView({ data }: { data: TimelineData }) {
             </div>
             {entries.map((e) =>
               e.kind === "milestone" ? (
-                mode === "cinematic" && isBigBeat(e.ms) ? (
+                isBigBeat(e.ms) ? (
                   <AlbumSpread key={e.ms.id} ms={e.ms} />
                 ) : (
                   <AlbumEntry

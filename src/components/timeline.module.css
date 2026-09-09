@@ -476,7 +476,7 @@ button.recRow:hover {
   position: relative;
 }
 
-/* hero: one band. Kicker and motion switch on the top line; masthead on
+/* hero: one band. Kicker on the top line; masthead on
    the left, lead beside it, the four numerals stacked at the right — all
    sharing a bottom edge, so the first year starts above the fold. */
 .albumHero {
@@ -485,7 +485,7 @@ button.recRow:hover {
   align-items: end;
 }
 .albumKicker {
-  grid-column: 1 / 9;
+  grid-column: 1 / 13;
   font-size: 12px;
   line-height: 16px;
   letter-spacing: 0.08em;
@@ -533,36 +533,6 @@ button.recRow:hover {
   text-transform: uppercase;
   color: var(--content-secondary);
 }
-.motionPick {
-  grid-column: 9 / 13;
-  justify-self: end;
-  align-self: start;
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  background: var(--surface-secondary);
-  border-radius: 8px;
-  padding: 4px;
-  margin-bottom: 24px;
-}
-.motionPickLabel {
-  font-size: 12px;
-  line-height: 16px;
-  color: var(--content-secondary);
-  padding: 0 8px 0 8px;
-}
-.motionBtn {
-  font-size: 12px;
-  line-height: 16px;
-  padding: 6px 12px;
-  border-radius: 4px;
-  color: var(--content-secondary);
-}
-.motionBtnActive {
-  background: var(--surface-highlight);
-  color: var(--content-primary);
-}
-
 .albumBody {
   position: relative;
 }
@@ -622,9 +592,8 @@ button.recRow:hover {
   color: var(--content-secondary);
 }
 
-/* The year opens at display scale, set on the first column. In editorial
-   it scrolls up and hands off to the bar; in cinematic it pins faintly
-   behind the year's entries. */
+/* The year opens at display scale, set on the first column, scrolls up
+   and hands off to the bar. */
 .albumOpener {
   position: relative;
   height: 232px;
@@ -638,44 +607,11 @@ button.recRow:hover {
   letter-spacing: -0.04em;
   color: var(--content-primary);
 }
-/* cinematic: the opener is a full-height layer behind the year's entries
-   and the numeral pins inside it, so it holds while they scroll past and
-   leaves exactly when the year does */
-.album[data-motion="cinematic"] .albumOpener {
-  position: absolute;
-  inset: 0;
-  height: auto;
-  padding: 0;
-  pointer-events: none;
-  z-index: 0;
-}
-.album[data-motion="cinematic"] .albumOpenerNumeral {
-  position: sticky;
-  top: 64px;
-  display: block;
-  height: 312px;
-  font-size: 312px;
-  line-height: 312px;
-  letter-spacing: -0.05em;
-  color: var(--surface-tertiary);
-}
-/* the first entry of a year starts under where the numeral first shows */
-.album[data-motion="cinematic"] .albumYear + .albumOpener + .albumEntry,
-.album[data-motion="cinematic"] .albumYear + .albumOpener + .albumFloatEntry {
-  margin-top: 136px;
-}
-.album[data-motion="cinematic"] .albumYear + .albumOpener + .albumSpread {
-  margin-top: 96px;
-}
 .albumSpread .albumStrip {
   padding-top: 48px;
 }
 .albumSpread {
   margin-bottom: 48px;
-}
-.album[data-motion="cinematic"] .albumStrip,
-.album[data-motion="cinematic"] .albumFloatEntry {
-  padding-bottom: 120px;
 }
 
 /* entries: photo six columns, text five, one column of air by the spine */
@@ -1107,9 +1043,6 @@ button.recRow:hover {
       animation-timeline: scroll(root);
       animation-range: 0 70vh;
     }
-    .album[data-motion="cinematic"] .albumHero {
-      animation-name: heroExitCinematic;
-    }
 
     /* spine fill: from this section's top crossing the middle of the
        viewport to its bottom crossing it */
@@ -1131,17 +1064,11 @@ button.recRow:hover {
       animation-range: cover calc(50vh - 12px) cover 50vh;
     }
 
-    /* year opener: parallax up, fades as it reaches the bar (editorial) */
-    .album[data-motion="editorial"] .albumOpenerNumeral {
+    /* year opener: parallax up, fades as it reaches the bar */
+    .albumOpenerNumeral {
       animation: openerDrift linear both;
       animation-timeline: view();
       animation-range: entry 0% exit 100%;
-    }
-    /* cinematic: it pins, so it only breathes in */
-    .album[data-motion="cinematic"] .albumOpenerNumeral {
-      animation: openerIn linear both;
-      animation-timeline: view();
-      animation-range: entry 0% entry 100%;
     }
 
     /* entries: photo and text arrive from opposite sides, text a beat
@@ -1202,12 +1129,6 @@ button.recRow:hover {
     transform: translateY(-48px);
   }
 }
-@keyframes heroExitCinematic {
-  to {
-    opacity: 0;
-    transform: translateY(-64px) scale(0.94);
-  }
-}
 @keyframes fillDown {
   from {
     transform: scaleY(0);
@@ -1249,16 +1170,6 @@ button.recRow:hover {
   to {
     transform: translateY(-72px);
     opacity: 0;
-  }
-}
-@keyframes openerIn {
-  from {
-    opacity: 0;
-    transform: translateY(48px);
-  }
-  to {
-    opacity: 1;
-    transform: none;
   }
 }
 @keyframes fromLeft {
@@ -1471,11 +1382,6 @@ button.recRow:hover {
   .albumKicker {
     margin-bottom: 16px;
   }
-  .motionPick {
-    order: 10;
-    align-self: flex-start;
-    margin: 24px 0 0 0;
-  }
   .albumTitle {
     font-size: 96px;
     line-height: 88px;
@@ -1501,19 +1407,13 @@ button.recRow:hover {
     font-size: 24px;
     line-height: 24px;
   }
-  .albumOpener,
-  .album[data-motion="cinematic"] .albumOpener {
-    position: relative;
-    top: auto;
+  .albumOpener {
     height: auto;
-    margin-bottom: 0;
     padding: 32px 0 8px 0;
   }
-  .albumOpenerNumeral,
-  .album[data-motion="cinematic"] .albumOpenerNumeral {
+  .albumOpenerNumeral {
     font-size: 96px;
     line-height: 88px;
-    color: var(--content-primary);
   }
   .albumEntry {
     display: flex;
@@ -1615,20 +1515,13 @@ button.recRow:hover {
    it to the page grid. ---- */
 .skyWrap {
   position: relative;
-  margin: 24px 0 96px 0;
-  background-color: var(--surface-highlight);
-  background-image: radial-gradient(var(--surface-tertiary) 1px, transparent 1.5px);
-  background-size: var(--lh) var(--lh);
-  background-position: center;
-  border: 1px solid var(--surface-tertiary);
-  border-radius: 16px;
-  overflow: hidden;
+  margin: 8px 0 96px 0;
 }
 .skyLegend {
   position: absolute;
-  top: 16px;
-  left: 24px;
-  right: 24px;
+  top: 24px;
+  left: 0;
+  right: 0;
   display: flex;
   gap: 24px;
   align-items: center;
@@ -1787,7 +1680,7 @@ button.recRow:hover {
   font-size: 12px;
   text-anchor: middle;
   paint-order: stroke;
-  stroke: var(--surface-highlight);
+  stroke: var(--surface-primary);
   stroke-width: 4px;
   pointer-events: none;
   transition: opacity 0.4s ease;
@@ -1803,12 +1696,13 @@ button.recRow:hover {
   pointer-events: none;
   opacity: 0;
   transition: opacity 0.3s ease;
+  stroke: var(--surface-primary);
 }
 .skyNode[data-hovered] .skyMomentLabel {
   opacity: 1;
 }
 .skyMomentRing {
-  fill: var(--surface-highlight);
+  fill: var(--surface-primary);
   stroke: var(--content-secondary);
   stroke-width: 1;
 }
@@ -1866,7 +1760,6 @@ button.recRow:hover {
   position: relative;
   padding: 8px 0 16px 0;
   border-top: 1px solid var(--surface-tertiary);
-  background: color-mix(in srgb, var(--surface-highlight) 80%, transparent);
 }
 .skyRailTrack {
   position: relative;
@@ -1924,7 +1817,7 @@ button.recRow:hover {
 }
 .skyRailAll {
   position: absolute;
-  right: 24px;
+  right: 0;
   top: 12px;
   font-size: 12px;
   line-height: 16px;
@@ -1941,7 +1834,7 @@ button.recRow:hover {
 }
 .skyCard {
   position: absolute;
-  right: 24px;
+  right: 0;
   bottom: 96px;
   width: 300px;
   background: var(--surface-highlight);
@@ -2006,26 +1899,23 @@ button.recRow:hover {
 
 @media (max-width: 760px) {
   .skyWrap {
-    margin: 16px -16px 48px -16px;
-    border-radius: 0;
+    margin: 8px 0 48px 0;
   }
   .sky {
     height: 64vh;
     min-height: 420px;
   }
   .skyCard {
-    left: 16px;
-    right: 16px;
+    left: 0;
+    right: 0;
     bottom: 88px;
     width: auto;
   }
   .skyLegend {
     flex-wrap: wrap;
     gap: 12px;
-    left: 16px;
-    right: 16px;
   }
-  .skyHint {
+  .skyLegend > .skyHint {
     display: none;
   }
   .skyYearText {
@@ -2035,6 +1925,6 @@ button.recRow:hover {
     padding: 8px 0 12px 0;
   }
   .skyRailAll {
-    right: 12px;
+    right: 0;
   }
 }
