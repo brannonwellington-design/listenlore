@@ -21,9 +21,15 @@ export default async function AddMomentPage({
 
   return (
     <div className="wrap" style={{ paddingTop: 48, paddingBottom: 96 }}>
-      <Link href="/" style={{ fontSize: 14 }}>
-        ← Back to the timeline
-      </Link>
+      {preselected ? (
+        <Link href={`/milestone/${preselected.id}`} style={{ fontSize: 14 }}>
+          ← Back to {preselected.label.replace(/ \(\d{4}-\d{2}\)$/, "")}
+        </Link>
+      ) : (
+        <Link href="/" style={{ fontSize: 14 }}>
+          ← Back to the timeline
+        </Link>
+      )}
       <h1 style={{ fontSize: 48, lineHeight: "52px", marginTop: 24 }}>
         Add a Moment
       </h1>
