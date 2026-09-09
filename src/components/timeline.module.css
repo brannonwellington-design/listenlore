@@ -476,40 +476,23 @@ button.recRow:hover {
   position: relative;
 }
 
-/* hero: one band. Kicker on the top line; masthead on
-   the left, lead beside it, the four numerals stacked at the right — all
-   sharing a bottom edge, so the first year starts above the fold. */
+/* hero: one line. The lead on the left, the four numerals on the right,
+   sharing a bottom edge, and the first year right underneath. */
 .albumHero {
   padding: 40px 0 40px 0;
   row-gap: 0;
   align-items: end;
 }
-.albumKicker {
-  grid-column: 1 / 13;
-  font-size: 12px;
-  line-height: 16px;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--content-secondary);
-  margin-bottom: 24px;
-}
-.albumTitle {
-  grid-column: 1 / 5;
-  font-size: 128px;
-  line-height: 112px;
-  letter-spacing: -0.03em;
-  margin-bottom: 0;
-}
 .albumLead {
-  grid-column: 5 / 9;
-  font-size: 16px;
-  line-height: 24px;
-  color: var(--content-secondary);
-  max-width: 360px;
-  padding-bottom: 8px;
+  grid-column: 1 / 6;
+  font-size: 20px;
+  line-height: 28px;
+  color: var(--content-primary);
+  max-width: 440px;
+  padding-bottom: 4px;
 }
 .albumStats {
-  grid-column: 9 / 13;
+  grid-column: 7 / 13;
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   column-gap: var(--gutter);
@@ -546,6 +529,7 @@ button.recRow:hover {
 }
 .albumYearSection {
   position: relative;
+  timeline-scope: --opener;
 }
 /* the spine fills with ink as far as you've read: each year's segment
    scales in as the section crosses the middle of the viewport */
@@ -599,6 +583,7 @@ button.recRow:hover {
   height: 232px;
   padding-top: 32px;
   z-index: 0;
+  view-timeline-name: --opener;
 }
 .albumOpenerNumeral {
   display: block;
@@ -1064,6 +1049,13 @@ button.recRow:hover {
       animation-range: cover calc(50vh - 12px) cover 50vh;
     }
 
+    /* the bar's year only appears once the big numeral has scrolled out,
+       so the two never read as a duplicate */
+    .albumYearNumeral {
+      animation: barYearIn linear both;
+      animation-timeline: --opener;
+      animation-range: exit 20% exit 100%;
+    }
     /* year opener: parallax up, fades as it reaches the bar */
     .albumOpenerNumeral {
       animation: openerDrift linear both;
@@ -1127,6 +1119,16 @@ button.recRow:hover {
   to {
     opacity: 0.1;
     transform: translateY(-48px);
+  }
+}
+@keyframes barYearIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
   }
 }
 @keyframes fillDown {
@@ -1376,19 +1378,14 @@ button.recRow:hover {
     display: flex;
     flex-direction: column;
     align-items: stretch;
-    padding: 32px 0 32px 0;
+    padding: 24px 0 32px 0;
     gap: 0;
   }
-  .albumKicker {
-    margin-bottom: 16px;
-  }
-  .albumTitle {
-    font-size: 96px;
-    line-height: 88px;
-  }
   .albumLead {
-    padding: 16px 0 0 0;
+    font-size: 18px;
+    line-height: 28px;
     max-width: none;
+    padding: 0;
   }
   .albumStats {
     grid-template-columns: repeat(4, minmax(0, 1fr));

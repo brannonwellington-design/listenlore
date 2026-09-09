@@ -323,14 +323,10 @@ export default function AlbumView({ data }: { data: TimelineData }) {
   return (
     <div className={s.album}>
       <div className={`grid12 ${s.albumHero}`}>
-        <div className={s.albumKicker}>Listen Labs, Remembered</div>
-        <h1 className={s.albumTitle} data-optical="">
-          Lore
-        </h1>
-        <p className={s.albumLead}>
+        <h1 className={s.albumLead}>
           Scroll down through time. The big events hold the small ones that made
           them worth remembering.
-        </p>
+        </h1>
         <div className={s.albumStats}>
           {[
             [yearSpan, "Years"],
