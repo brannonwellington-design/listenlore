@@ -199,7 +199,7 @@ export function MediaEl({
   controls?: boolean;
 }) {
   if (media.kind === "video") {
-    return (
+    const video = (
       <video
         src={media.url}
         className={className}
@@ -209,6 +209,30 @@ export function MediaEl({
         playsInline
         preload="metadata"
       />
+    );
+    if (controls) return video;
+    // Cover-frame mode: first frame as the still, a play badge so it
+    // reads as a video; playback happens on the page it links to.
+    return (
+      <span style={{ position: "relative", display: "block" }}>
+        {video}
+        <span
+          aria-hidden
+          style={{
+            position: "absolute",
+            inset: 0,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            fontSize: 28,
+            color: "#fff",
+            textShadow: "0 1px 8px rgba(0,0,0,0.6)",
+            pointerEvents: "none",
+          }}
+        >
+          ▶
+        </span>
+      </span>
     );
   }
   // eslint-disable-next-line @next/next/no-img-element
