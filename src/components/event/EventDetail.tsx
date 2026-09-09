@@ -9,6 +9,7 @@ import t from "../timeline.module.css";
 import s from "./event.module.css";
 import {
   aspect,
+  MediaEl,
   CategoryChip,
   fmtDate,
   MomentCard,
@@ -100,10 +101,11 @@ export default function EventDetail({
 
         {hero && (
           <figure className={s.figure}>
-            <img
+            <MediaEl
+              media={hero}
+              controls={hero.kind === "video"}
               className={s.heroPhoto}
               style={{ aspectRatio: aspect(hero, 3 / 4, 3 / 2) }}
-              src={hero.url}
               alt={ms.title}
             />
             {hero.caption && (
@@ -116,13 +118,13 @@ export default function EventDetail({
       {(gallery.length > 0 || viewer) && (
         <div className={s.gallery}>
           {gallery.map((m) => (
-            <img
+            <MediaEl
               key={m.id}
+              media={m}
+              controls={m.kind === "video"}
               className={s.galleryPhoto}
               style={{ aspectRatio: aspect(m, 3 / 4, 8 / 5) }}
-              src={m.url}
               alt={m.caption ?? ""}
-              loading="lazy"
             />
           ))}
           {viewer && (

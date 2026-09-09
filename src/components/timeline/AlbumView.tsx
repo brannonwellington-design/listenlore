@@ -10,6 +10,7 @@ import {
   clusterEntries,
   excerpt,
   fmtDate,
+  MediaEl,
   groupTimelineByYear,
   type ClusteredEntry,
 } from "./shared";
@@ -46,7 +47,7 @@ function ParallaxPhoto({
 }) {
   return (
     <div className={`${s.frame} ${s[`frame_${frameKind(media)}`]} ${className ?? ""}`}>
-      <img className={s.framePhoto} src={media.url} alt={alt} loading="lazy" />
+      <MediaEl media={media} className={s.framePhoto} alt={alt} />
     </div>
   );
 }
@@ -144,7 +145,7 @@ function AlbumSpread({ ms }: { ms: Milestone }) {
     <>
       <div className={s.spread}>
         <div className={s.spreadFrame}>
-          <img className={s.spreadPhoto} src={hero.url} alt={ms.title} loading="lazy" />
+          <MediaEl media={hero} className={s.spreadPhoto} alt={ms.title} />
         </div>
         <div className={s.spreadScrim} />
         <div className={`grid12 ${s.spreadText}`}>
@@ -201,12 +202,7 @@ function Strip({
             title={m.title}
             data-moment-id={m.id}
           >
-            <img
-              className={s.albumStripThumb}
-              src={m.media[0].url}
-              alt={m.title}
-              loading="lazy"
-            />
+            <MediaEl media={m.media[0]} className={s.albumStripThumb} alt={m.title} />
             <span className={s.albumStripCaption}>{m.title}</span>
           </Link>
         ) : (
@@ -275,11 +271,10 @@ function AlbumMomentCluster({ moments }: { moments: Moment[] }) {
                 title={m.title}
                 data-moment-id={m.id}
               >
-                <img
+                <MediaEl
+                  media={m.media[0]}
                   className={s.albumStripThumb}
-                  src={m.media[0].url}
                   alt={m.title}
-                  loading="lazy"
                 />
                 <span className={s.albumStripCaption}>{m.title}</span>
               </Link>

@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import AddPhotos from "@/components/AddPhotos";
 import { getViewer } from "@/lib/auth";
 import { serviceClient } from "@/lib/supabase/service";
-import { MAX_PHOTOS_PER_MOMENT } from "@/lib/upload";
+import { MAX_PHOTOS_PER_MOMENT, VIDEO_EXTENSIONS } from "@/lib/upload";
 
 export const dynamic = "force-dynamic";
 
@@ -145,19 +145,20 @@ export default async function MomentPage({
         {mediaRows.map((m) => {
           const url = signed.get(m.storage_path);
           if (!url) return null;
+          const style = {
+            width: "100%",
+            borderRadius: 8,
+            aspectRatio:
+              m.width && m.height ? `${m.width} / ${m.height}` : undefined,
+          };
+          if (VIDEO_EXTENSIONS.test(m.storage_path)) {
+            return (
+              <video key={m.id} src={url} controls playsInline preload="metadata" style={style} />
+            );
+          }
           return (
             // eslint-disable-next-line @next/next/no-img-element
-            <img
-              key={m.id}
-              src={url}
-              alt={m.caption ?? moment.title}
-              style={{
-                width: "100%",
-                borderRadius: 8,
-                aspectRatio:
-                  m.width && m.height ? `${m.width} / ${m.height}` : undefined,
-              }}
-            />
+            <img key={m.id} src={url} alt={m.caption ?? moment.title} style={style} />
           );
         })}
       </div>

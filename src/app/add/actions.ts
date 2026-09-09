@@ -7,10 +7,12 @@ import { serviceClient } from "@/lib/supabase/service";
 import { getViewer, type Viewer } from "@/lib/auth";
 import {
   ACCEPTED_IMAGE_TYPES,
+  ACCEPTED_VIDEO_TYPES,
   MAX_BULK_MOMENTS,
   MAX_BULK_PHOTOS,
   MAX_FILE_BYTES,
   MAX_PHOTOS_PER_MOMENT,
+  MAX_VIDEO_BYTES,
   type UploadTicket,
   type UploadedPhoto,
 } from "@/lib/upload";
@@ -29,19 +31,25 @@ export async function requestUploadTickets(
     return { error: `Up to ${MAX_BULK_PHOTOS} photos at a time.` };
   }
   for (const f of files) {
-    if (!ACCEPTED_IMAGE_TYPES[f.type]) {
+    const isVideo = !!ACCEPTED_VIDEO_TYPES[f.type];
+    if (!ACCEPTED_IMAGE_TYPES[f.type] && !isVideo) {
       return {
-        error:
-          "Only JPEG, PNG, WebP, or GIF photos (iPhone HEIC photos need exporting as JPEG).",
+        error: "Only JPEG, PNG, WebP, GIF, HEIC photos or MP4/MOV/WebM videos.",
       };
     }
-    if (f.size > MAX_FILE_BYTES) return { error: "Each photo must be under 10 MB." };
+    if (isVideo) {
+      if (f.size > MAX_VIDEO_BYTES)
+        return { error: "Each video must be under 50 MB." };
+    } else if (f.size > MAX_FILE_BYTES) {
+      return { error: "Each photo must be under 10 MB." };
+    }
   }
 
   const service = serviceClient();
   const tickets: UploadTicket[] = [];
   for (const f of files) {
-    const path = `uploads/${viewer.userId}/${crypto.randomUUID()}.${ACCEPTED_IMAGE_TYPES[f.type]}`;
+    const ext = ACCEPTED_IMAGE_TYPES[f.type] ?? ACCEPTED_VIDEO_TYPES[f.type];
+    const path = `uploads/${viewer.userId}/${crypto.randomUUID()}.${ext}`;
     const { data, error } = await service.storage
       .from("media")
       .createSignedUploadUrl(path);

@@ -4,7 +4,9 @@ import { useCallback, useRef, useState } from "react";
 import { requestUploadTickets } from "@/app/add/actions";
 import {
   ACCEPTED_IMAGE_TYPES,
+  ACCEPTED_VIDEO_TYPES,
   MAX_FILE_BYTES,
+  MAX_VIDEO_BYTES,
   type UploadedPhoto,
 } from "@/lib/upload";
 import { readImageSize, uploadToStorage } from "@/lib/upload-client";
@@ -12,11 +14,37 @@ import { readImageSize, uploadToStorage } from "@/lib/upload-client";
 export interface UploadEntry {
   key: string;
   name: string;
+  kind: "image" | "video";
   previewUrl: string;
   progress: number;
   status: "uploading" | "done" | "error";
   error?: string;
   uploaded?: UploadedPhoto;
+}
+
+// iPhone photos arrive as HEIC, which browsers can pick but storage
+// shouldn't keep — convert to JPEG in the browser before the normal
+// pipeline. The converter (wasm) loads lazily, only when a HEIC shows up.
+function isHeic(file: File): boolean {
+  return (
+    /image\/hei[cf]/i.test(file.type) || /\.hei[cf]$/i.test(file.name)
+  );
+}
+
+async function heicToJpeg(file: File): Promise<File | null> {
+  try {
+    const { default: heic2any } = await import("heic2any");
+    const out = await heic2any({
+      blob: file,
+      toType: "image/jpeg",
+      quality: 0.9,
+    });
+    const blob = Array.isArray(out) ? out[0] : out;
+    const name = `${file.name.replace(/\.hei[cf]$/i, "")}.jpg`;
+    return new File([blob], name, { type: "image/jpeg" });
+  } catch {
+    return null;
+  }
 }
 
 // Owns the whole client upload pipeline: validate, mint tickets, PUT
@@ -39,19 +67,32 @@ export function usePhotoUploads(maxCount: number) {
 
       const current = entries.length;
       const accepted: File[] = [];
-      for (const file of Array.from(files)) {
+      for (let file of Array.from(files)) {
         if (current + accepted.length >= maxCount) {
           setWarning(`Up to ${maxCount} photos here — the rest were left out.`);
           break;
         }
-        if (!ACCEPTED_IMAGE_TYPES[file.type]) {
+        if (isHeic(file)) {
+          const converted = await heicToJpeg(file);
+          if (!converted) {
+            setWarning(
+              `Couldn’t convert “${file.name}” — try exporting it as JPEG.`
+            );
+            continue;
+          }
+          file = converted;
+        }
+        const isVideo = !!ACCEPTED_VIDEO_TYPES[file.type];
+        if (!ACCEPTED_IMAGE_TYPES[file.type] && !isVideo) {
           setWarning(
-            `“${file.name}” isn’t a supported image (JPEG, PNG, WebP, or GIF — iPhone HEIC photos need exporting as JPEG).`
+            `“${file.name}” isn’t supported (photos: JPEG, PNG, WebP, GIF, HEIC; videos: MP4, MOV, WebM).`
           );
           continue;
         }
-        if (file.size > MAX_FILE_BYTES) {
-          setWarning(`“${file.name}” is over 10 MB.`);
+        if (isVideo ? file.size > MAX_VIDEO_BYTES : file.size > MAX_FILE_BYTES) {
+          setWarning(
+            `“${file.name}” is over ${isVideo ? "50" : "10"} MB.`
+          );
           continue;
         }
         accepted.push(file);
@@ -61,6 +102,7 @@ export function usePhotoUploads(maxCount: number) {
       const fresh: UploadEntry[] = accepted.map((file) => ({
         key: `u${counter.current++}`,
         name: file.name,
+        kind: ACCEPTED_VIDEO_TYPES[file.type] ? ("video" as const) : ("image" as const),
         previewUrl: URL.createObjectURL(file),
         progress: 0,
         status: "uploading" as const,
@@ -86,7 +128,9 @@ export function usePhotoUploads(maxCount: number) {
           const entry = fresh[i];
           const ticket = ticketRes.tickets[i];
           try {
-            const dims = await readImageSize(file);
+            const dims = ACCEPTED_VIDEO_TYPES[file.type]
+              ? { width: null, height: null }
+              : await readImageSize(file);
             await uploadToStorage(ticket, file, (fraction) =>
               patch(entry.key, { progress: fraction })
             );

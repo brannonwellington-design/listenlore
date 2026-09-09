@@ -704,6 +704,13 @@ button.recRow:hover {
 .frame_portrait {
   height: 552px;
 }
+/* a video in a frame: the media element wraps it in a span for its play
+   badge, so the span has to fill the frame for the badge to centre */
+.frame > span,
+.spreadFrame > span {
+  position: absolute !important;
+  inset: 0;
+}
 .framePhoto {
   position: absolute;
   left: 0;
