@@ -491,15 +491,15 @@ button.recRow:hover {
 }
 
 /* hero: one masthead band hanging from the header's rule. The lead and
-   the play control stack in columns 1–4; four numerals, two columns each,
-   across 5–12, so every figure starts on a column line. A second rule
-   closes the band before the first year opens. */
+   the play control stack in columns 1–5; the four numerals sit on the
+   right half, columns 7–12, split into four equal tracks on the same
+   gutter. Column 6 stays empty as the breath between them. */
 .albumHero {
   padding: 24px 0 24px 0;
   align-items: start;
 }
 .albumLeadWrap {
-  grid-column: 1 / 5;
+  grid-column: 1 / 6;
 }
 .albumLead {
   font-size: 24px;
@@ -508,18 +508,12 @@ button.recRow:hover {
   text-wrap: pretty;
 }
 .albumStats {
-  grid-column: 5 / 13;
+  grid-column: 7 / 13;
   display: grid;
-  grid-template-columns: subgrid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   column-gap: var(--gutter);
 }
-@supports not (grid-template-columns: subgrid) {
-  .albumStats {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-  }
-}
 .albumStat {
-  grid-column: span 2;
   display: flex;
   flex-direction: column;
   gap: 8px;
