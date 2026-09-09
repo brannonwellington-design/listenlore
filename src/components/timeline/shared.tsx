@@ -1,3 +1,5 @@
+"use client";
+
 import Link from "next/link";
 import type { MediaItem, Milestone, Moment, TimelineData } from "@/lib/types";
 import s from "../timeline.module.css";
