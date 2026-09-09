@@ -346,6 +346,10 @@ export default function AlbumView({
           <Walkthrough
             script={walkthrough}
             milestones={data.milestones}
+            moments={[
+              ...data.milestones.flatMap((ms) => ms.moments),
+              ...data.floatingMoments,
+            ]}
             canEdit={canEdit}
           />
         </div>

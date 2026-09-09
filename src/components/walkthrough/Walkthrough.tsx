@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import type { MediaItem, Milestone } from "@/lib/types";
+import type { MediaItem, Milestone, Moment } from "@/lib/types";
 import type { Walkthrough as Script } from "@/lib/walkthrough";
 import { MediaEl } from "../timeline/shared";
 import s from "./walkthrough.module.css";
@@ -25,19 +25,39 @@ const SCROLL_LEAD = 0.55; // share of the gap spent travelling to the next stop
 
 type RawStop = Omit<Stop, "hold">;
 
-function resolveStops(script: Script, milestones: Milestone[]): Stop[] {
+function resolveStops(
+  script: Script,
+  milestones: Milestone[],
+  moments: Moment[]
+): Stop[] {
   const byId = new Map(milestones.map((ms) => [ms.id, ms]));
+  const momentById = new Map(moments.map((m) => [m.id, m]));
   const raw: RawStop[] = [];
   for (const st of script.stops) {
     const ms = byId.get(st.id);
-    if (!ms) continue;
+    if (ms) {
+      raw.push({
+        id: ms.id,
+        title: ms.title,
+        when: ms.date_start ?? "",
+        at: st.at,
+        text: st.text,
+        media: ms.media[0] ?? ms.moments.find((m) => m.media.length > 0)?.media[0] ?? null,
+      });
+      continue;
+    }
+    // A stop can also be a single moment: its photo becomes the frame, and
+    // the scroll target falls back to its parent event when the moment has
+    // no element of its own on the current view.
+    const mo = momentById.get(st.id);
+    if (!mo) continue;
     raw.push({
-      id: ms.id,
-      title: ms.title,
-      when: ms.date_start ?? "",
+      id: mo.id,
+      title: mo.title,
+      when: mo.event_date ?? "",
       at: st.at,
       text: st.text,
-      media: ms.media[0] ?? ms.moments.find((m) => m.media.length > 0)?.media[0] ?? null,
+      media: mo.media[0] ?? null,
     });
   }
   // No timestamps yet: space the stops evenly on the silent clock.
@@ -57,7 +77,10 @@ function fmtClock(seconds: number): string {
 }
 
 function eventEl(id: string): HTMLElement | null {
-  return document.querySelector<HTMLElement>(`[data-event-id="${id}"]`);
+  return (
+    document.querySelector<HTMLElement>(`[data-event-id="${id}"]`) ??
+    document.querySelector<HTMLElement>(`[data-moment-id="${id}"]`)
+  );
 }
 function heroEl(id: string): HTMLElement | null {
   return eventEl(id)?.querySelector<HTMLElement>("[data-event-hero]") ?? null;
@@ -79,13 +102,18 @@ const ease = (t: number) => 1 - Math.pow(1 - t, 3);
 export default function Walkthrough({
   script,
   milestones,
+  moments = [],
   canEdit,
 }: {
   script: Script;
   milestones: Milestone[];
+  moments?: Moment[];
   canEdit: boolean;
 }) {
-  const stops = useMemo(() => resolveStops(script, milestones), [script, milestones]);
+  const stops = useMemo(
+    () => resolveStops(script, milestones, moments),
+    [script, milestones, moments]
+  );
   const total = stops.length
     ? stops[stops.length - 1].at + stops[stops.length - 1].hold + 1
     : 0;
@@ -359,7 +387,7 @@ export default function Walkthrough({
                 <div className={s.barFill} style={{ width: `${(t / Math.max(total, 1)) * 100}%` }} />
                 {stops.map((st, i) => (
                   <span
-                    key={st.id}
+                    key={`${st.id}-${i}`}
                     className={`${s.barStop} ${i < doneCount ? s.barStopDone : ""}`}
                     style={{ left: `${(st.at / Math.max(total, 1)) * 100}%` }}
                   />
