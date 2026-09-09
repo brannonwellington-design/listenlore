@@ -5,7 +5,7 @@ import { serviceClient } from "./supabase/service";
 export async function formOptions() {
   const service = serviceClient();
   const [categories, milestones, people] = await Promise.all([
-    service.from("categories").select("id, label").order("sort"),
+    service.from("categories").select("id, label").order("label"),
     service
       .from("milestones")
       .select("id, title, date_start, category_id")
