@@ -276,7 +276,9 @@
 .momentRow,
 .momentCard,
 .recRow,
-.albumFloatEntry {
+.albumFloatEntry,
+.albumStripItem,
+.albumStripText {
   scroll-margin-top: 176px;
 }
 .editLink {
@@ -494,19 +496,55 @@ button.recRow:hover {
   width: 2px;
   background: var(--surface-tertiary);
 }
+/* The year rides along the top as a proper bar — full width of the page,
+   frosted so the photos passing under it stay legible as texture, ruled
+   underneath so it reads as chrome rather than a loose numeral floating
+   over the pictures. */
 .albumYear {
-  text-align: center;
-  padding-bottom: 64px;
   position: sticky;
-  top: 16px;
+  top: 0;
   z-index: 3;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 0 calc(-1 * var(--margin)) 56px calc(-1 * var(--margin));
+  padding: 10px var(--margin) 8px var(--margin);
+  background: color-mix(in srgb, var(--surface-primary) 86%, transparent);
+  -webkit-backdrop-filter: blur(16px) saturate(120%);
+  backdrop-filter: blur(16px) saturate(120%);
+  border-bottom: 1px solid var(--surface-tertiary);
+}
+@supports not (backdrop-filter: blur(1px)) {
+  .albumYear {
+    background: var(--surface-primary);
+  }
 }
 .albumYearNumeral {
-  background: var(--surface-primary);
-  padding: 0 24px;
-  font-size: 48px;
-  line-height: 52px;
-  color: var(--content-disabled);
+  font-size: 40px;
+  line-height: 44px;
+  letter-spacing: -0.01em;
+  color: var(--content-secondary);
+}
+.albumEntryLink {
+  color: inherit;
+}
+.albumEntryLink:hover {
+  color: var(--content-brand);
+  text-decoration: none;
+}
+.albumOpen {
+  display: inline-block;
+  margin-top: 16px;
+  font-size: 14px;
+  line-height: 20px;
+  color: var(--content-brand);
+}
+.albumInviteLink {
+  color: inherit;
+}
+.albumInviteLink:hover {
+  text-decoration: none;
+  color: var(--content-brand-contrast-secondary);
 }
 .albumEntry {
   padding-bottom: 96px;
@@ -634,6 +672,34 @@ button.recRow:hover {
 }
 .albumStripItem:hover .albumStripCaption {
   color: var(--content-brand);
+}
+/* the overflow tile: what didn't fit in the strip lives on the event page */
+.albumStripMore {
+  width: 120px;
+  min-height: 120px;
+  border: 1px dashed var(--surface-tertiary);
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  text-align: center;
+  color: var(--content-secondary);
+  padding: 12px;
+}
+.albumStripMore:hover {
+  text-decoration: none;
+  border-color: var(--content-brand);
+  color: var(--content-brand);
+}
+.albumStripMore:hover .albumStripCaption {
+  color: var(--content-brand);
+}
+.albumStripMoreCount {
+  font-size: 24px;
+  line-height: 28px;
+  color: var(--content-primary);
 }
 
 /* ---- album: free-floating moment tucked onto the spine ---- */
@@ -916,7 +982,20 @@ button.recRow:hover {
     border-radius: 8px;
   }
   .albumYear {
-    padding-bottom: 32px;
+    margin-bottom: 32px;
+    padding-top: 8px;
+    padding-bottom: 6px;
+  }
+  .albumYearNumeral {
+    font-size: 28px;
+    line-height: 32px;
+  }
+  .albumStripMore {
+    width: 100%;
+    min-height: 0;
+    flex-direction: row;
+    justify-content: center;
+    gap: 8px;
   }
   .albumStrip {
     flex-wrap: wrap;

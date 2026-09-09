@@ -19,10 +19,21 @@ const VIEW_LABELS: Record<ViewMode, string> = {
   constellation: "Nodes",
 };
 
+// Register and Record are parked for now: not in the switcher, not a
+// default, but still reachable by ?view= so nothing is thrown away.
+const HIDDEN_VIEWS: ReadonlySet<ViewMode> = new Set(["register", "record"]);
+const SHOWN_VIEWS = (Object.keys(VIEW_LABELS) as ViewMode[]).filter(
+  (v) => !HIDDEN_VIEWS.has(v)
+);
+const DEFAULT_VIEW: ViewMode = "album";
+
 function isView(v: string | null): v is ViewMode {
   return (
     v === "register" || v === "record" || v === "album" || v === "constellation"
   );
+}
+function isShownView(v: string | null): v is ViewMode {
+  return isView(v) && !HIDDEN_VIEWS.has(v);
 }
 
 function scrollToMoment(ids: string) {
@@ -46,7 +57,7 @@ export default function Timeline({
   data: TimelineData;
   viewer: ViewerInfo | null;
 }) {
-  const [view, setView] = useState<ViewMode>("register");
+  const [view, setView] = useState<ViewMode>(DEFAULT_VIEW);
   const scrollMemory = useRef<Partial<Record<ViewMode, number>>>({});
   const restoreTo = useRef<number | null>(null);
   const pendingAdded = useRef<string | null>(null);
@@ -55,10 +66,11 @@ export default function Timeline({
     viewRef.current = view;
   }, [view]);
 
-  // On load: ?view= in the URL wins, then the viewer's saved preference.
-  // A fresh ?added= submission always lands on Register, where every
-  // moment is guaranteed visible. Deferred a frame so the first client
-  // render matches the server HTML.
+  // On load: ?view= in the URL wins, then the viewer's saved preference
+  // (a saved preference for a parked view falls back to the default).
+  // A fresh ?added= submission lands on the default view and scrolls to
+  // the new moment where it appears there. Deferred a frame so the first
+  // client render matches the server HTML.
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const added = params.get("added");
@@ -72,19 +84,19 @@ export default function Timeline({
           "",
           window.location.pathname + (qs ? `?${qs}` : "")
         );
-        if (viewRef.current === "register") {
-          // Already on Register (the default) — scroll straight away.
+        if (viewRef.current === DEFAULT_VIEW) {
+          // Already on the default view — scroll straight away.
           scrollToMoment(added);
         } else {
           pendingAdded.current = added;
-          setView("register");
+          setView(DEFAULT_VIEW);
         }
       } else if (isView(fromUrl)) {
         setView(fromUrl);
       } else {
         try {
           const saved = window.localStorage.getItem("lore-view");
-          if (isView(saved)) setView(saved);
+          if (isShownView(saved)) setView(saved);
         } catch {}
       }
     });
@@ -97,7 +109,7 @@ export default function Timeline({
       window.scrollTo({ top: restoreTo.current, behavior: "auto" });
       restoreTo.current = null;
     }
-    if (view === "register" && pendingAdded.current) {
+    if (view === DEFAULT_VIEW && pendingAdded.current) {
       const added = pendingAdded.current;
       pendingAdded.current = null;
       requestAnimationFrame(() => scrollToMoment(added));
@@ -127,7 +139,7 @@ export default function Timeline({
         </div>
         <div className={s.headerActions}>
           <div className={s.switcher} aria-label="Timeline view">
-            {(Object.keys(VIEW_LABELS) as ViewMode[]).map((v) => (
+            {SHOWN_VIEWS.map((v) => (
               <button
                 key={v}
                 aria-pressed={view === v}

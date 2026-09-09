@@ -80,6 +80,13 @@ function parseUploaded(raw: string[], viewer: Viewer): UploadedPhoto[] | null {
 // Shared field handling
 // ---------------------------------------------------------------------------
 
+// Only same-site event pages may be named as the place to land after
+// saving; anything else falls back to the timeline.
+function safeReturnTo(formData: FormData): string | null {
+  const raw = String(formData.get("return_to") ?? "");
+  return /^\/event\/[A-Za-z0-9-]+$/.test(raw) ? raw : null;
+}
+
 function readFields(formData: FormData) {
   const title = String(formData.get("title") ?? "").trim();
   const body = String(formData.get("body") ?? "").trim() || null;
@@ -241,7 +248,9 @@ export async function createMoment(
   if ("error" in result) return { error: `Couldn’t save the moment: ${result.error}` };
 
   revalidatePath("/");
-  redirect(`/?added=${result.id}`);
+  if (fields.milestone_id) revalidatePath(`/event/${fields.milestone_id}`);
+  const returnTo = safeReturnTo(formData);
+  redirect(`${returnTo ?? "/"}?added=${result.id}`);
 }
 
 export async function updateMoment(
@@ -306,7 +315,9 @@ export async function updateMoment(
   }
 
   revalidatePath("/");
-  redirect(`/?added=${momentId}`);
+  if (fields.milestone_id) revalidatePath(`/event/${fields.milestone_id}`);
+  const returnTo = safeReturnTo(formData);
+  redirect(`${returnTo ?? "/"}?added=${momentId}`);
 }
 
 // ---------------------------------------------------------------------------
@@ -449,7 +460,7 @@ export async function addPhotosToMoment(
 
   revalidatePath("/");
   revalidatePath(`/moment/${momentId}`);
-  revalidatePath("/milestone/[id]", "page");
+  revalidatePath("/event/[id]", "page");
   return { ok: true };
 }
 
@@ -494,7 +505,7 @@ export async function addPhotosToMilestone(
   );
 
   revalidatePath("/");
-  revalidatePath("/milestone/[id]", "page");
+  revalidatePath("/event/[id]", "page");
   return { ok: true };
 }
 

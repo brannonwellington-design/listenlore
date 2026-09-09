@@ -40,7 +40,7 @@ function RegisterMilestone({
         </div>
         <div className={`${s.bandBody} ${s.bandBodyWide}`}>
           <h2 className={s.bandTitle}>
-            <Link href={`/milestone/${ms.id}`} className={s.momentTitleLink}>
+            <Link href={`/event/${ms.id}`} className={s.momentTitleLink}>
               {ms.title}
             </Link>
           </h2>
@@ -71,7 +71,7 @@ function RegisterMilestone({
         className={`${s.bandBody} ${expanded || !hero ? s.bandBodyWide : ""}`}
       >
         <h2 className={s.bandTitle}>
-          <Link href={`/milestone/${ms.id}`} className={s.momentTitleLink}>
+          <Link href={`/event/${ms.id}`} className={s.momentTitleLink}>
             {ms.title}
           </Link>
         </h2>

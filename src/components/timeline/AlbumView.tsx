@@ -20,6 +20,7 @@ function AlbumEntry({ ms, side }: { ms: Milestone; side: "left" | "right" }) {
   );
   const textMoments = ms.moments.filter((m) => m.media.length === 0);
   const strip = [...photoExtras.slice(0, 4), ...textMoments.slice(0, 3)];
+  const hidden = ms.moments.length - strip.length - (heroMoment ? 1 : 0);
 
   const heroImg = hero && (
     <img
@@ -38,7 +39,7 @@ function AlbumEntry({ ms, side }: { ms: Milestone; side: "left" | "right" }) {
       {heroMoment ? (
         <Link href={`/moment/${heroMoment.id}`}>{heroImg}</Link>
       ) : (
-        heroImg
+        <Link href={`/event/${ms.id}`}>{heroImg}</Link>
       )}
       {heroMoment && (
         <figcaption className={s.albumCaption}>
@@ -62,11 +63,16 @@ function AlbumEntry({ ms, side }: { ms: Milestone; side: "left" | "right" }) {
         {ms.category ? ` · ${ms.category}` : ""}
       </div>
       <h2 className={s.albumEntryTitle}>
-        <Link href={`/milestone/${ms.id}`} className={s.momentTitleLink}>
+        <Link href={`/event/${ms.id}`} className={s.albumEntryLink}>
           {ms.title}
         </Link>
       </h2>
       {ms.blurb && <p className={s.albumBlurb}>{ms.blurb}</p>}
+      <Link href={`/event/${ms.id}`} className={s.albumOpen}>
+        {ms.moments.length === 0
+          ? "Open this event →"
+          : `Open this event · ${ms.moments.length} moment${ms.moments.length === 1 ? "" : "s"} →`}
+      </Link>
     </div>
   );
 
@@ -95,6 +101,7 @@ function AlbumEntry({ ms, side }: { ms: Milestone; side: "left" | "right" }) {
                 href={`/moment/${m.id}`}
                 className={s.albumStripItem}
                 title={m.title}
+                data-moment-id={m.id}
               >
                 <img
                   className={s.albumStripThumb}
@@ -110,6 +117,7 @@ function AlbumEntry({ ms, side }: { ms: Milestone; side: "left" | "right" }) {
                 href={`/moment/${m.id}`}
                 className={s.albumStripText}
                 title={m.title}
+                data-moment-id={m.id}
               >
                 <span className={s.albumStripQuote}>
                   {excerpt(m, 120) ?? m.title}
@@ -119,6 +127,12 @@ function AlbumEntry({ ms, side }: { ms: Milestone; side: "left" | "right" }) {
                 )}
               </Link>
             )
+          )}
+          {hidden > 0 && (
+            <Link href={`/event/${ms.id}`} className={s.albumStripMore}>
+              <span className={s.albumStripMoreCount}>+{hidden}</span>
+              <span className={s.albumStripCaption}>more in this event</span>
+            </Link>
           )}
         </div>
       )}
@@ -175,6 +189,7 @@ function AlbumMomentCluster({ moments }: { moments: Moment[] }) {
                 href={`/moment/${m.id}`}
                 className={s.albumStripItem}
                 title={m.title}
+                data-moment-id={m.id}
               >
                 <img
                   className={s.albumStripThumb}
@@ -190,6 +205,7 @@ function AlbumMomentCluster({ moments }: { moments: Moment[] }) {
                 href={`/moment/${m.id}`}
                 className={s.albumStripText}
                 title={m.title}
+                data-moment-id={m.id}
               >
                 <span className={s.albumStripQuote}>
                   {excerpt(m, 120) ?? m.title}
@@ -270,7 +286,11 @@ export default function AlbumView({ data }: { data: TimelineData }) {
           <div className={`${s.albumInviteKicker} num`}>
             {fmtDate(ms)} · Upcoming
           </div>
-          <h2 className={s.albumInviteTitle}>{ms.title}</h2>
+          <h2 className={s.albumInviteTitle}>
+            <Link href={`/event/${ms.id}`} className={s.albumInviteLink}>
+              {ms.title}
+            </Link>
+          </h2>
           {ms.blurb && <p className={s.albumInviteLead}>{ms.blurb}</p>}
         </div>
       ))}

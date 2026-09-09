@@ -1,3 +1,78 @@
+/* ---- form pages (/add, /moment/[id]/edit): one rhythm for the chrome
+   around the form, so the back link, title, lead and form share a left edge
+   and a consistent vertical beat. ---- */
+.page {
+  padding: 48px var(--margin) 96px var(--margin);
+  max-width: calc(640px + 2 * var(--margin));
+  margin: 0 auto;
+}
+.pageBack {
+  font-size: 14px;
+  line-height: 20px;
+}
+.pageTitle {
+  font-size: 48px;
+  line-height: 52px;
+  margin-top: 24px;
+}
+.pageLead {
+  font-size: 16px;
+  line-height: 24px;
+  color: var(--content-secondary);
+  margin-top: 12px;
+  max-width: 480px;
+}
+.pageNote {
+  font-size: 14px;
+  line-height: 20px;
+  margin-top: 8px;
+}
+.pageBody {
+  margin-top: 40px;
+}
+/* The event a moment is being added to: shown up top so there is no
+   guessing which dropdown did what. */
+.context {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  max-width: 640px;
+  margin-top: 24px;
+  padding: 16px 20px;
+  background: var(--surface-brand-secondary);
+  border-radius: 8px;
+  color: var(--content-brand);
+}
+.contextThumb {
+  width: 56px;
+  height: 56px;
+  object-fit: cover;
+  border-radius: 4px;
+  flex: none;
+}
+.contextKicker {
+  font-size: 12px;
+  line-height: 16px;
+}
+.contextTitle {
+  font-size: 18px;
+  line-height: 24px;
+  color: var(--content-primary);
+}
+.contextMeta {
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--content-secondary);
+}
+.contextClear {
+  margin-left: auto;
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--content-brand);
+  text-decoration: underline;
+  white-space: nowrap;
+}
+
 .form {
   display: flex;
   flex-direction: column;
@@ -9,7 +84,8 @@
   gap: 24px;
 }
 .row > * {
-  flex: 1;
+  flex: 1 1 0;
+  min-width: 0;
 }
 .field {
   display: flex;
@@ -28,6 +104,57 @@
   border: 1px solid var(--surface-tertiary);
   border-radius: 8px;
   padding: 12px 16px;
+  width: 100%;
+  min-width: 0;
+  min-height: 50px;
+}
+.input::placeholder {
+  color: var(--content-disabled);
+}
+.input:focus-visible {
+  outline: 2px solid var(--content-brand);
+  outline-offset: 0;
+  border-color: var(--content-brand);
+}
+textarea.input {
+  min-height: 0;
+  resize: vertical;
+}
+/* Selects draw their own chevron so it sits 16px in from the edge, on the
+   same inset as the text, in every browser. */
+select.input {
+  appearance: none;
+  -webkit-appearance: none;
+  padding-right: 44px;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16' fill='none'><path d='M4 6l4 4 4-4' stroke='%236b6861' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/></svg>");
+  background-repeat: no-repeat;
+  background-position: right 16px center;
+  background-size: 16px 16px;
+  cursor: pointer;
+}
+input[type="date"].input {
+  padding-right: 16px;
+}
+input[type="date"].input::-webkit-calendar-picker-indicator {
+  margin: 0;
+  padding: 0;
+  opacity: 0.6;
+  cursor: pointer;
+}
+input[type="file"].input {
+  padding: 10px 16px;
+  color: var(--content-secondary);
+}
+input[type="file"].input::file-selector-button {
+  font: inherit;
+  font-size: 14px;
+  color: var(--content-primary);
+  background: var(--surface-secondary);
+  border: none;
+  border-radius: 4px;
+  padding: 6px 12px;
+  margin-right: 12px;
+  cursor: pointer;
 }
 .fieldset {
   border: 1px solid var(--surface-tertiary);
@@ -70,6 +197,22 @@
   .row {
     flex-direction: column;
     gap: 24px;
+  }
+  .page {
+    padding-top: 32px;
+    padding-bottom: 64px;
+  }
+  .pageTitle {
+    font-size: 36px;
+    line-height: 40px;
+  }
+  .context {
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+  .contextClear {
+    margin-left: 0;
+    width: 100%;
   }
 }
 
