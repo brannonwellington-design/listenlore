@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import type { TimelineData } from "@/lib/types";
+import LoreTour, { type TourData } from "@/components/LoreTour";
 import GridOverlay from "../GridOverlay";
 import s from "../timeline.module.css";
 import AlbumView from "./AlbumView";
@@ -54,9 +55,11 @@ function scrollToMoment(ids: string) {
 export default function Timeline({
   data,
   viewer,
+  tour,
 }: {
   data: TimelineData;
   viewer: ViewerInfo | null;
+  tour?: TourData | null;
 }) {
   const [view, setView] = useState<ViewMode>(DEFAULT_VIEW);
   const scrollMemory = useRef<Partial<Record<ViewMode, number>>>({});
@@ -140,6 +143,7 @@ export default function Timeline({
           <span className={s.wordmarkSub}>Lore</span>
         </div>
         <div className={s.headerActions}>
+          {tour && <LoreTour tour={tour} />}
           <div className={s.switcher} aria-label="Timeline view">
             {SHOWN_VIEWS.map((v) => (
               <button
