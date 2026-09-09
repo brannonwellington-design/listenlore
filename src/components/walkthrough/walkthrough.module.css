@@ -111,6 +111,74 @@
   background: var(--surface-brand-secondary);
   color: var(--content-brand);
 }
+/* the gap after a stop: extras slotted in, and the buttons to add more */
+.gap {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px 0 4px 80px;
+}
+.extra {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 8px 12px;
+  background: var(--surface-secondary);
+  border-radius: 4px;
+}
+.extraLabel {
+  font-size: 14px;
+  line-height: 20px;
+  flex: 1;
+}
+.extraSeconds {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  line-height: 20px;
+  color: var(--content-secondary);
+}
+.extraSeconds input {
+  width: 88px;
+  min-height: 0;
+  padding: 6px 12px;
+}
+.extraRemove {
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--content-secondary);
+  text-decoration: underline;
+}
+.gapAdd {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.gapAddLabel {
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--content-secondary);
+  margin-right: 4px;
+}
+.gapBtn {
+  font-size: 12px;
+  line-height: 16px;
+  padding: 6px 10px;
+  border-radius: 4px;
+  border: 1px dashed var(--surface-tertiary);
+  color: var(--content-brand);
+}
+.gapBtn:hover {
+  border-color: var(--content-brand);
+  background: var(--surface-brand-secondary);
+}
+.momentRow {
+  margin: 16px 0 0 80px;
+  padding: 12px 0 0 0;
+  border-top: 1px dashed var(--surface-tertiary);
+}
 .saveRow {
   display: flex;
   align-items: center;
@@ -120,6 +188,11 @@
   .rowFields {
     grid-template-columns: 1fr;
     padding-left: 0;
+  }
+  .gap,
+  .momentRow {
+    padding-left: 0;
+    margin-left: 0;
   }
 }
 

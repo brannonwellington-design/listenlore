@@ -9,11 +9,7 @@ import {
   MAX_AUDIO_BYTES,
   type UploadTicket,
 } from "@/lib/upload";
-import {
-  AUDIO_PREFIX,
-  saveWalkthrough,
-  type WalkthroughScript,
-} from "@/lib/walkthrough";
+import { AUDIO_PREFIX, saveWalkthrough } from "@/lib/walkthrough";
 
 // One signed ticket for the narration track, straight to storage.
 export async function requestAudioUploadTicket(file: {
@@ -42,7 +38,7 @@ export async function saveWalkthroughScript(
   const viewer = await getViewer();
   if (!viewer) redirect("/login?next=/walkthrough/edit");
 
-  let payload: WalkthroughScript;
+  let payload: unknown;
   try {
     payload = JSON.parse(String(formData.get("payload") ?? ""));
   } catch {

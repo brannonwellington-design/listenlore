@@ -261,7 +261,13 @@ function clusterOf(id: string, byId: Map<string, Node>, edges: Edge[]): Set<stri
 
 const INTRO_KEY = "lore-sky-intro";
 
-export default function ConstellationView({ data }: { data: TimelineData }) {
+export default function ConstellationView({
+  data,
+  forceIntro = false,
+}: {
+  data: TimelineData;
+  forceIntro?: boolean;
+}) {
   const { nodes, edges } = useMemo(() => buildSky(data), [data]);
   const byId = useMemo(() => new Map(nodes.map((n) => [n.id, n])), [nodes]);
   const [selected, setSelected] = useState<Node | null>(null);
@@ -282,7 +288,7 @@ export default function ConstellationView({ data }: { data: TimelineData }) {
   useEffect(() => {
     let seen = false;
     try {
-      seen = window.sessionStorage.getItem(INTRO_KEY) === "1";
+      seen = !forceIntro && window.sessionStorage.getItem(INTRO_KEY) === "1";
     } catch {}
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     let raf2 = 0;
@@ -305,7 +311,7 @@ export default function ConstellationView({ data }: { data: TimelineData }) {
       cancelAnimationFrame(raf1);
       cancelAnimationFrame(raf2);
     };
-  }, []);
+  }, [forceIntro]);
   const settled = intro !== "playing";
 
   const years = useMemo(() => {

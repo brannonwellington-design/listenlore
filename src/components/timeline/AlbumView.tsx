@@ -2,8 +2,7 @@
 
 import Link from "next/link";
 import type { MediaItem, Milestone, Moment, TimelineData } from "@/lib/types";
-import type { Walkthrough as WalkthroughScript } from "@/lib/walkthrough";
-import Walkthrough from "../walkthrough/Walkthrough";
+import WalkthroughControls from "../walkthrough/WalkthroughControls";
 import s from "../timeline.module.css";
 import {
   byline,
@@ -304,11 +303,11 @@ function isBigBeat(ms: Milestone): boolean {
 
 export default function AlbumView({
   data,
-  walkthrough,
+  tour,
   canEdit,
 }: {
   data: TimelineData;
-  walkthrough: WalkthroughScript;
+  tour: { stopCount: number; narrated: boolean; onPlay: () => void };
   canEdit: boolean;
 }) {
   const years: [string, ClusteredEntry[]][] = groupTimelineByYear(data)
@@ -343,14 +342,11 @@ export default function AlbumView({
             Scroll down through time. The big events hold the small ones that
             made them worth remembering.
           </h1>
-          <Walkthrough
-            script={walkthrough}
-            milestones={data.milestones}
-            moments={[
-              ...data.milestones.flatMap((ms) => ms.moments),
-              ...data.floatingMoments,
-            ]}
+          <WalkthroughControls
+            stopCount={tour.stopCount}
+            narrated={tour.narrated}
             canEdit={canEdit}
+            onPlay={tour.onPlay}
           />
         </div>
         <div className={s.albumStats}>

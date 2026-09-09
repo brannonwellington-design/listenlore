@@ -1,9 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { TimelineData } from "@/lib/types";
 import type { Walkthrough } from "@/lib/walkthrough";
+import WalkthroughPlayer, { type TourView } from "../walkthrough/WalkthroughPlayer";
 import GridOverlay from "../GridOverlay";
 import s from "../timeline.module.css";
 import AlbumView from "./AlbumView";
@@ -81,6 +82,20 @@ export default function Timeline({
   walkthrough: Walkthrough;
 }) {
   const [view, setView] = useState<ViewMode>(DEFAULT_VIEW);
+
+  // The walkthrough runs in this shell so it survives its own trips
+  // through the Grid and the Nodes.
+  const [touring, setTouring] = useState(false);
+  const allMoments = useMemo(
+    () => [...data.milestones.flatMap((ms) => ms.moments), ...data.floatingMoments],
+    [data]
+  );
+  const stopCount = walkthrough.items.filter((it) => it.kind === "stop").length;
+  const tourView = useCallback((v: TourView) => setView(v), []);
+  const endTour = useCallback(() => {
+    setTouring(false);
+    setView("album");
+  }, []);
   const scrollMemory = useRef<Partial<Record<ViewMode, number>>>({});
   const restoreTo = useRef<number | null>(null);
   const pendingAdded = useRef<string | null>(null);
@@ -195,11 +210,30 @@ export default function Timeline({
         {view === "register" && <RegisterView data={data} viewer={viewer} />}
         {view === "record" && <RecordView data={data} viewer={viewer} />}
         {view === "album" && (
-          <AlbumView data={data} walkthrough={walkthrough} canEdit={!!viewer} />
+          <AlbumView
+            data={data}
+            canEdit={!!viewer}
+            tour={{
+              stopCount,
+              narrated: !!walkthrough.audioUrl,
+              onPlay: () => setTouring(true),
+            }}
+          />
         )}
-        {view === "grid" && <GridView data={data} />}
-        {view === "constellation" && <ConstellationView data={data} />}
+        {view === "grid" && <GridView data={data} drift={touring} />}
+        {view === "constellation" && (
+          <ConstellationView data={data} forceIntro={touring} />
+        )}
       </div>
+      <WalkthroughPlayer
+        script={walkthrough}
+        milestones={data.milestones}
+        moments={allMoments}
+        running={touring}
+        view={view === "grid" || view === "constellation" ? view : "album"}
+        onView={tourView}
+        onEnd={endTour}
+      />
     </div>
   );
 }

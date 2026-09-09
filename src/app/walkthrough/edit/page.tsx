@@ -27,6 +27,17 @@ export default async function EditWalkthroughPage() {
       moments: ms.moments.length,
     }));
 
+  const moments = [
+    ...data.milestones.flatMap((ms) => ms.moments),
+    ...data.floatingMoments,
+  ].map((m) => ({
+    id: m.id,
+    title: m.title,
+    when: m.event_date ?? "",
+    thumb: m.media[0]?.url ?? null,
+    parent: m.milestone_id,
+  }));
+
   return (
     <div className={`wrap ${s.page}`} style={{ maxWidth: "calc(880px + 2 * var(--margin))" }}>
       <Link href="/?view=timeline" className={s.pageBack}>
@@ -35,11 +46,12 @@ export default async function EditWalkthroughPage() {
       <h1 className={s.pageTitle}>Walkthrough script</h1>
       <p className={s.pageLead}>
         Tick the events the tour should stop on, write what is said at each,
-        and mark where in the recording each one begins. Everyone signed in
-        can edit this.
+        and mark where in the recording each one begins. Between stops you
+        can wander through the Grid or the Nodes, or simply wait. Everyone
+        signed in can edit this.
       </p>
       <div className={s.pageBody}>
-        <WalkthroughEditor events={events} script={script} />
+        <WalkthroughEditor events={events} moments={moments} script={script} />
       </div>
     </div>
   );
