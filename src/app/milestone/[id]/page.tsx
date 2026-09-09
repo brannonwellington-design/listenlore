@@ -17,7 +17,7 @@ function fmt(date: string | null, precision: string): string | null {
   const [y, m, d] = date.split("-").map(Number);
   if (precision === "day") return `${MONTHS[m - 1]} ${d}, ${y}`;
   if (precision === "year") return `${y}`;
-  return `${MONTHS[m - 1]} ${y}${precision === "approx" ? " ≈" : ""}`;
+  return `${MONTHS[m - 1]} ${y}`;
 }
 
 function fmtRange(
