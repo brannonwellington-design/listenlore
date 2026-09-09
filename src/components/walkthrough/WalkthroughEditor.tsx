@@ -70,15 +70,30 @@ export default function WalkthroughEditor({
 
   const stopOf = (id: string) =>
     items.find((it): it is StopItem => it.kind === "stop" && it.id === id);
+  // Events and moments without a parent event share one chronological
+  // list; moments inside an event sit under it, in their own order.
+  const rows = useMemo(() => {
+    const list: Array<{ kind: "event"; ev: EventRow } | { kind: "moment"; mo: MomentRow }> = [
+      ...events.map((ev) => ({ kind: "event" as const, ev })),
+      ...moments.filter((mo) => !mo.parent).map((mo) => ({ kind: "moment" as const, mo })),
+    ];
+    list.sort((a, b) => {
+      const wa = a.kind === "event" ? a.ev.when : a.mo.when;
+      const wb = b.kind === "event" ? b.ev.when : b.mo.when;
+      return wa.localeCompare(wb);
+    });
+    return list;
+  }, [events, moments]);
   const orderIndex = useMemo(() => {
     const m = new Map<string, number>();
-    events.forEach((e, i) => m.set(e.id, i * 1000));
-    moments.forEach((mo) => {
-      const base = mo.parent ? (m.get(mo.parent) ?? 0) : events.length * 1000;
-      m.set(mo.id, base + 1 + (m.size % 900));
+    rows.forEach((r, i) => m.set(r.kind === "event" ? r.ev.id : r.mo.id, i * 1000));
+    events.forEach((ev) => {
+      moments
+        .filter((mo) => mo.parent === ev.id)
+        .forEach((mo, j) => m.set(mo.id, (m.get(ev.id) ?? 0) + j + 1));
     });
     return m;
-  }, [events, moments]);
+  }, [rows, events, moments]);
 
   // Insert a stop in timeline order: after the last stop that comes
   // before it (and that stop's extras), else after the opening extras.
@@ -259,7 +274,7 @@ export default function WalkthroughEditor({
   );
 
   // Moment stops already in the script show under their parent event.
-  const momentStopsUnder = (eventId: string | null) =>
+  const momentStopsUnder = (eventId: string) =>
     moments.filter((mo) => mo.parent === eventId && !!stopOf(mo.id));
 
   return (
@@ -303,29 +318,32 @@ export default function WalkthroughEditor({
 
       <div className={s.rows}>
         {gap(null)}
-        {momentStopsUnder(null).map((mo) => {
-          const st = stopOf(mo.id)!;
-          return (
-            <div key={mo.id} className={`${s.row} ${s.rowOn}`}>
-              <label className={s.rowPick}>
-                <input type="checkbox" checked onChange={() => removeStop(mo.id)} />
-                {mo.thumb ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img src={mo.thumb} alt="" className={s.rowThumb} />
-                ) : (
-                  <span className={s.rowThumbEmpty} />
-                )}
-                <span className={s.rowTitle}>
-                  {mo.title}
-                  <span className={s.rowMeta}>{mo.when.slice(0, 4)} · moment</span>
-                </span>
-              </label>
-              {stopFields(mo.id, mo.title, st)}
-              {gap(mo.id)}
-            </div>
-          );
-        })}
-        {events.map((ev) => {
+        {rows.map((row) => {
+          if (row.kind === "moment") {
+            const mo = row.mo;
+            const st = stopOf(mo.id);
+            if (!st) return null;
+            return (
+              <div key={mo.id} className={`${s.row} ${s.rowOn}`}>
+                <label className={s.rowPick}>
+                  <input type="checkbox" checked onChange={() => removeStop(mo.id)} />
+                  {mo.thumb ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={mo.thumb} alt="" className={s.rowThumb} />
+                  ) : (
+                    <span className={s.rowThumbEmpty} />
+                  )}
+                  <span className={s.rowTitle}>
+                    {mo.title}
+                    <span className={s.rowMeta}>{mo.when.slice(0, 4)} · moment</span>
+                  </span>
+                </label>
+                {stopFields(mo.id, mo.title, st)}
+                {gap(mo.id)}
+              </div>
+            );
+          }
+          const ev = row.ev;
           const st = stopOf(ev.id);
           return (
             <div key={ev.id} className={`${s.row} ${st ? s.rowOn : ""}`}>
