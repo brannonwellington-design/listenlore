@@ -3,22 +3,38 @@
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import type { TimelineData } from "@/lib/types";
+import type { Walkthrough } from "@/lib/walkthrough";
 import GridOverlay from "../GridOverlay";
 import s from "../timeline.module.css";
 import AlbumView from "./AlbumView";
 import ConstellationView from "./ConstellationView";
+import GridView from "./GridView";
 import RecordView from "./RecordView";
 import RegisterView from "./RegisterView";
 import type { ViewerInfo } from "./shared";
 
-type ViewMode = "register" | "record" | "album" | "constellation";
+type ViewMode = "register" | "record" | "album" | "grid" | "constellation";
 
 const VIEW_LABELS: Record<ViewMode, string> = {
   register: "Register",
   record: "Record",
-  album: "Album",
+  album: "Timeline",
+  grid: "Grid",
   constellation: "Nodes",
 };
+
+// The URL spells the album view "timeline"; older links still say
+// "album" and keep working.
+const URL_NAMES: Record<ViewMode, string> = {
+  register: "register",
+  record: "record",
+  album: "timeline",
+  grid: "grid",
+  constellation: "constellation",
+};
+function fromUrlName(v: string | null): string | null {
+  return v === "timeline" ? "album" : v;
+}
 
 // Register and Record are parked for now: not in the switcher, not a
 // default, but still reachable by ?view= so nothing is thrown away.
@@ -30,7 +46,11 @@ const DEFAULT_VIEW: ViewMode = "album";
 
 function isView(v: string | null): v is ViewMode {
   return (
-    v === "register" || v === "record" || v === "album" || v === "constellation"
+    v === "register" ||
+    v === "record" ||
+    v === "album" ||
+    v === "grid" ||
+    v === "constellation"
   );
 }
 function isShownView(v: string | null): v is ViewMode {
@@ -54,9 +74,11 @@ function scrollToMoment(ids: string) {
 export default function Timeline({
   data,
   viewer,
+  walkthrough,
 }: {
   data: TimelineData;
   viewer: ViewerInfo | null;
+  walkthrough: Walkthrough;
 }) {
   const [view, setView] = useState<ViewMode>(DEFAULT_VIEW);
   const scrollMemory = useRef<Partial<Record<ViewMode, number>>>({});
@@ -75,7 +97,7 @@ export default function Timeline({
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const added = params.get("added");
-    const fromUrl = params.get("view");
+    const fromUrl = fromUrlName(params.get("view"));
     requestAnimationFrame(() => {
       if (added) {
         params.delete("added");
@@ -96,7 +118,7 @@ export default function Timeline({
         setView(fromUrl);
       } else {
         try {
-          const saved = window.localStorage.getItem("lore-view");
+          const saved = fromUrlName(window.localStorage.getItem("lore-view"));
           if (isShownView(saved)) setView(saved);
         } catch {}
       }
@@ -126,7 +148,7 @@ export default function Timeline({
       window.localStorage.setItem("lore-view", v);
     } catch {}
     const params = new URLSearchParams(window.location.search);
-    params.set("view", v);
+    params.set("view", URL_NAMES[v]);
     window.history.replaceState(null, "", `?${params.toString()}`);
   };
 
@@ -172,7 +194,10 @@ export default function Timeline({
       <div key={view} className="viewfade">
         {view === "register" && <RegisterView data={data} viewer={viewer} />}
         {view === "record" && <RecordView data={data} viewer={viewer} />}
-        {view === "album" && <AlbumView data={data} />}
+        {view === "album" && (
+          <AlbumView data={data} walkthrough={walkthrough} canEdit={!!viewer} />
+        )}
+        {view === "grid" && <GridView data={data} />}
         {view === "constellation" && <ConstellationView data={data} />}
       </div>
     </div>
