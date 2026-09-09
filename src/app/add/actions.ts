@@ -460,6 +460,52 @@ export async function addPhotosToMoment(
 
   revalidatePath("/");
   revalidatePath(`/moment/${momentId}`);
+  revalidatePath("/event/[id]", "page");
+  return { ok: true };
+}
+
+// Same affordance for a milestone's own gallery on the event page.
+export async function addPhotosToMilestone(
+  _prev: { error: string } | { ok: true } | null,
+  formData: FormData
+): Promise<{ error: string } | { ok: true }> {
+  const viewer = await getViewer();
+  if (!viewer) redirect("/login");
+
+  const milestoneId = String(formData.get("milestone_id") ?? "");
+  const photos = parseUploaded(formData.getAll("uploaded").map(String), viewer);
+  if (!milestoneId || photos === null || photos.length === 0) {
+    return { error: "No photos to add." };
+  }
+
+  const supabase = await createClient();
+  const { data: milestone } = await supabase
+    .from("milestones")
+    .select("id")
+    .eq("id", milestoneId)
+    .maybeSingle();
+  if (!milestone) return { error: "That event no longer exists." };
+
+  const { count } = await supabase
+    .from("media")
+    .select("id", { count: "exact", head: true })
+    .eq("milestone_id", milestoneId)
+    .eq("owner_type", "milestone");
+
+  await supabase.from("media").insert(
+    photos.map((p, i) => ({
+      owner_type: "milestone",
+      milestone_id: milestoneId,
+      storage_path: p.path,
+      sort: (count ?? 0) + i,
+      width: p.width,
+      height: p.height,
+      created_by: viewer.userId,
+    }))
+  );
+
+  revalidatePath("/");
+  revalidatePath("/event/[id]", "page");
   return { ok: true };
 }
 

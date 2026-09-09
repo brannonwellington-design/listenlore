@@ -114,6 +114,14 @@
   padding: 40px 0;
   border-bottom: 1px solid var(--surface-tertiary);
 }
+.galleryAdd {
+  flex: 1 1 100%;
+  font-size: 14px;
+  line-height: 20px;
+}
+.galleryAdd:only-child {
+  flex-basis: auto;
+}
 .galleryPhoto {
   height: 220px;
   width: auto;
@@ -216,7 +224,15 @@
   .gallery {
     padding: 32px 0;
   }
-  .galleryPhoto {
+  .galleryAdd {
+  flex: 1 1 100%;
+  font-size: 14px;
+  line-height: 20px;
+}
+.galleryAdd:only-child {
+  flex-basis: auto;
+}
+.galleryPhoto {
     height: 160px;
   }
   .moments {

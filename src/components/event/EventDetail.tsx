@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { useEffect } from "react";
 import type { Milestone } from "@/lib/types";
+import { MAX_PHOTOS_PER_MOMENT } from "@/lib/upload";
+import AddPhotos from "../AddPhotos";
 import t from "../timeline.module.css";
 import s from "./event.module.css";
 import {
@@ -111,7 +113,7 @@ export default function EventDetail({
         )}
       </header>
 
-      {gallery.length > 0 && (
+      {(gallery.length > 0 || viewer) && (
         <div className={s.gallery}>
           {gallery.map((m) => (
             <img
@@ -123,6 +125,14 @@ export default function EventDetail({
               loading="lazy"
             />
           ))}
+          {viewer && (
+            <div className={s.galleryAdd}>
+              <AddPhotos
+                milestoneId={ms.id}
+                remaining={MAX_PHOTOS_PER_MOMENT - ms.media.length}
+              />
+            </div>
+          )}
         </div>
       )}
 

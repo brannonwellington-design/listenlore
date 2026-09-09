@@ -12,10 +12,12 @@ export const dynamic = "force-dynamic";
 export default async function AddMomentPage({
   searchParams,
 }: {
-  searchParams: Promise<{ event?: string }>;
+  searchParams: Promise<{ event?: string; milestone?: string }>;
 }) {
   const viewer = await getViewer();
-  const { event: eventId } = await searchParams;
+  // ?milestone= is the older spelling of the same thing.
+  const sp = await searchParams;
+  const eventId = sp.event ?? sp.milestone;
   if (!viewer) {
     redirect(`/login?next=${encodeURIComponent(eventId ? `/add?event=${eventId}` : "/add")}`);
   }

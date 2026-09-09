@@ -1,7 +1,7 @@
 "use client";
 
 import { useActionState, useEffect, useState } from "react";
-import { addPhotosToMoment } from "@/app/add/actions";
+import { addPhotosToMilestone, addPhotosToMoment } from "@/app/add/actions";
 import s from "./form.module.css";
 import PhotoPicker from "./PhotoPicker";
 import { usePhotoUploads } from "./usePhotoUploads";
@@ -10,14 +10,19 @@ import { usePhotoUploads } from "./usePhotoUploads";
 // going through the full edit form.
 export default function AddPhotos({
   momentId,
+  milestoneId,
   remaining,
 }: {
-  momentId: string;
+  momentId?: string;
+  milestoneId?: string;
   remaining: number;
 }) {
   const [open, setOpen] = useState(false);
   const uploads = usePhotoUploads(Math.max(remaining, 0));
-  const [state, formAction, pending] = useActionState(addPhotosToMoment, null);
+  const [state, formAction, pending] = useActionState(
+    milestoneId ? addPhotosToMilestone : addPhotosToMoment,
+    null
+  );
 
   useEffect(() => {
     if (state && "ok" in state) {
@@ -52,7 +57,11 @@ export default function AddPhotos({
 
   return (
     <form action={formAction} style={{ maxWidth: 640 }}>
-      <input type="hidden" name="moment_id" value={momentId} />
+      {milestoneId ? (
+        <input type="hidden" name="milestone_id" value={milestoneId} />
+      ) : (
+        <input type="hidden" name="moment_id" value={momentId} />
+      )}
       <PhotoPicker uploads={uploads} maxCount={remaining} />
       {state && "error" in state && <p className={s.error}>{state.error}</p>}
       <div style={{ display: "flex", gap: 16, marginTop: 16 }}>

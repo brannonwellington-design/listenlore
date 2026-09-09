@@ -10,7 +10,7 @@ const inter = Inter({
 
 export const metadata: Metadata = {
   title: "ListenLore",
-  description: "Listen Labs company history — milestones and moments.",
+  description: "Listen Labs company history — categories, subcategories, and moments.",
 };
 
 export default function RootLayout({

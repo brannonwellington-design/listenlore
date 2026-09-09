@@ -48,7 +48,11 @@ export default function MomentForm({
 }) {
   const [state, formAction, pending] = useActionState(action, null);
   const uploads = usePhotoUploads(MAX_PHOTOS_PER_MOMENT);
-  const [categoryId, setCategoryId] = useState(defaults.category_id ?? "");
+  const [categoryId, setCategoryId] = useState(
+    defaults.category_id ??
+      milestones.find((m) => m.id === defaults.milestone_id)?.categoryId ??
+      ""
+  );
   const [milestoneId, setMilestoneId] = useState(defaults.milestone_id ?? "");
   const shownMilestones = categoryId
     ? milestones.filter((m) => !m.categoryId || m.categoryId === categoryId)
