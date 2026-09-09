@@ -57,7 +57,7 @@ function AlbumEntry({ ms, side }: { ms: Milestone; side: "left" | "right" }) {
     >
       <div className={`${s.albumMetaLine} num`}>
         {fmtDate(ms)}
-        {ms.date_precision === "approx" && ms.date_start ? " ≈" : ""}
+        
         {ms.location ? ` · ${ms.location}` : ""}
         {ms.category ? ` · ${ms.category}` : ""}
       </div>
