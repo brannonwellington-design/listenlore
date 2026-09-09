@@ -25,7 +25,7 @@ function RecordRow({
   const canOpen = ms.moments.length > 0;
   const dateCell = ms.date_start
     ? ms.date_precision === "approx"
-      ? `${MONTHS[parts(ms.date_start).m - 1]} ≈`
+      ? `${MONTHS[parts(ms.date_start).m - 1]}`
       : fmtDate(ms)
     : "—";
 
@@ -33,7 +33,15 @@ function RecordRow({
     <>
       <span className={`${s.recDate} num`}>{dateCell}</span>
       <span className={s.recCat}>{ms.upcoming ? "Upcoming" : ms.category}</span>
-      <span className={s.recTitle}>{ms.title}</span>
+      <span className={s.recTitle}>
+        <Link
+          href={`/milestone/${ms.id}`}
+          className={s.momentTitleLink}
+          onClick={(e) => e.stopPropagation()}
+        >
+          {ms.title}
+        </Link>
+      </span>
       <span className={s.recLoc}>{ms.location}</span>
       <span className={s.recCount}>
         {ms.moments.length > 0
@@ -47,9 +55,21 @@ function RecordRow({
   return (
     <div className={open ? s.recExpanded : undefined}>
       {canOpen ? (
-        <button className={rowClass} onClick={() => setOpen(!open)} aria-expanded={open}>
+        <div
+          className={rowClass}
+          onClick={() => setOpen(!open)}
+          role="button"
+          tabIndex={0}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault();
+              setOpen(!open);
+            }
+          }}
+          aria-expanded={open}
+        >
           {rowContent}
-        </button>
+        </div>
       ) : (
         <div className={rowClass}>{rowContent}</div>
       )}
@@ -73,7 +93,7 @@ function RecordMomentRow({ m }: { m: Moment }) {
   const dateCell = p
     ? m.date_precision === "day"
       ? `${MONTHS[p.m - 1]} ${p.d}`
-      : `${MONTHS[p.m - 1]} ≈`
+      : `${MONTHS[p.m - 1]}`
     : "—";
   return (
     <Link
@@ -111,8 +131,8 @@ export default function RecordView({
         </div>
         <div style={{ gridColumn: "8 / 13", alignSelf: "end" }}>
           <p className={s.sectionNote}>
-            A complete index of company history — milestones and free-floating
-            moments in one ledger. Open a milestone to read the moments
+            A complete index of company history — subcategories and free-floating
+            moments in one ledger. Open a subcategory to read the moments
             underneath it.
           </p>
         </div>
@@ -148,7 +168,7 @@ export default function RecordView({
       )}
 
       <div className={s.recNote}>
-        ≈ marks approximate dates from the source archive. Owners can correct
+        Some dates from the source archive are approximate. Owners can correct
         their own.
       </div>
     </div>
