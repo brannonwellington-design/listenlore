@@ -1,8 +1,10 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getViewer } from "@/lib/auth";
+import { getMilestoneSummary } from "@/lib/data";
 import { formOptions } from "@/lib/form-options";
 import MomentForm from "@/components/MomentForm";
+import s from "@/components/form.module.css";
 import { createMoment } from "./actions";
 
 export const dynamic = "force-dynamic";
@@ -10,55 +12,78 @@ export const dynamic = "force-dynamic";
 export default async function AddMomentPage({
   searchParams,
 }: {
-  searchParams: Promise<{ milestone?: string }>;
+  searchParams: Promise<{ event?: string; milestone?: string }>;
 }) {
   const viewer = await getViewer();
-  if (!viewer) redirect("/login?next=/add");
+  // ?milestone= is the older spelling of the same thing.
+  const sp = await searchParams;
+  const eventId = sp.event ?? sp.milestone;
+  if (!viewer) {
+    redirect(`/login?next=${encodeURIComponent(eventId ? `/add?event=${eventId}` : "/add")}`);
+  }
 
-  const options = await formOptions();
-  const { milestone } = await searchParams;
-  const preselected = options.milestones.find((m) => m.id === milestone);
+  // Arriving from an event page: that event is preselected, and saving
+  // returns you to it instead of the timeline.
+  const [options, event] = await Promise.all([
+    formOptions(),
+    eventId ? getMilestoneSummary(eventId) : Promise.resolve(null),
+  ]);
 
   return (
-    <div className="wrap" style={{ paddingTop: 48, paddingBottom: 96 }}>
-      {preselected ? (
-        <Link href={`/milestone/${preselected.id}`} style={{ fontSize: 14 }}>
-          ← Back to {preselected.label.replace(/ \(\d{4}-\d{2}\)$/, "")}
-        </Link>
-      ) : (
-        <Link href="/" style={{ fontSize: 14 }}>
-          ← Back to the timeline
-        </Link>
-      )}
-      <h1 style={{ fontSize: 48, lineHeight: "52px", marginTop: 24 }}>
-        Add a Moment
-      </h1>
-      <p
-        style={{
-          fontSize: 16,
-          lineHeight: "24px",
-          color: "var(--content-secondary)",
-          margin: "16px 0 8px 0",
-          maxWidth: 480,
-        }}
+    <div className={`wrap ${s.page}`}>
+      <Link
+        href={event ? `/event/${event.id}` : "/"}
+        className={s.pageBack}
       >
-        Posting as {viewer.name}. It goes live on the timeline right away, and
-        you can edit or remove it whenever.
+        ← Back to {event ? event.title : "the timeline"}
+      </Link>
+      <h1 className={s.pageTitle}>Add a Moment</h1>
+      <p className={s.pageLead}>
+        Posting as {viewer.name}. It goes live right away, and you can edit or
+        remove it whenever.
       </p>
-      <p style={{ fontSize: 14, lineHeight: "20px", margin: "0 0 40px 0" }}>
-        Adding a lot at once?{" "}
-        <Link href="/add/bulk" style={{ color: "var(--content-brand)" }}>
-          Switch to bulk mode →
-        </Link>
-      </p>
-      <MomentForm
-        action={createMoment}
-        categories={options.categories}
-        milestones={options.milestones}
-        people={options.people}
-        defaults={preselected ? { milestone_id: preselected.id } : {}}
-        submitLabel="Add to the timeline"
-      />
+      {!event && (
+        <p className={s.pageNote}>
+          Adding a lot at once?{" "}
+          <Link href="/add/bulk">Switch to bulk mode →</Link>
+        </p>
+      )}
+      {event && (
+        <div className={s.context}>
+          {event.thumb && (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={event.thumb} alt="" className={s.contextThumb} />
+          )}
+          <div>
+            <div className={s.contextKicker}>Adding to</div>
+            <div className={s.contextTitle}>{event.title}</div>
+            {event.meta && <div className={s.contextMeta}>{event.meta}</div>}
+          </div>
+          <Link href="/add" className={s.contextClear}>
+            Post on its own instead
+          </Link>
+        </div>
+      )}
+      <div className={s.pageBody}>
+        <MomentForm
+          action={createMoment}
+          categories={options.categories}
+          milestones={options.milestones}
+          people={options.people}
+          defaults={
+            event
+              ? {
+                  milestone_id: event.id,
+                  category_id: event.categoryId ?? undefined,
+                  event_date: event.dateStart ?? undefined,
+                  location: event.location ?? undefined,
+                }
+              : {}
+          }
+          returnTo={event ? `/event/${event.id}` : undefined}
+          submitLabel={event ? `Add to ${event.title}` : "Add to the timeline"}
+        />
+      </div>
     </div>
   );
 }

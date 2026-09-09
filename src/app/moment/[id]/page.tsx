@@ -112,7 +112,7 @@ export default async function MomentPage({
         <p style={{ fontSize: 14, lineHeight: "20px", marginTop: 8 }}>
           Part of{" "}
           <Link
-            href={`/milestone/${milestone.id}`}
+            href={`/event/${milestone.id}`}
             style={{ color: "var(--content-brand)" }}
           >
             {milestone.title}

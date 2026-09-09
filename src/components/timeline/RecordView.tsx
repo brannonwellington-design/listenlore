@@ -35,7 +35,7 @@ function RecordRow({
       <span className={s.recCat}>{ms.upcoming ? "Upcoming" : ms.category}</span>
       <span className={s.recTitle}>
         <Link
-          href={`/milestone/${ms.id}`}
+          href={`/event/${ms.id}`}
           className={s.momentTitleLink}
           onClick={(e) => e.stopPropagation()}
         >
@@ -79,6 +79,9 @@ function RecordRow({
             {ms.moments.map((m) => (
               <MomentRow key={m.id} m={m} viewer={viewer} />
             ))}
+            <Link href={`/event/${ms.id}`} className={s.skyCardLink}>
+              Open this event →
+            </Link>
           </div>
         </div>
       )}
