@@ -123,7 +123,12 @@ function AlbumEntry({ ms, side }: { ms: Milestone; side: "left" | "right" }) {
           </>
         )}
       </div>
-      <Strip ms={ms} strip={strip} hidden={hidden} />
+      <Strip
+        moments={strip}
+        moreHref={`/event/${ms.id}`}
+        hidden={hidden}
+        align={side === "left" ? "right" : "left"}
+      />
     </>
   );
 }
@@ -142,7 +147,7 @@ function AlbumSpread({ ms }: { ms: Milestone }) {
   if (!hero) return <AlbumEntry ms={ms} side="left" />;
 
   return (
-    <>
+    <div className={s.albumSpread}>
       <div className={s.spread}>
         <div className={s.spreadFrame}>
           <MediaEl media={hero} className={s.spreadPhoto} alt={ms.title} />
@@ -176,54 +181,74 @@ function AlbumSpread({ ms }: { ms: Milestone }) {
           )}
         </div>
       </div>
-      <Strip ms={ms} strip={strip} hidden={hidden} />
-    </>
+      <Strip moments={strip} moreHref={`/event/${ms.id}`} hidden={hidden} align="full" />
+    </div>
   );
 }
 
+type StripAlign = "left" | "right" | "full";
+
+// Thumbnails on the grid: one column each, a quote two, the overflow tile
+// one. Under an event the strip sits in that event's text column; a
+// floating cluster runs across all twelve.
 function Strip({
-  ms,
-  strip,
-  hidden,
+  moments,
+  moreHref,
+  hidden = 0,
+  align,
+  inline = false,
 }: {
-  ms: Milestone;
-  strip: Moment[];
-  hidden: number;
+  moments: Moment[];
+  moreHref?: string;
+  hidden?: number;
+  align: StripAlign;
+  inline?: boolean;
 }) {
-  if (strip.length === 0) return null;
+  if (moments.length === 0) return null;
+  const bandClass =
+    align === "left"
+      ? s.albumStripBandLeft
+      : align === "right"
+        ? s.albumStripBandRight
+        : s.albumStripBandFull;
   return (
-    <div className={s.albumStrip}>
-      {strip.map((m) =>
-        m.media[0] ? (
-          <Link
-            key={m.id}
-            href={`/moment/${m.id}`}
-            className={s.albumStripItem}
-            title={m.title}
-            data-moment-id={m.id}
-          >
-            <MediaEl media={m.media[0]} className={s.albumStripThumb} alt={m.title} />
-            <span className={s.albumStripCaption}>{m.title}</span>
+    <div className={`${s.albumStrip} ${inline ? s.albumStripInline : ""}`}>
+      <div className={`${s.albumStripBand} ${bandClass}`}>
+        {moments.map((m) =>
+          m.media[0] ? (
+            <Link
+              key={m.id}
+              href={`/moment/${m.id}`}
+              className={s.albumStripItem}
+              title={m.title}
+              data-moment-id={m.id}
+            >
+              <MediaEl media={m.media[0]} className={s.albumStripThumb} alt={m.title} />
+              <span className={s.albumStripCaption}>{m.title}</span>
+            </Link>
+          ) : (
+            <Link
+              key={m.id}
+              href={`/moment/${m.id}`}
+              className={s.albumStripText}
+              title={m.title}
+              data-moment-id={m.id}
+            >
+              <span className={s.albumStripQuote}>{excerpt(m, 120) ?? m.title}</span>
+              <span className={s.albumStripCaption}>
+                {m.title}
+                {excerpt(m) ? "" : m.author ? ` · ${m.author}` : ""}
+              </span>
+            </Link>
+          )
+        )}
+        {hidden > 0 && moreHref && (
+          <Link href={moreHref} className={s.albumStripMore}>
+            <span className={s.albumStripMoreCount}>+{hidden}</span>
+            <span className={s.albumStripCaption}>more in this event</span>
           </Link>
-        ) : (
-          <Link
-            key={m.id}
-            href={`/moment/${m.id}`}
-            className={s.albumStripText}
-            title={m.title}
-            data-moment-id={m.id}
-          >
-            <span className={s.albumStripQuote}>{excerpt(m, 120) ?? m.title}</span>
-            {excerpt(m) && <span className={s.albumStripCaption}>{m.title}</span>}
-          </Link>
-        )
-      )}
-      {hidden > 0 && (
-        <Link href={`/event/${ms.id}`} className={s.albumStripMore}>
-          <span className={s.albumStripMoreCount}>+{hidden}</span>
-          <span className={s.albumStripCaption}>more in this event</span>
-        </Link>
-      )}
+        )}
+      </div>
     </div>
   );
 }
@@ -252,49 +277,24 @@ function AlbumMoment({ m }: { m: Moment }) {
 
 // A run of them becomes a loose handful of snapshots scattered across the
 // spine — the way photos pile up between an album's big pages.
-function AlbumMomentCluster({ moments }: { moments: Moment[] }) {
+function AlbumMomentCluster({
+  moments,
+  side,
+}: {
+  moments: Moment[];
+  side: "left" | "right";
+}) {
   if (moments.length === 1) return <AlbumMoment m={moments[0]} />;
   return (
     <div className={s.albumFloatEntry}>
       <div className={s.albumDotSmall} />
-      <div className={s.albumClusterWrap}>
+      <div
+        className={`${s.albumClusterWrap} ${side === "right" ? s.albumClusterWrapRight : ""}`}
+      >
         <div className={`${s.albumClusterKicker} num`}>
           {clusterDateLabel(moments)} · {moments.length} moments
         </div>
-        <div className={s.albumClusterStrip}>
-          {moments.map((m) =>
-            m.media[0] ? (
-              <Link
-                key={m.id}
-                href={`/moment/${m.id}`}
-                className={s.albumStripItem}
-                title={m.title}
-                data-moment-id={m.id}
-              >
-                <MediaEl
-                  media={m.media[0]}
-                  className={s.albumStripThumb}
-                  alt={m.title}
-                />
-                <span className={s.albumStripCaption}>{m.title}</span>
-              </Link>
-            ) : (
-              <Link
-                key={m.id}
-                href={`/moment/${m.id}`}
-                className={s.albumStripText}
-                title={m.title}
-                data-moment-id={m.id}
-              >
-                <span className={s.albumStripQuote}>{excerpt(m, 120) ?? m.title}</span>
-                <span className={s.albumStripCaption}>
-                  {m.title}
-                  {m.author ? ` · ${m.author}` : ""}
-                </span>
-              </Link>
-            )
-          )}
-        </div>
+        <Strip moments={moments} align="full" inline />
       </div>
     </div>
   );
@@ -347,15 +347,15 @@ export default function AlbumView({ data }: { data: TimelineData }) {
     )
     .filter(([, entries]) => entries.length > 0);
   const upcoming = data.milestones.filter((m) => m.upcoming);
-  const milestonesInOrder = years
+  // Events and clusters alternate sides together, so the column of
+  // content swings left, right, left down the spine.
+  const sideOf = new Map<string, "left" | "right">();
+  years
     .flatMap(([, list]) => list)
-    .filter((e) => e.kind === "milestone");
-  const sideOf = new Map<string, "left" | "right">(
-    milestonesInOrder.map((e, i) => [
-      (e as { ms: Milestone }).ms.id,
-      i % 2 === 0 ? "left" : "right",
-    ])
-  );
+    .forEach((e, i) => {
+      const key = e.kind === "milestone" ? e.ms.id : e.moments[0].id;
+      sideOf.set(key, i % 2 === 0 ? "left" : "right");
+    });
   const yearSpan =
     years.length > 0 ? Number(years[years.length - 1][0]) - Number(years[0][0]) + 1 : 0;
 
@@ -363,39 +363,6 @@ export default function AlbumView({ data }: { data: TimelineData }) {
     <div className={s.album} data-motion={mode}>
       <div className={`grid12 ${s.albumHero}`}>
         <div className={s.albumKicker}>Listen Labs, Remembered</div>
-        <h1 className={s.albumTitle} data-optical="">
-          Lore
-        </h1>
-        <p className={s.albumLead}>
-          Scroll down through time. The big events hold the small ones that made
-          them worth remembering.
-        </p>
-        <div className={`${s.albumStats} band`}>
-          <div className={s.albumStat}>
-            <span className={`${s.albumStatValue} num`} data-optical="">
-              {yearSpan}
-            </span>
-            <span className={s.albumStatLabel}>Years</span>
-          </div>
-          <div className={s.albumStat}>
-            <span className={`${s.albumStatValue} num`} data-optical="">
-              {data.counts.milestones}
-            </span>
-            <span className={s.albumStatLabel}>Events</span>
-          </div>
-          <div className={s.albumStat}>
-            <span className={`${s.albumStatValue} num`} data-optical="">
-              {data.counts.moments}
-            </span>
-            <span className={s.albumStatLabel}>Moments</span>
-          </div>
-          <div className={s.albumStat}>
-            <span className={`${s.albumStatValue} num`} data-optical="">
-              {data.counts.people}
-            </span>
-            <span className={s.albumStatLabel}>People</span>
-          </div>
-        </div>
         <div className={s.motionPick} aria-label="Motion">
           <span className={s.motionPickLabel}>Motion</span>
           {(["editorial", "cinematic"] as MotionMode[]).map((m) => (
@@ -407,6 +374,26 @@ export default function AlbumView({ data }: { data: TimelineData }) {
             >
               {m === "editorial" ? "Editorial" : "Cinematic"}
             </button>
+          ))}
+        </div>
+        <h1 className={s.albumTitle} data-optical="">
+          Lore
+        </h1>
+        <p className={s.albumLead}>
+          Scroll down through time. The big events hold the small ones that made
+          them worth remembering.
+        </p>
+        <div className={s.albumStats}>
+          {[
+            [yearSpan, "Years"],
+            [data.counts.milestones, "Events"],
+            [data.counts.moments, "Moments"],
+            [data.counts.people, "People"],
+          ].map(([value, label]) => (
+            <div key={label} className={s.albumStat}>
+              <span className={`${s.albumStatValue} num`}>{value}</span>
+              <span className={s.albumStatLabel}>{label}</span>
+            </div>
           ))}
         </div>
       </div>
@@ -436,7 +423,13 @@ export default function AlbumView({ data }: { data: TimelineData }) {
                   />
                 )
               ) : (
-                <AlbumMomentCluster key={e.moments[0].id} moments={e.moments} />
+                <AlbumMomentCluster
+                  key={e.moments[0].id}
+                  moments={e.moments}
+                  // an event's "left" puts its text on the right, so the
+                  // next cluster takes the left to keep the swing going
+                  side={sideOf.get(e.moments[0].id) === "left" ? "right" : "left"}
+                />
               )
             )}
           </section>
