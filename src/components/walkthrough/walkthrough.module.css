@@ -1,0 +1,370 @@
+/* ---- editor ---- */
+.editor {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+.audioBox {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 24px;
+  background: var(--surface-highlight);
+  border: 1px solid var(--surface-tertiary);
+  border-radius: 8px;
+}
+.audio {
+  width: 100%;
+}
+.audioNote {
+  font-size: 14px;
+  line-height: 20px;
+  color: var(--content-secondary);
+}
+.audioPick {
+  align-self: flex-start;
+  font-size: 14px;
+  line-height: 20px;
+  color: var(--content-brand);
+  text-decoration: underline;
+  cursor: pointer;
+}
+.audioPick input {
+  display: none;
+}
+.rows {
+  display: flex;
+  flex-direction: column;
+  border-top: 1px solid var(--surface-tertiary);
+}
+.row {
+  padding: 16px 0;
+  border-bottom: 1px solid var(--surface-tertiary);
+}
+.rowOn {
+  background: linear-gradient(to right, transparent, transparent);
+}
+.rowPick {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  cursor: pointer;
+}
+.rowPick input {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--content-brand);
+}
+.rowThumb {
+  width: 48px;
+  height: 48px;
+  object-fit: cover;
+  border-radius: 4px;
+  flex: none;
+}
+.rowThumbEmpty {
+  width: 48px;
+  height: 48px;
+  border-radius: 4px;
+  background: var(--surface-secondary);
+  flex: none;
+}
+.rowTitle {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 16px;
+  line-height: 24px;
+}
+.rowMeta {
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--content-secondary);
+}
+.rowFields {
+  display: grid;
+  grid-template-columns: 160px minmax(0, 1fr);
+  gap: 24px;
+  padding: 16px 0 8px 80px;
+}
+.rowAt,
+.rowText {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.rowAtInput {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.nowBtn {
+  font-size: 12px;
+  line-height: 16px;
+  padding: 8px 10px;
+  border-radius: 4px;
+  background: var(--surface-secondary);
+  color: var(--content-primary);
+  white-space: nowrap;
+}
+.nowBtn:hover {
+  background: var(--surface-brand-secondary);
+  color: var(--content-brand);
+}
+.saveRow {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+@media (max-width: 640px) {
+  .rowFields {
+    grid-template-columns: 1fr;
+    padding-left: 0;
+  }
+}
+
+/* ---- player: the hero control ---- */
+.playRow {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-top: 24px;
+}
+.playBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--surface-brand-primary);
+  color: var(--content-brand-contrast);
+  font-size: 14px;
+  line-height: 20px;
+  padding: 10px 20px 10px 16px;
+  border-radius: 8px;
+}
+.playBtn:hover {
+  background: var(--content-brand);
+}
+.playBtn:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+.playGlyph {
+  width: 0;
+  height: 0;
+  border-left: 10px solid currentColor;
+  border-top: 6px solid transparent;
+  border-bottom: 6px solid transparent;
+}
+.editLink {
+  font-size: 14px;
+  line-height: 20px;
+  color: var(--content-brand);
+}
+.playNote {
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--content-secondary);
+}
+
+/* ---- player: while the tour runs ---- */
+.bar {
+  position: fixed;
+  left: 50%;
+  bottom: 24px;
+  transform: translateX(-50%);
+  width: min(720px, calc(100% - 32px));
+  background: var(--content-primary);
+  color: var(--content-brand-contrast);
+  border-radius: 12px;
+  padding: 12px 16px;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 16px;
+  align-items: center;
+  z-index: 40;
+  box-shadow: 0 16px 48px rgba(18, 15, 8, 0.24);
+}
+.barBtns {
+  display: flex;
+  gap: 4px;
+}
+.barBtn {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--content-brand-contrast);
+  font-size: 14px;
+}
+.barBtn:hover {
+  background: rgba(249, 244, 235, 0.12);
+}
+.barBody {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+.barTitle {
+  font-size: 14px;
+  line-height: 20px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.barKicker {
+  color: var(--content-brand-contrast-secondary);
+}
+.barTrack {
+  position: relative;
+  height: 2px;
+  background: rgba(249, 244, 235, 0.2);
+  border-radius: 1px;
+}
+.barFill {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  background: var(--content-brand-contrast);
+  border-radius: 1px;
+}
+.barStop {
+  position: absolute;
+  top: -3px;
+  width: 8px;
+  height: 8px;
+  border-radius: 4px;
+  background: var(--content-brand-contrast-secondary);
+  transform: translateX(-50%);
+}
+.barStopDone {
+  background: var(--content-brand-contrast);
+}
+.barTime {
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--content-brand-contrast-secondary);
+  white-space: nowrap;
+}
+
+/* the focused photo: grows from its frame to fill the screen, in place */
+.focus {
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+  pointer-events: none;
+}
+.focusScrim {
+  position: absolute;
+  inset: 0;
+  background: rgba(18, 15, 8, 0.88);
+  opacity: 0;
+  transition: opacity 0.5s ease;
+}
+.focusOn .focusScrim {
+  opacity: 1;
+}
+.focusFrame {
+  position: absolute;
+  overflow: hidden;
+  border-radius: 12px;
+  background: var(--surface-secondary);
+  transition:
+    left 0.7s cubic-bezier(0.2, 0.8, 0.2, 1),
+    top 0.7s cubic-bezier(0.2, 0.8, 0.2, 1),
+    width 0.7s cubic-bezier(0.2, 0.8, 0.2, 1),
+    height 0.7s cubic-bezier(0.2, 0.8, 0.2, 1),
+    opacity 0.3s ease;
+  opacity: 0;
+}
+.focusOn .focusFrame {
+  opacity: 1;
+}
+.focusMedia {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.focusFrame > span {
+  position: absolute !important;
+  inset: 0;
+}
+.focusText {
+  position: absolute;
+  left: var(--margin);
+  right: var(--margin);
+  bottom: 96px;
+  display: grid;
+  grid-template-columns: repeat(var(--cols), minmax(0, 1fr));
+  column-gap: var(--gutter);
+  color: var(--content-brand-contrast);
+  opacity: 0;
+  transform: translateY(16px);
+  transition:
+    opacity 0.5s ease 0.3s,
+    transform 0.5s ease 0.3s;
+}
+.focusOn .focusText {
+  opacity: 1;
+  transform: none;
+}
+.focusBody {
+  grid-column: 1 / 8;
+}
+.focusKicker {
+  font-size: 14px;
+  line-height: 24px;
+  color: var(--content-brand-contrast-secondary);
+}
+.focusTitle {
+  font-size: 56px;
+  line-height: 56px;
+  letter-spacing: -0.02em;
+  margin-top: 8px;
+}
+.focusCaption {
+  font-size: 18px;
+  line-height: 28px;
+  margin-top: 16px;
+  max-width: 560px;
+  text-wrap: pretty;
+}
+@media (prefers-reduced-motion: reduce) {
+  .focusFrame,
+  .focusScrim,
+  .focusText {
+    transition: none;
+  }
+}
+@media (max-width: 760px) {
+  .playRow {
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .bar {
+    bottom: 12px;
+    padding: 10px 12px;
+    gap: 12px;
+  }
+  .barTime {
+    display: none;
+  }
+  .focusText {
+    bottom: 88px;
+  }
+  .focusBody {
+    grid-column: 1 / -1;
+  }
+  .focusTitle {
+    font-size: 32px;
+    line-height: 36px;
+  }
+  .focusCaption {
+    font-size: 16px;
+    line-height: 24px;
+  }
+}

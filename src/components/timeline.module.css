@@ -483,13 +483,15 @@ button.recRow:hover {
   row-gap: 0;
   align-items: end;
 }
-.albumLead {
+.albumLeadWrap {
   grid-column: 1 / 6;
+  padding-bottom: 4px;
+}
+.albumLead {
   font-size: 20px;
   line-height: 28px;
   color: var(--content-primary);
   max-width: 440px;
-  padding-bottom: 4px;
 }
 .albumStats {
   grid-column: 7 / 13;
@@ -555,7 +557,7 @@ button.recRow:hover {
   top: 0;
   z-index: 4;
   display: flex;
-  justify-content: center;
+  justify-content: flex-start;
   align-items: center;
   margin: 0 calc(-1 * var(--margin)) 0 calc(-1 * var(--margin));
   padding: 8px var(--margin) 8px var(--margin);
@@ -588,15 +590,13 @@ button.recRow:hover {
     background: var(--surface-primary);
   }
 }
+/* the running head: the year at column 1, like a folio in the margin,
+   so the spine passes through the bar's centre untouched */
 .albumYearNumeral {
-  position: relative;
-  z-index: 1;
-  font-size: 32px;
+  font-size: 24px;
   line-height: 32px;
   letter-spacing: -0.01em;
   color: var(--content-secondary);
-  background: var(--surface-primary);
-  padding: 0 16px;
 }
 
 /* The year opens at display scale, set on the first column, scrolls up
@@ -1545,6 +1545,102 @@ button.recRow:hover {
   .albumInviteTitle {
     font-size: 40px;
     line-height: 40px;
+  }
+}
+
+/* ---- grid view: an endless plane of photos, dragged in any direction ---- */
+.gridView {
+  margin: 0 0 96px 0;
+}
+.gridLegend {
+  display: flex;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 24px 0;
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--content-secondary);
+}
+.gridPlane {
+  position: relative;
+  height: calc(100vh - 208px);
+  min-height: 480px;
+  overflow: hidden;
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+  outline: none;
+}
+.gridPlane:active {
+  cursor: grabbing;
+}
+.gridPlane:focus-visible {
+  box-shadow: 0 0 0 2px var(--content-brand);
+}
+.gridLayer {
+  position: absolute;
+  left: 0;
+  top: 0;
+  will-change: transform;
+}
+.gridTile {
+  position: absolute;
+  display: block;
+  overflow: hidden;
+  border-radius: 8px;
+  background: var(--surface-secondary);
+  color: var(--content-brand-contrast);
+}
+.gridTile img,
+.gridTile video,
+.gridTile > span {
+  pointer-events: none;
+}
+.gridMedia {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.gridTile > span:first-child {
+  position: absolute !important;
+  inset: 0;
+}
+.gridCaption {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 24px 12px 10px 12px;
+  font-size: 12px;
+  line-height: 16px;
+  background: linear-gradient(to top, rgba(18, 15, 8, 0.7), rgba(18, 15, 8, 0));
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.gridTile:hover .gridCaption {
+  opacity: 1;
+}
+.gridTile:hover {
+  text-decoration: none;
+}
+.gridTileFeature .gridCaption {
+  font-size: 14px;
+  line-height: 20px;
+}
+@media (max-width: 760px) {
+  .gridLegend {
+    flex-direction: column;
+    gap: 4px;
+    padding: 16px 0;
+  }
+  .gridPlane {
+    height: calc(100vh - 240px);
+    min-height: 400px;
+    margin: 0 calc(-1 * var(--margin));
   }
 }
 

@@ -10,6 +10,18 @@ export const ACCEPTED_VIDEO_TYPES: Record<string, string> = {
   "video/quicktime": "mov",
   "video/webm": "webm",
 };
+export const ACCEPTED_AUDIO_TYPES: Record<string, string> = {
+  "audio/mpeg": "mp3",
+  "audio/mp3": "mp3",
+  "audio/mp4": "m4a",
+  "audio/x-m4a": "m4a",
+  "audio/aac": "aac",
+  "audio/wav": "wav",
+  "audio/x-wav": "wav",
+  "audio/webm": "webm",
+  "audio/ogg": "ogg",
+};
+export const MAX_AUDIO_BYTES = 50 * 1024 * 1024;
 export const MAX_FILE_BYTES = 10 * 1024 * 1024;
 // Storage bucket caps files at 50 MB; videos get the full allowance.
 export const MAX_VIDEO_BYTES = 50 * 1024 * 1024;

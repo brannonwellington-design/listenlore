@@ -2,6 +2,8 @@
 
 import Link from "next/link";
 import type { MediaItem, Milestone, Moment, TimelineData } from "@/lib/types";
+import type { Walkthrough as WalkthroughScript } from "@/lib/walkthrough";
+import Walkthrough from "../walkthrough/Walkthrough";
 import s from "../timeline.module.css";
 import {
   byline,
@@ -29,13 +31,18 @@ function ParallaxPhoto({
   media,
   alt,
   className,
+  hero = false,
 }: {
   media: MediaItem;
   alt: string;
   className?: string;
+  hero?: boolean;
 }) {
   return (
-    <div className={`${s.frame} ${s[`frame_${frameKind(media)}`]} ${className ?? ""}`}>
+    <div
+      className={`${s.frame} ${s[`frame_${frameKind(media)}`]} ${className ?? ""}`}
+      data-event-hero={hero ? "" : undefined}
+    >
       <MediaEl media={media} className={s.framePhoto} alt={alt} />
     </div>
   );
@@ -60,7 +67,7 @@ function AlbumEntry({ ms, side }: { ms: Milestone; side: "left" | "right" }) {
       className={`${s.albumFigure} ${side === "left" ? s.albumFigureLeft : s.albumFigureRight}`}
     >
       <Link href={heroMoment ? `/moment/${heroMoment.id}` : `/event/${ms.id}`}>
-        <ParallaxPhoto media={hero} alt={ms.title} />
+        <ParallaxPhoto media={hero} alt={ms.title} hero />
       </Link>
       {heroMoment && (
         <figcaption className={s.albumCaption}>
@@ -98,7 +105,7 @@ function AlbumEntry({ ms, side }: { ms: Milestone; side: "left" | "right" }) {
 
   return (
     <>
-      <div className={`grid12 ${s.albumEntry}`}>
+      <div className={`grid12 ${s.albumEntry}`} data-event-id={ms.id}>
         <div className={s.albumDot} />
         {side === "left" ? (
           <>
@@ -136,9 +143,9 @@ function AlbumSpread({ ms }: { ms: Milestone }) {
   if (!hero) return <AlbumEntry ms={ms} side="left" />;
 
   return (
-    <div className={s.albumSpread}>
+    <div className={s.albumSpread} data-event-id={ms.id}>
       <div className={s.spread}>
-        <div className={s.spreadFrame}>
+        <div className={s.spreadFrame} data-event-hero="">
           <MediaEl media={hero} className={s.spreadPhoto} alt={ms.title} />
         </div>
         <div className={s.spreadScrim} />
@@ -295,7 +302,15 @@ function isBigBeat(ms: Milestone): boolean {
   return hasPhoto && (ms.moments.length >= 3 || ms.media.length > 0);
 }
 
-export default function AlbumView({ data }: { data: TimelineData }) {
+export default function AlbumView({
+  data,
+  walkthrough,
+  canEdit,
+}: {
+  data: TimelineData;
+  walkthrough: WalkthroughScript;
+  canEdit: boolean;
+}) {
   const years: [string, ClusteredEntry[]][] = groupTimelineByYear(data)
     .map(
       ([year, entries]) =>
@@ -323,10 +338,17 @@ export default function AlbumView({ data }: { data: TimelineData }) {
   return (
     <div className={s.album}>
       <div className={`grid12 ${s.albumHero}`}>
-        <h1 className={s.albumLead}>
-          Scroll down through time. The big events hold the small ones that made
-          them worth remembering.
-        </h1>
+        <div className={s.albumLeadWrap}>
+          <h1 className={s.albumLead}>
+            Scroll down through time. The big events hold the small ones that
+            made them worth remembering.
+          </h1>
+          <Walkthrough
+            script={walkthrough}
+            milestones={data.milestones}
+            canEdit={canEdit}
+          />
+        </div>
         <div className={s.albumStats}>
           {[
             [yearSpan, "Years"],
