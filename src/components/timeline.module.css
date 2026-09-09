@@ -559,21 +559,44 @@ button.recRow:hover {
   align-items: center;
   margin: 0 calc(-1 * var(--margin)) 0 calc(-1 * var(--margin));
   padding: 8px var(--margin) 8px var(--margin);
+}
+/* the band: frosted ground and hairline, drawn on a layer so it can wait
+   until the bar is actually stuck (see the motion block) */
+.albumYear::before {
+  content: "";
+  position: absolute;
+  inset: 0;
   background: color-mix(in srgb, var(--surface-primary) 86%, transparent);
   -webkit-backdrop-filter: blur(16px) saturate(120%);
   backdrop-filter: blur(16px) saturate(120%);
   border-bottom: 1px solid var(--surface-tertiary);
+  z-index: -1;
+}
+/* the spine runs straight through the bar: by the time the bar is stuck,
+   everything above the middle of the screen has been read, so it's ink */
+.albumYear::after {
+  content: "";
+  position: absolute;
+  left: calc(50% - 1px);
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: var(--surface-brand-primary);
 }
 @supports not (backdrop-filter: blur(1px)) {
-  .albumYear {
+  .albumYear::before {
     background: var(--surface-primary);
   }
 }
 .albumYearNumeral {
+  position: relative;
+  z-index: 1;
   font-size: 32px;
   line-height: 32px;
   letter-spacing: -0.01em;
   color: var(--content-secondary);
+  background: var(--surface-primary);
+  padding: 0 16px;
 }
 
 /* The year opens at display scale, set on the first column, scrolls up
@@ -1049,6 +1072,16 @@ button.recRow:hover {
       animation-range: cover calc(50vh - 12px) cover 50vh;
     }
 
+    /* the bar's band and spine appear only as it sticks (the opener is
+       48px below it, so: the opener's top reaching 48px from the top
+       of the viewport). In the flow it is invisible, so there is one
+       hairline on screen, never two. */
+    .albumYear::before,
+    .albumYear::after {
+      animation: barIn linear both;
+      animation-timeline: --opener;
+      animation-range: cover calc(100vh - 72px) cover calc(100vh - 48px);
+    }
     /* the bar's year only appears once the big numeral has scrolled out,
        so the two never read as a duplicate */
     .albumYearNumeral {
@@ -1119,6 +1152,14 @@ button.recRow:hover {
   to {
     opacity: 0.1;
     transform: translateY(-48px);
+  }
+}
+@keyframes barIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
   }
 }
 @keyframes barYearIn {
@@ -1371,7 +1412,8 @@ button.recRow:hover {
   .albumSpine,
   .albumSpineFill,
   .albumDot,
-  .albumDotSmall {
+  .albumDotSmall,
+  .albumYear::after {
     display: none !important;
   }
   .albumHero {
