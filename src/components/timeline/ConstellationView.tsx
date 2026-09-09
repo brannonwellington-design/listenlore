@@ -440,6 +440,12 @@ export default function ConstellationView({ data }: { data: TimelineData }) {
                 {selected.milestone.moments.length} moment
                 {selected.milestone.moments.length === 1 ? "" : "s"} attached
               </div>
+              <Link
+                href={`/event/${selected.milestone.id}`}
+                className={s.skyCardLink}
+              >
+                Open this event →
+              </Link>
             </>
           ) : selected.kind === "person" ? (
             (() => {

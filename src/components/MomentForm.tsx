@@ -31,6 +31,7 @@ export default function MomentForm({
   milestones,
   people,
   defaults = {},
+  returnTo,
   submitLabel,
 }: {
   action: (
@@ -41,6 +42,8 @@ export default function MomentForm({
   milestones: Option[];
   people: Option[];
   defaults?: MomentDefaults;
+  /** Where to land after saving (defaults to the timeline). */
+  returnTo?: string;
   submitLabel: string;
 }) {
   const [state, formAction, pending] = useActionState(action, null);
@@ -70,6 +73,7 @@ export default function MomentForm({
       {defaults.moment_id && (
         <input type="hidden" name="moment_id" value={defaults.moment_id} />
       )}
+      {returnTo && <input type="hidden" name="return_to" value={returnTo} />}
 
       <label className={s.field}>
         <span className={s.label}>Title</span>

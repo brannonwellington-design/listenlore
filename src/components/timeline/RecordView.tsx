@@ -59,6 +59,9 @@ function RecordRow({
             {ms.moments.map((m) => (
               <MomentRow key={m.id} m={m} viewer={viewer} />
             ))}
+            <Link href={`/event/${ms.id}`} className={s.skyCardLink}>
+              Open this event →
+            </Link>
           </div>
         </div>
       )}

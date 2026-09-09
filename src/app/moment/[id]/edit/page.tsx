@@ -4,6 +4,7 @@ import { getViewer } from "@/lib/auth";
 import { serviceClient } from "@/lib/supabase/service";
 import MomentForm from "@/components/MomentForm";
 import ConfirmSubmit from "@/components/ConfirmSubmit";
+import s from "@/components/form.module.css";
 import { updateMoment, deleteMedia, deleteMoment } from "@/app/add/actions";
 
 export const dynamic = "force-dynamic";
@@ -45,16 +46,14 @@ export default async function EditMomentPage({
   }
 
   return (
-    <div className="wrap" style={{ paddingTop: 48, paddingBottom: 96 }}>
-      <Link href="/" style={{ fontSize: 14 }}>
-        ← Back to the timeline
+    <div className={`wrap ${s.page}`}>
+      <Link href={`/moment/${id}`} className={s.pageBack}>
+        ← Back to the moment
       </Link>
-      <h1 style={{ fontSize: 48, lineHeight: "52px", marginTop: 24 }}>
-        Edit Moment
-      </h1>
-      <div style={{ margin: "16px 0 40px 0" }}>
+      <h1 className={s.pageTitle}>Edit Moment</h1>
+      <div className={s.pageBody}>
         {mediaRows.length > 0 && (
-          <div style={{ display: "flex", gap: 12, flexWrap: "wrap", marginBottom: 24 }}>
+          <div style={{ display: "flex", gap: 12, flexWrap: "wrap", marginBottom: 32 }}>
             {mediaRows.map((m) => (
               <div key={m.id} style={{ display: "flex", flexDirection: "column", gap: 4 }}>
                 {signedThumbs.get(m.storage_path) && (
@@ -77,7 +76,6 @@ export default async function EditMomentPage({
             ))}
           </div>
         )}
-      </div>
       <MomentForm
         action={updateMoment}
         categories={(categories.data ?? []).map((c) => ({ id: c.id, label: c.label }))}
@@ -99,6 +97,7 @@ export default async function EditMomentPage({
         }}
         submitLabel="Save changes"
       />
+      </div>
       {canDelete && (
         <form
           action={deleteMoment}

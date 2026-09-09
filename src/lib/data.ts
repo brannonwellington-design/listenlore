@@ -170,3 +170,78 @@ export async function getTimelineData(): Promise<TimelineData> {
     yearRange,
   };
 }
+
+// The one milestone a page is about, with everything the timeline already
+// knows how to render for it (signed photo URLs, attached moments).
+export async function getMilestone(id: string): Promise<Milestone | null> {
+  const data = await getTimelineData();
+  return data.milestones.find((m) => m.id === id) ?? null;
+}
+
+export interface MilestoneSummary {
+  id: string;
+  title: string;
+  categoryId: string | null;
+  dateStart: string | null;
+  location: string | null;
+  meta: string | null;
+  thumb: string | null;
+}
+
+// A light lookup for forms that only need to name the event they're
+// adding to: one row, one signed thumbnail.
+export async function getMilestoneSummary(
+  id: string
+): Promise<MilestoneSummary | null> {
+  const db = serviceClient();
+  const { data: ms } = await db
+    .from("milestones")
+    .select("id, title, category_id, date_start, date_precision, location, categories(label)")
+    .eq("id", id)
+    .eq("published", true)
+    .maybeSingle();
+  if (!ms) return null;
+
+  const { data: media } = await db
+    .from("media")
+    .select("storage_path")
+    .eq("milestone_id", id)
+    .order("sort")
+    .limit(1);
+  let thumb: string | null = null;
+  const path = media?.[0]?.storage_path;
+  if (path) {
+    const { data: signed } = await db.storage
+      .from("media")
+      .createSignedUrl(path, 3600);
+    thumb = signed?.signedUrl ?? null;
+  }
+
+  type Rel = { label: string } | { label: string }[] | null;
+  const rel = ms.categories as Rel;
+  const category =
+    rel == null ? null : Array.isArray(rel) ? (rel[0]?.label ?? null) : rel.label;
+  const date = ms.date_start as string | null;
+  const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  let when: string | null = null;
+  if (date) {
+    const [y, m, d] = date.split("-").map(Number);
+    when =
+      ms.date_precision === "day"
+        ? `${MONTHS[m - 1]} ${d}, ${y}`
+        : ms.date_precision === "year"
+          ? `${y}`
+          : `${MONTHS[m - 1]} ${y}`;
+  }
+  const meta = [when, ms.location, category].filter(Boolean).join(" · ");
+
+  return {
+    id: ms.id as string,
+    title: ms.title as string,
+    categoryId: (ms.category_id as string) ?? null,
+    dateStart: date,
+    location: (ms.location as string) ?? null,
+    meta: meta || null,
+    thumb,
+  };
+}
