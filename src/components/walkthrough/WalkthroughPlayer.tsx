@@ -261,16 +261,26 @@ export default function WalkthroughPlayer({
   const [frame, setFrame] = useState<{ left: number; top: number; width: number; height: number } | null>(null);
   const focusId = running && holding && current ? current.id : null;
   const hasMedia = !!currentDetail?.media;
+  const textRef = useRef<HTMLDivElement>(null);
+  // The grown frame fills the room above the words: measure the text block
+  // as rendered (a two-line title and a long caption need more than a
+  // fixed reserve) and fit the photo into what is left.
+  const grown = useCallback(() => {
+    const vw = window.innerWidth;
+    const vh = window.innerHeight;
+    const phone = vw < 760;
+    const margin = phone ? 16 : 96;
+    const top = phone ? 24 : 56;
+    const gap = phone ? 16 : 32;
+    const textBottom = phone ? 88 : 96;
+    const textH = textRef.current?.offsetHeight ?? 200;
+    const width = vw - margin * 2;
+    const room = vh - top - gap - textH - textBottom;
+    const height = Math.max(120, Math.min(room, width * (phone ? 1.1 : 0.62)));
+    return { left: margin, top: top + Math.max(0, (room - height) / 2), width, height };
+  }, []);
   useEffect(() => {
     let raf2 = 0;
-    const grown = () => {
-      const vw = window.innerWidth;
-      const vh = window.innerHeight;
-      const margin = vw < 760 ? 16 : 96;
-      const width = vw - margin * 2;
-      const height = Math.max(240, Math.min(vh - 320, width * 0.62));
-      return { left: margin, top: Math.max(56, (vh - 260 - height) / 2), width, height };
-    };
     const raf1 = requestAnimationFrame(() => {
       const el = focusId ? heroEl(focusId) : null;
       if (!el) {
@@ -287,7 +297,20 @@ export default function WalkthroughPlayer({
       cancelAnimationFrame(raf1);
       cancelAnimationFrame(raf2);
     };
-  }, [focusId, hasMedia]);
+  }, [focusId, hasMedia, grown]);
+  // Tell the page it is behind the overlay (see .shell in timeline.module.css).
+  const focusOn = !!frame && holding;
+  useEffect(() => {
+    document.documentElement.toggleAttribute("data-tour-focus", focusOn);
+    return () => document.documentElement.removeAttribute("data-tour-focus");
+  }, [focusOn]);
+  // Keep the frame fitted if the window changes while a stop is held.
+  useEffect(() => {
+    if (!focusId || !hasMedia) return;
+    const onResize = () => setFrame(grown());
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, [focusId, hasMedia, grown]);
 
   const doneCount = schedule.stops.filter((st) => t >= st.at).length;
   const total = schedule.total;
@@ -332,7 +355,7 @@ export default function WalkthroughPlayer({
                 </div>
               )}
               {holding && current && currentDetail && (
-                <div className={s.focusText}>
+                <div className={s.focusText} ref={textRef}>
                   <div className={s.focusBody}>
                     <div className={`${s.focusKicker} num`}>
                       {currentDetail.when.slice(0, 4)} · Stop {(stopIndex ?? 0) + 1} of{" "}

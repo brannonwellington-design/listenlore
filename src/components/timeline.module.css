@@ -498,6 +498,14 @@ button.recRow:hover {
   padding: 24px 0 24px 0;
   align-items: start;
 }
+
+/* While the walkthrough holds on a stop, the page steps out from behind
+   the overlay once the scrim has faded in, so nothing ghosts through.
+   Layout and scroll position stay put; it comes straight back after. */
+:global(html[data-tour-focus]) .shell {
+  visibility: hidden;
+  transition: visibility 0s linear 0.5s;
+}
 .albumLeadWrap {
   grid-column: 1 / 6;
 }

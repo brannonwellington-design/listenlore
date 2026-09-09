@@ -334,7 +334,7 @@
 .focusScrim {
   position: absolute;
   inset: 0;
-  background: rgba(18, 15, 8, 0.88);
+  background: rgba(18, 15, 8, 0.97);
   opacity: 0;
   transition: opacity 0.5s ease;
 }
@@ -345,7 +345,7 @@
   position: absolute;
   overflow: hidden;
   border-radius: 12px;
-  background: var(--surface-secondary);
+  background: rgba(255, 255, 255, 0.04);
   transition:
     left 0.7s cubic-bezier(0.2, 0.8, 0.2, 1),
     top 0.7s cubic-bezier(0.2, 0.8, 0.2, 1),
@@ -387,7 +387,7 @@
   transform: none;
 }
 .focusBody {
-  grid-column: 1 / 8;
+  grid-column: 1 / 9;
 }
 .focusKicker {
   font-size: 14px;
