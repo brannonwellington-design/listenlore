@@ -8,6 +8,7 @@ export interface Person {
 export interface MediaItem {
   id: string;
   url: string;
+  kind: "image" | "video";
   caption: string | null;
   sort: number;
   width: number | null;

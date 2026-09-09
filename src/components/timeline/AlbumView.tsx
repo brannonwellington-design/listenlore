@@ -8,6 +8,7 @@ import {
   clusterEntries,
   excerpt,
   fmtDate,
+  MediaEl,
   groupTimelineByYear,
   type ClusteredEntry,
 } from "./shared";
@@ -23,12 +24,11 @@ function AlbumEntry({ ms, side }: { ms: Milestone; side: "left" | "right" }) {
   const hidden = ms.moments.length - strip.length - (heroMoment ? 1 : 0);
 
   const heroImg = hero && (
-    <img
+    <MediaEl
+      media={hero}
       className={s.albumPhoto}
       style={{ aspectRatio: aspect(hero, 3 / 4, 8 / 5) }}
-      src={hero.url}
       alt={ms.title}
-      loading="lazy"
     />
   );
 
@@ -103,11 +103,10 @@ function AlbumEntry({ ms, side }: { ms: Milestone; side: "left" | "right" }) {
                 title={m.title}
                 data-moment-id={m.id}
               >
-                <img
+                <MediaEl
+                  media={m.media[0]}
                   className={s.albumStripThumb}
-                  src={m.media[0].url}
                   alt={m.title}
-                  loading="lazy"
                 />
                 <span className={s.albumStripCaption}>{m.title}</span>
               </Link>
@@ -149,12 +148,10 @@ function AlbumMoment({ m }: { m: Moment }) {
       <div className={s.albumDotSmall} />
       <Link href={`/moment/${m.id}`} className={s.albumFloatCard} title={m.title}>
         {m.media[0] ? (
-          <img
+          <MediaEl
+            media={m.media[0]}
             className={s.albumFloatPhoto}
             style={{ aspectRatio: aspect(m.media[0], 3 / 4, 8 / 5) }}
-            src={m.media[0].url}
-            alt=""
-            loading="lazy"
           />
         ) : (
           quote && (
@@ -191,11 +188,10 @@ function AlbumMomentCluster({ moments }: { moments: Moment[] }) {
                 title={m.title}
                 data-moment-id={m.id}
               >
-                <img
+                <MediaEl
+                  media={m.media[0]}
                   className={s.albumStripThumb}
-                  src={m.media[0].url}
                   alt={m.title}
-                  loading="lazy"
                 />
                 <span className={s.albumStripCaption}>{m.title}</span>
               </Link>
