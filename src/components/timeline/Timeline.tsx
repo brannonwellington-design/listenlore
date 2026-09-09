@@ -161,8 +161,7 @@ export default function Timeline({
           <span className={s.wordmarkSlash}>/</span>
           <span className={s.wordmarkSub}>Lore</span>
         </div>
-        <div className={s.headerActions}>
-          <div className={s.switcher} aria-label="Timeline view">
+        <div className={s.switcher} aria-label="Timeline view">
             {SHOWN_VIEWS.map((v) => (
               <button
                 key={v}
@@ -173,7 +172,8 @@ export default function Timeline({
                 {VIEW_LABELS[v]}
               </button>
             ))}
-          </div>
+        </div>
+        <div className={s.headerActions}>
           <Link href="/add" className={s.addBtn}>
             Add a Moment
           </Link>

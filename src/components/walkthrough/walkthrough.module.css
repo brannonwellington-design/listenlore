@@ -129,6 +129,7 @@
   align-items: center;
   gap: 16px;
   margin-top: 24px;
+  flex-wrap: wrap;
 }
 .playBtn {
   display: inline-flex;

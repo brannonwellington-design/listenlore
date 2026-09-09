@@ -1,12 +1,17 @@
-/* ---- shared chrome ---- */
+/* ---- shared chrome: the header is a band on the grid. Wordmark at
+   column 1, the view switch starting on column 7 (the spine's line),
+   actions flush right; the rule sits inside the band so the whole thing
+   stays a multiple of the baseline. ---- */
 .header {
-  display: flex;
-  justify-content: space-between;
+  display: grid;
+  grid-template-columns: repeat(var(--cols), minmax(0, 1fr));
+  column-gap: var(--gutter);
   align-items: center;
-  padding: 32px 0;
-  border-bottom: 1px solid var(--surface-tertiary);
+  padding: 24px 0 23px 0;
+  border-bottom: 1px solid var(--content-primary);
 }
 .wordmark {
+  grid-column: 1 / 5;
   display: flex;
   gap: 8px;
   font-size: 16px;
@@ -19,6 +24,8 @@
   color: var(--content-secondary);
 }
 .headerActions {
+  grid-column: 10 / 13;
+  justify-self: end;
   display: flex;
   align-items: center;
   gap: 16px;
@@ -48,6 +55,8 @@
   text-decoration: underline;
 }
 .switcher {
+  grid-column: 7 / 10;
+  justify-self: start;
   display: flex;
   gap: 4px;
   background: var(--surface-secondary);
@@ -476,48 +485,54 @@ button.recRow:hover {
   position: relative;
 }
 
-/* hero: one line. The lead on the left, the four numerals on the right,
-   sharing a bottom edge, and the first year right underneath. */
+/* hero: one masthead band hanging from the header's rule. The lead and
+   the play control stack in columns 1–4; four numerals, two columns each,
+   across 5–12, so every figure starts on a column line. A second rule
+   closes the band before the first year opens. */
 .albumHero {
-  padding: 40px 0 40px 0;
-  row-gap: 0;
-  align-items: end;
+  padding: 24px 0 31px 0;
+  border-bottom: 1px solid var(--content-primary);
+  align-items: start;
 }
 .albumLeadWrap {
-  grid-column: 1 / 6;
-  padding-bottom: 4px;
+  grid-column: 1 / 5;
 }
 .albumLead {
-  font-size: 20px;
-  line-height: 28px;
+  font-size: 24px;
+  line-height: 32px;
   color: var(--content-primary);
-  max-width: 440px;
+  text-wrap: pretty;
 }
 .albumStats {
-  grid-column: 7 / 13;
+  grid-column: 5 / 13;
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: subgrid;
   column-gap: var(--gutter);
-  padding-top: 16px;
-  border-top: 1px solid var(--content-primary);
+}
+@supports not (grid-template-columns: subgrid) {
+  .albumStats {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
 }
 .albumStat {
+  grid-column: span 2;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 8px;
 }
 .albumStatValue {
-  font-size: 32px;
-  line-height: 32px;
+  font-size: 56px;
+  line-height: 56px;
   letter-spacing: -0.02em;
 }
 .albumStatLabel {
-  font-size: 10px;
+  font-size: 12px;
   line-height: 16px;
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--content-secondary);
 }
+
 .albumBody {
   position: relative;
 }
@@ -1304,10 +1319,11 @@ button.recRow:hover {
 /* ---- phones ---- */
 @media (max-width: 760px) {
   .header {
+    display: flex;
     flex-direction: column;
     align-items: flex-start;
     gap: 16px;
-    padding: 24px 0;
+    padding: 24px 0 23px 0;
   }
   .hero {
     padding: 48px 0 32px 0;
@@ -1420,23 +1436,24 @@ button.recRow:hover {
     display: flex;
     flex-direction: column;
     align-items: stretch;
-    padding: 24px 0 32px 0;
-    gap: 0;
+    padding: 24px 0 23px 0;
+    gap: 24px;
   }
   .albumLead {
-    font-size: 18px;
-    line-height: 28px;
-    max-width: none;
-    padding: 0;
+    font-size: 20px;
+    line-height: 32px;
   }
   .albumStats {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    column-gap: 12px;
-    margin-top: 24px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px 16px;
+  }
+  .albumStat {
+    grid-column: auto;
   }
   .albumStatValue {
-    font-size: 28px;
-    line-height: 32px;
+    font-size: 40px;
+    line-height: 40px;
   }
   .albumYear {
     padding-top: 8px;

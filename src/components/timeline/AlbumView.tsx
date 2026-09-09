@@ -357,7 +357,9 @@ export default function AlbumView({
             [data.counts.people, "People"],
           ].map(([value, label]) => (
             <div key={label} className={s.albumStat}>
-              <span className={`${s.albumStatValue} num`}>{value}</span>
+              <span className={`${s.albumStatValue} num`} data-optical="">
+                {value}
+              </span>
               <span className={s.albumStatLabel}>{label}</span>
             </div>
           ))}
