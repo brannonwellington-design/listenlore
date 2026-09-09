@@ -102,6 +102,11 @@ export default async function MilestonePage({
           {milestone.story}
         </p>
       )}
+      {viewer && (
+        <div style={{ marginTop: 24 }}>
+          <AddPhotos milestoneId={milestone.id} remaining={MAX_PHOTOS_PER_MOMENT} />
+        </div>
+      )}
       <div style={{ display: "flex", flexDirection: "column", gap: 24, marginTop: 40 }}>
         {milestone.media.map((m) => (
           // eslint-disable-next-line @next/next/no-img-element
@@ -125,15 +130,7 @@ export default async function MilestonePage({
           </h2>
           <div className={s.momentGrid} style={{ gridTemplateColumns: "repeat(3, minmax(0, 1fr))" }}>
             {milestone.moments.map((m) => (
-              <div key={m.id}>
-                <MomentCard m={m} viewer={viewer} />
-                {viewer && (
-                  <AddPhotos
-                    momentId={m.id}
-                    remaining={MAX_PHOTOS_PER_MOMENT - m.media.length}
-                  />
-                )}
-              </div>
+              <MomentCard key={m.id} m={m} viewer={viewer} />
             ))}
           </div>
         </div>
