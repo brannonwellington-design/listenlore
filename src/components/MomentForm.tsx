@@ -114,7 +114,7 @@ export default function MomentForm({
         </label>
 
         <label className={s.field}>
-          <span className={s.label}>Part of a milestone? (optional)</span>
+          <span className={s.label}>Subcategory (optional)</span>
           <select
             name="milestone_id"
             value={milestoneId}
