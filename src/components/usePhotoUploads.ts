@@ -47,11 +47,42 @@ async function heicToJpeg(file: File): Promise<File | null> {
   }
 }
 
+function ymd(d: Date): string {
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+}
+
+// Read the best available date out of a photo before any conversion
+// strips it: camera capture time, else the file's own EXIF modify time
+// (scanners write this), else the file's last-modified — but only when
+// that is old enough to mean something; a fresh one is usually just the
+// download timestamp. Loads the parser lazily; returns YYYY-MM-DD or null.
+async function readCaptureDate(file: File): Promise<string | null> {
+  try {
+    const exifr = (await import("exifr")).default;
+    const parsed = await exifr.parse(file, [
+      "DateTimeOriginal",
+      "CreateDate",
+      "ModifyDate",
+    ]);
+    const d: Date | undefined =
+      parsed?.DateTimeOriginal ?? parsed?.CreateDate ?? parsed?.ModifyDate;
+    if (d && !Number.isNaN(d.getTime())) return ymd(d);
+  } catch {}
+  const TWO_WEEKS = 14 * 24 * 60 * 60 * 1000;
+  if (file.lastModified && Date.now() - file.lastModified > TWO_WEEKS) {
+    return ymd(new Date(file.lastModified));
+  }
+  return null;
+}
+
 // Owns the whole client upload pipeline: validate, mint tickets, PUT
 // directly to storage with progress, and expose the finished photo refs.
 export function usePhotoUploads(maxCount: number) {
   const [entries, setEntries] = useState<UploadEntry[]>([]);
   const [warning, setWarning] = useState<string | null>(null);
+  // Earliest capture date seen across added photos, for date prefill.
+  const [capturedDate, setCapturedDate] = useState<string | null>(null);
   const counter = useRef(0);
 
   const patch = useCallback((key: string, changes: Partial<UploadEntry>) => {
@@ -72,6 +103,9 @@ export function usePhotoUploads(maxCount: number) {
           setWarning(`Up to ${maxCount} photos here — the rest were left out.`);
           break;
         }
+        readCaptureDate(file).then((d) => {
+          if (d) setCapturedDate((prev) => (prev && prev <= d ? prev : d));
+        });
         if (isHeic(file)) {
           const converted = await heicToJpeg(file);
           if (!converted) {
@@ -176,5 +210,15 @@ export function usePhotoUploads(maxCount: number) {
       e.status === "done" && !!e.uploaded
   );
 
-  return { entries, addFiles, remove, clear, warning, pending, failed, done };
+  return {
+    entries,
+    addFiles,
+    remove,
+    clear,
+    warning,
+    pending,
+    failed,
+    done,
+    capturedDate,
+  };
 }
