@@ -25,7 +25,7 @@ function RecordRow({
   const canOpen = ms.moments.length > 0;
   const dateCell = ms.date_start
     ? ms.date_precision === "approx"
-      ? `${MONTHS[parts(ms.date_start).m - 1]} ≈`
+      ? `${MONTHS[parts(ms.date_start).m - 1]}`
       : fmtDate(ms)
     : "—";
 
@@ -93,7 +93,7 @@ function RecordMomentRow({ m }: { m: Moment }) {
   const dateCell = p
     ? m.date_precision === "day"
       ? `${MONTHS[p.m - 1]} ${p.d}`
-      : `${MONTHS[p.m - 1]} ≈`
+      : `${MONTHS[p.m - 1]}`
     : "—";
   return (
     <Link
@@ -168,7 +168,7 @@ export default function RecordView({
       )}
 
       <div className={s.recNote}>
-        ≈ marks approximate dates from the source archive. Owners can correct
+        Some dates from the source archive are approximate. Owners can correct
         their own.
       </div>
     </div>
