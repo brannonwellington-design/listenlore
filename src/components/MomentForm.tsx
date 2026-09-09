@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useActionState, useEffect, useState } from "react";
 import s from "./form.module.css";
 import PhotoPicker from "./PhotoPicker";
 import TagPicker from "./TagPicker";
@@ -54,6 +54,20 @@ export default function MomentForm({
       ""
   );
   const [milestoneId, setMilestoneId] = useState(defaults.milestone_id ?? "");
+  const [eventDate, setEventDate] = useState(defaults.event_date ?? "");
+
+  // A photo's EXIF capture date fills an empty date field; a date the
+  // person typed themselves is never overwritten.
+  const captured = uploads.capturedDate;
+  useEffect(() => {
+    if (!captured) return;
+    // Deferred a frame, matching AddPhotos: reacting to the upload's
+    // result, not part of this render pass.
+    const id = requestAnimationFrame(() =>
+      setEventDate((prev) => prev || captured)
+    );
+    return () => cancelAnimationFrame(id);
+  }, [captured]);
   const shownMilestones = categoryId
     ? milestones.filter((m) => !m.categoryId || m.categoryId === categoryId)
     : milestones;
@@ -146,7 +160,8 @@ export default function MomentForm({
             type="date"
             name="event_date"
             required
-            defaultValue={defaults.event_date}
+            value={eventDate}
+            onChange={(e) => setEventDate(e.target.value)}
             className={s.input}
           />
         </label>

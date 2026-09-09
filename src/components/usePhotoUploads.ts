@@ -47,11 +47,28 @@ async function heicToJpeg(file: File): Promise<File | null> {
   }
 }
 
+// Read the capture date out of a photo's EXIF before any conversion
+// strips it. Loads the parser lazily; returns YYYY-MM-DD or null.
+async function readCaptureDate(file: File): Promise<string | null> {
+  try {
+    const exifr = (await import("exifr")).default;
+    const parsed = await exifr.parse(file, ["DateTimeOriginal", "CreateDate"]);
+    const d: Date | undefined = parsed?.DateTimeOriginal ?? parsed?.CreateDate;
+    if (!d || Number.isNaN(d.getTime())) return null;
+    const pad = (n: number) => String(n).padStart(2, "0");
+    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+  } catch {
+    return null;
+  }
+}
+
 // Owns the whole client upload pipeline: validate, mint tickets, PUT
 // directly to storage with progress, and expose the finished photo refs.
 export function usePhotoUploads(maxCount: number) {
   const [entries, setEntries] = useState<UploadEntry[]>([]);
   const [warning, setWarning] = useState<string | null>(null);
+  // Earliest capture date seen across added photos, for date prefill.
+  const [capturedDate, setCapturedDate] = useState<string | null>(null);
   const counter = useRef(0);
 
   const patch = useCallback((key: string, changes: Partial<UploadEntry>) => {
@@ -72,6 +89,9 @@ export function usePhotoUploads(maxCount: number) {
           setWarning(`Up to ${maxCount} photos here — the rest were left out.`);
           break;
         }
+        readCaptureDate(file).then((d) => {
+          if (d) setCapturedDate((prev) => (prev && prev <= d ? prev : d));
+        });
         if (isHeic(file)) {
           const converted = await heicToJpeg(file);
           if (!converted) {
@@ -176,5 +196,15 @@ export function usePhotoUploads(maxCount: number) {
       e.status === "done" && !!e.uploaded
   );
 
-  return { entries, addFiles, remove, clear, warning, pending, failed, done };
+  return {
+    entries,
+    addFiles,
+    remove,
+    clear,
+    warning,
+    pending,
+    failed,
+    done,
+    capturedDate,
+  };
 }
