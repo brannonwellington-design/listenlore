@@ -136,6 +136,26 @@ export default async function MilestonePage({
           {milestone.story}
         </p>
       )}
+      <div style={{ display: "flex", flexDirection: "column", gap: 24, marginTop: 40 }}>
+        {mediaRows.map((m) => {
+          const url = signed.get(m.storage_path);
+          if (!url) return null;
+          return (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              key={m.id}
+              src={url}
+              alt={m.caption ?? milestone.title}
+              style={{
+                width: "100%",
+                borderRadius: 8,
+                aspectRatio:
+                  m.width && m.height ? `${m.width} / ${m.height}` : undefined,
+              }}
+            />
+          );
+        })}
+      </div>
       {moments.length > 0 && (
         <div style={{ marginTop: 40 }}>
           <h2 style={{ fontSize: 24, lineHeight: "28px" }}>
@@ -180,26 +200,6 @@ export default async function MilestonePage({
           </ul>
         </div>
       )}
-      <div style={{ display: "flex", flexDirection: "column", gap: 24, marginTop: 40 }}>
-        {mediaRows.map((m) => {
-          const url = signed.get(m.storage_path);
-          if (!url) return null;
-          return (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              key={m.id}
-              src={url}
-              alt={m.caption ?? milestone.title}
-              style={{
-                width: "100%",
-                borderRadius: 8,
-                aspectRatio:
-                  m.width && m.height ? `${m.width} / ${m.height}` : undefined,
-              }}
-            />
-          );
-        })}
-      </div>
     </div>
   );
 }
