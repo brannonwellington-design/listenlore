@@ -19,6 +19,10 @@ const VIEW_LABELS: Record<ViewMode, string> = {
   constellation: "Nodes",
 };
 
+// Register and Record are hidden from the switcher (consolidating on the
+// album view) but stay reachable via ?view= so nothing is deleted.
+const VISIBLE_VIEWS: ViewMode[] = ["album", "constellation"];
+
 function isView(v: string | null): v is ViewMode {
   return (
     v === "register" || v === "record" || v === "album" || v === "constellation"
@@ -46,7 +50,7 @@ export default function Timeline({
   data: TimelineData;
   viewer: ViewerInfo | null;
 }) {
-  const [view, setView] = useState<ViewMode>("register");
+  const [view, setView] = useState<ViewMode>("album");
   const scrollMemory = useRef<Partial<Record<ViewMode, number>>>({});
   const restoreTo = useRef<number | null>(null);
   const pendingAdded = useRef<string | null>(null);
@@ -72,19 +76,19 @@ export default function Timeline({
           "",
           window.location.pathname + (qs ? `?${qs}` : "")
         );
-        if (viewRef.current === "register") {
-          // Already on Register (the default) — scroll straight away.
+        if (viewRef.current === "album") {
+          // Already on Album (the default) — scroll straight away.
           scrollToMoment(added);
         } else {
           pendingAdded.current = added;
-          setView("register");
+          setView("album");
         }
       } else if (isView(fromUrl)) {
         setView(fromUrl);
       } else {
         try {
           const saved = window.localStorage.getItem("lore-view");
-          if (isView(saved)) setView(saved);
+          if (isView(saved) && VISIBLE_VIEWS.includes(saved)) setView(saved);
         } catch {}
       }
     });
@@ -97,7 +101,7 @@ export default function Timeline({
       window.scrollTo({ top: restoreTo.current, behavior: "auto" });
       restoreTo.current = null;
     }
-    if (view === "register" && pendingAdded.current) {
+    if (view === "album" && pendingAdded.current) {
       const added = pendingAdded.current;
       pendingAdded.current = null;
       requestAnimationFrame(() => scrollToMoment(added));
@@ -127,7 +131,7 @@ export default function Timeline({
         </div>
         <div className={s.headerActions}>
           <div className={s.switcher} aria-label="Timeline view">
-            {(Object.keys(VIEW_LABELS) as ViewMode[]).map((v) => (
+            {VISIBLE_VIEWS.map((v) => (
               <button
                 key={v}
                 aria-pressed={view === v}
