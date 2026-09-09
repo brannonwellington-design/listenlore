@@ -179,7 +179,7 @@ export default function Timeline({
           </Link>
           {viewer ? (
             <form action="/auth/signout" method="post" className={s.authNote}>
-              {viewer.name} ·{" "}
+              <span className={s.authName}>{viewer.name} · </span>
               <button type="submit" className={s.authNoteBtn}>
                 Sign out
               </button>
