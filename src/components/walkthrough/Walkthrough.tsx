@@ -268,12 +268,25 @@ export default function Walkthrough({
   // The focused photo: measured from its frame on the page, then grown.
   const [frame, setFrame] = useState<{ left: number; top: number; width: number; height: number } | null>(null);
   const focusId = running && holding && current ? current.id : null;
+  const hasMedia = !!current?.media;
   useEffect(() => {
     let raf2 = 0;
     const raf1 = requestAnimationFrame(() => {
       const el = focusId ? heroEl(focusId) : null;
       if (!el) {
-        setFrame(null);
+        // No frame on the page to grow from (a moment stop, or an event
+        // without a photo): if the stop carries media, cut straight to
+        // the focused frame; otherwise show the words alone.
+        if (focusId && hasMedia) {
+          const vw = window.innerWidth;
+          const vh = window.innerHeight;
+          const margin = vw < 760 ? 16 : 96;
+          const width = vw - margin * 2;
+          const height = Math.max(240, Math.min(vh - 320, width * 0.62));
+          setFrame({ left: margin, top: Math.max(56, (vh - 260 - height) / 2), width, height });
+        } else {
+          setFrame(null);
+        }
         return;
       }
       const r = el.getBoundingClientRect();
@@ -294,7 +307,7 @@ export default function Walkthrough({
       cancelAnimationFrame(raf1);
       cancelAnimationFrame(raf2);
     };
-  }, [focusId]);
+  }, [focusId, hasMedia]);
 
   const doneCount = stops.filter((st) => t >= st.at).length;
 
