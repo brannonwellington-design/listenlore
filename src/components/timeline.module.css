@@ -898,20 +898,49 @@ button.recRow:hover {
 
 .albumStrip {
   position: relative;
-  display: flex;
-  gap: 24px;
-  justify-content: center;
+  display: grid;
+  grid-template-columns: repeat(var(--cols), minmax(0, 1fr));
+  column-gap: var(--gutter);
   padding-bottom: 96px;
   z-index: 1;
 }
+.albumStripInline {
+  padding-bottom: 0;
+}
+.albumStripBand {
+  display: grid;
+  grid-template-columns: subgrid;
+  column-gap: var(--gutter);
+  row-gap: 24px;
+  align-items: start;
+}
+@supports not (grid-template-columns: subgrid) {
+  .albumStripBand {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+  }
+  .albumStripBandFull {
+    grid-template-columns: repeat(var(--cols), minmax(0, 1fr));
+  }
+}
+.albumStripBandLeft {
+  grid-column: 1 / 7;
+}
+.albumStripBandRight {
+  grid-column: 7 / 13;
+}
+.albumStripBandFull {
+  grid-column: 1 / 13;
+}
 .albumStripThumb {
-  width: 120px;
-  height: 120px;
+  width: 100%;
+  aspect-ratio: 1;
+  height: auto;
   object-fit: cover;
   border-radius: 8px;
 }
 .albumStripText {
-  width: 216px;
+  grid-column: span 2;
+  align-self: stretch;
   min-height: 120px;
   border: 1px solid var(--surface-tertiary);
   border-radius: 8px;
@@ -944,10 +973,10 @@ button.recRow:hover {
   border-color: var(--content-brand);
 }
 .albumStripItem {
+  grid-column: span 1;
   display: flex;
   flex-direction: column;
   gap: 8px;
-  width: 120px;
 }
 .albumStripItem .albumStripCaption {
   display: -webkit-box;
@@ -963,8 +992,8 @@ button.recRow:hover {
 }
 /* the overflow tile: what didn't fit in the strip lives on the event page */
 .albumStripMore {
-  width: 120px;
-  min-height: 120px;
+  grid-column: span 1;
+  aspect-ratio: 1;
   border: 1px dashed var(--surface-tertiary);
   border-radius: 8px;
   display: flex;
@@ -993,8 +1022,9 @@ button.recRow:hover {
 /* ---- album: free-floating moment tucked onto the spine ---- */
 .albumFloatEntry {
   position: relative;
-  display: flex;
-  justify-content: center;
+  display: grid;
+  grid-template-columns: repeat(var(--cols), minmax(0, 1fr));
+  column-gap: var(--gutter);
   padding-bottom: 96px;
   z-index: 1;
 }
@@ -1010,10 +1040,10 @@ button.recRow:hover {
   z-index: 2;
 }
 .albumFloatCard {
+  grid-column: 5 / 9;
   display: flex;
   flex-direction: column;
   gap: 8px;
-  width: min(360px, 78%);
   background: var(--surface-primary);
   padding-top: 32px;
   text-align: center;
@@ -1034,30 +1064,36 @@ button.recRow:hover {
   text-align: left;
   text-wrap: pretty;
 }
+/* a cluster takes one half of the grid, kicker flush with its first
+   column, thumbnails on the columns beneath it */
 .albumClusterWrap {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 16px;
+  grid-column: 1 / 7;
+  display: grid;
+  grid-template-columns: subgrid;
+  column-gap: var(--gutter);
+  row-gap: 24px;
   padding-top: 32px;
-  width: 100%;
+}
+.albumClusterWrapRight {
+  grid-column: 7 / 13;
+}
+@supports not (grid-template-columns: subgrid) {
+  .albumClusterWrap {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+  }
 }
 .albumClusterKicker {
+  grid-column: 1 / -1;
   font-size: 12px;
   line-height: 16px;
   color: var(--content-secondary);
-  background: var(--surface-primary);
-  padding: 0 16px;
 }
-.albumClusterStrip {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  align-items: flex-start;
-  gap: 24px;
-  max-width: 800px;
-  background: var(--surface-primary);
-  padding: 8px 16px;
+.albumClusterWrap .albumStripInline {
+  grid-column: 1 / -1;
+  grid-template-columns: subgrid;
+}
+.albumClusterWrap .albumStripBandFull {
+  grid-column: 1 / -1;
 }
 
 /* ---- experiential: scroll-driven, CSS-only, progressive enhancement.
@@ -1527,20 +1563,41 @@ button.recRow:hover {
   .spreadCaption {
     text-align: left;
   }
+  .albumStrip,
+  .albumFloatEntry {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    column-gap: 16px;
+  }
   .albumStrip {
-    flex-wrap: wrap;
-    gap: 16px;
     padding-bottom: 48px;
   }
-  .albumStripMore {
-    width: 100%;
+  .albumStripBandLeft,
+  .albumStripBandRight,
+  .albumStripBandFull {
+    grid-column: 1 / -1;
+  }
+  .albumStripBand {
+    row-gap: 16px;
+  }
+  .albumStripText {
+    grid-column: span 3;
     min-height: 0;
+  }
+  .albumStripMore {
+    grid-column: span 3;
+    aspect-ratio: auto;
     flex-direction: row;
     justify-content: center;
     gap: 8px;
   }
-  .albumFloatCard {
-    width: 88%;
+  .albumFloatCard,
+  .albumClusterWrap,
+  .albumClusterWrapRight {
+    grid-column: 1 / -1;
+  }
+  .albumClusterWrap {
+    column-gap: 16px;
+    row-gap: 16px;
   }
   .albumInvite {
     padding: 40px 24px;
