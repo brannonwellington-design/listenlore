@@ -3,8 +3,6 @@ import { notFound } from "next/navigation";
 import { getTimelineData } from "@/lib/data";
 import { getViewer } from "@/lib/auth";
 import { MomentCard } from "@/components/timeline/shared";
-import AddPhotos from "@/components/AddPhotos";
-import { MAX_PHOTOS_PER_MOMENT } from "@/lib/upload";
 import s from "@/components/timeline.module.css";
 
 export const dynamic = "force-dynamic";
@@ -103,9 +101,19 @@ export default async function MilestonePage({
         </p>
       )}
       {viewer && (
-        <div style={{ marginTop: 24 }}>
-          <AddPhotos milestoneId={milestone.id} remaining={MAX_PHOTOS_PER_MOMENT} />
-        </div>
+        <p style={{ marginTop: 24 }}>
+          <Link
+            href={`/add?milestone=${milestone.id}`}
+            style={{
+              fontSize: 14,
+              lineHeight: "20px",
+              color: "var(--content-brand)",
+              textDecoration: "underline",
+            }}
+          >
+            Add a Moment to this one
+          </Link>
+        </p>
       )}
       <div style={{ display: "flex", flexDirection: "column", gap: 24, marginTop: 40 }}>
         {milestone.media.map((m) => (
