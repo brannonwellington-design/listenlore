@@ -142,7 +142,7 @@ function AlbumSpread({ ms }: { ms: Milestone }) {
   if (!hero) return <AlbumEntry ms={ms} side="left" />;
 
   return (
-    <>
+    <div className={s.albumSpread}>
       <div className={s.spread}>
         <div className={s.spreadFrame}>
           <MediaEl media={hero} className={s.spreadPhoto} alt={ms.title} />
@@ -177,7 +177,7 @@ function AlbumSpread({ ms }: { ms: Milestone }) {
         </div>
       </div>
       <Strip ms={ms} strip={strip} hidden={hidden} />
-    </>
+    </div>
   );
 }
 
@@ -363,39 +363,6 @@ export default function AlbumView({ data }: { data: TimelineData }) {
     <div className={s.album} data-motion={mode}>
       <div className={`grid12 ${s.albumHero}`}>
         <div className={s.albumKicker}>Listen Labs, Remembered</div>
-        <h1 className={s.albumTitle} data-optical="">
-          Lore
-        </h1>
-        <p className={s.albumLead}>
-          Scroll down through time. The big events hold the small ones that made
-          them worth remembering.
-        </p>
-        <div className={`${s.albumStats} band`}>
-          <div className={s.albumStat}>
-            <span className={`${s.albumStatValue} num`} data-optical="">
-              {yearSpan}
-            </span>
-            <span className={s.albumStatLabel}>Years</span>
-          </div>
-          <div className={s.albumStat}>
-            <span className={`${s.albumStatValue} num`} data-optical="">
-              {data.counts.milestones}
-            </span>
-            <span className={s.albumStatLabel}>Events</span>
-          </div>
-          <div className={s.albumStat}>
-            <span className={`${s.albumStatValue} num`} data-optical="">
-              {data.counts.moments}
-            </span>
-            <span className={s.albumStatLabel}>Moments</span>
-          </div>
-          <div className={s.albumStat}>
-            <span className={`${s.albumStatValue} num`} data-optical="">
-              {data.counts.people}
-            </span>
-            <span className={s.albumStatLabel}>People</span>
-          </div>
-        </div>
         <div className={s.motionPick} aria-label="Motion">
           <span className={s.motionPickLabel}>Motion</span>
           {(["editorial", "cinematic"] as MotionMode[]).map((m) => (
@@ -407,6 +374,26 @@ export default function AlbumView({ data }: { data: TimelineData }) {
             >
               {m === "editorial" ? "Editorial" : "Cinematic"}
             </button>
+          ))}
+        </div>
+        <h1 className={s.albumTitle} data-optical="">
+          Lore
+        </h1>
+        <p className={s.albumLead}>
+          Scroll down through time. The big events hold the small ones that made
+          them worth remembering.
+        </p>
+        <div className={s.albumStats}>
+          {[
+            [yearSpan, "Years"],
+            [data.counts.milestones, "Events"],
+            [data.counts.moments, "Moments"],
+            [data.counts.people, "People"],
+          ].map(([value, label]) => (
+            <div key={label} className={s.albumStat}>
+              <span className={`${s.albumStatValue} num`}>{value}</span>
+              <span className={s.albumStatLabel}>{label}</span>
+            </div>
           ))}
         </div>
       </div>

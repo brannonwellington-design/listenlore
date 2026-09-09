@@ -476,14 +476,16 @@ button.recRow:hover {
   position: relative;
 }
 
-/* hero: masthead left, lead right, big numerals underneath */
+/* hero: one band. Kicker and motion switch on the top line; masthead on
+   the left, lead beside it, the four numerals stacked at the right — all
+   sharing a bottom edge, so the first year starts above the fold. */
 .albumHero {
-  padding: 96px 0 72px 0;
+  padding: 40px 0 40px 0;
   row-gap: 0;
   align-items: end;
 }
 .albumKicker {
-  grid-column: 1 / 13;
+  grid-column: 1 / 9;
   font-size: 12px;
   line-height: 16px;
   letter-spacing: 0.08em;
@@ -492,56 +494,56 @@ button.recRow:hover {
   margin-bottom: 24px;
 }
 .albumTitle {
-  grid-column: 1 / 7;
-  font-size: 200px;
-  line-height: 176px;
+  grid-column: 1 / 5;
+  font-size: 128px;
+  line-height: 112px;
   letter-spacing: -0.03em;
   margin-bottom: 0;
 }
 .albumLead {
-  grid-column: 8 / 12;
-  font-size: 18px;
-  line-height: 28px;
+  grid-column: 5 / 9;
+  font-size: 16px;
+  line-height: 24px;
   color: var(--content-secondary);
+  max-width: 360px;
   padding-bottom: 8px;
 }
 .albumStats {
-  margin-top: 72px;
-  padding-top: 24px;
+  grid-column: 9 / 13;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  column-gap: var(--gutter);
+  padding-top: 16px;
   border-top: 1px solid var(--content-primary);
 }
 .albumStat {
-  grid-column: span 2;
   display: flex;
   flex-direction: column;
-  gap: 8px;
-}
-.albumStat:first-child {
-  grid-column: 1 / 3;
+  gap: 4px;
 }
 .albumStatValue {
-  font-size: 72px;
-  line-height: 72px;
+  font-size: 32px;
+  line-height: 32px;
   letter-spacing: -0.02em;
 }
 .albumStatLabel {
-  font-size: 12px;
+  font-size: 10px;
   line-height: 16px;
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--content-secondary);
 }
 .motionPick {
-  grid-column: 10 / 13;
+  grid-column: 9 / 13;
   justify-self: end;
-  align-self: end;
+  align-self: start;
   display: flex;
   align-items: center;
   gap: 4px;
   background: var(--surface-secondary);
   border-radius: 8px;
   padding: 4px;
-  margin-top: 24px;
+  margin-bottom: 24px;
 }
 .motionPickLabel {
   font-size: 12px;
@@ -625,8 +627,8 @@ button.recRow:hover {
    behind the year's entries. */
 .albumOpener {
   position: relative;
-  height: 264px;
-  padding-top: 48px;
+  height: 232px;
+  padding-top: 32px;
   z-index: 0;
 }
 .albumOpenerNumeral {
@@ -658,8 +660,22 @@ button.recRow:hover {
   color: var(--surface-tertiary);
 }
 /* the first entry of a year starts under where the numeral first shows */
-.album[data-motion="cinematic"] .albumYear + .albumOpener + * {
-  padding-top: 120px;
+.album[data-motion="cinematic"] .albumYear + .albumOpener + .albumEntry,
+.album[data-motion="cinematic"] .albumYear + .albumOpener + .albumFloatEntry {
+  margin-top: 136px;
+}
+.album[data-motion="cinematic"] .albumYear + .albumOpener + .albumSpread {
+  margin-top: 96px;
+}
+.albumSpread .albumStrip {
+  padding-top: 48px;
+}
+.albumSpread {
+  margin-bottom: 48px;
+}
+.album[data-motion="cinematic"] .albumStrip,
+.album[data-motion="cinematic"] .albumFloatEntry {
+  padding-bottom: 120px;
 }
 
 /* entries: photo six columns, text five, one column of air by the spine */
@@ -787,6 +803,10 @@ button.recRow:hover {
 }
 
 /* cinematic spreads: full-bleed photo, words set low on the grid */
+.albumSpread {
+  position: relative;
+  z-index: 1;
+}
 .spread {
   position: relative;
   margin: 48px calc(-1 * var(--margin)) 0 calc(-1 * var(--margin));
@@ -1409,35 +1429,33 @@ button.recRow:hover {
     display: flex;
     flex-direction: column;
     align-items: stretch;
-    padding: 48px 0 40px 0;
+    padding: 32px 0 32px 0;
     gap: 0;
+  }
+  .albumKicker {
+    margin-bottom: 16px;
+  }
+  .motionPick {
+    order: 10;
+    align-self: flex-start;
+    margin: 24px 0 0 0;
   }
   .albumTitle {
     font-size: 96px;
     line-height: 88px;
   }
   .albumLead {
-    padding: 24px 0 0 0;
-    font-size: 16px;
-    line-height: 24px;
+    padding: 16px 0 0 0;
+    max-width: none;
   }
   .albumStats {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 24px;
-    margin-top: 40px;
-  }
-  .albumStat,
-  .albumStat:first-child {
-    grid-column: auto;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    column-gap: 12px;
+    margin-top: 24px;
   }
   .albumStatValue {
-    font-size: 48px;
-    line-height: 48px;
-  }
-  .motionPick {
-    align-self: flex-start;
-    margin-top: 32px;
+    font-size: 28px;
+    line-height: 32px;
   }
   .albumYear {
     padding-top: 8px;
