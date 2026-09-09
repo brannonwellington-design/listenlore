@@ -371,10 +371,7 @@ export default function AlbumView({
         {years.map(([year, entries]) => (
           <section key={year} className={s.albumYearSection}>
             <div className={s.albumSpineFill} />
-            <div className={s.albumYear}>
-              <span className={`${s.albumYearNumeral} num`}>{year}</span>
-            </div>
-            <div className={s.albumOpener} aria-hidden="true">
+            <div className={s.albumOpener}>
               <span className={`${s.albumOpenerNumeral} num`} data-optical="">
                 {year}
               </span>

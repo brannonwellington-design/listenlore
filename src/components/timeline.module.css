@@ -29,7 +29,12 @@
   display: flex;
   align-items: center;
   gap: 16px;
-  flex-wrap: wrap;
+  white-space: nowrap;
+}
+@media (max-width: 1200px) {
+  .authName {
+    display: none;
+  }
 }
 .addBtn {
   background: var(--surface-brand-primary);
@@ -288,7 +293,7 @@
 .albumFloatEntry,
 .albumStripItem,
 .albumStripText {
-  scroll-margin-top: 176px;
+  scroll-margin-top: 96px;
 }
 .editLink {
   font-size: 12px;
@@ -490,8 +495,7 @@ button.recRow:hover {
    across 5–12, so every figure starts on a column line. A second rule
    closes the band before the first year opens. */
 .albumHero {
-  padding: 24px 0 31px 0;
-  border-bottom: 1px solid var(--content-primary);
+  padding: 24px 0 24px 0;
   align-items: start;
 }
 .albumLeadWrap {
@@ -561,57 +565,6 @@ button.recRow:hover {
   transform-origin: top;
   transform: scaleY(0);
   z-index: 1;
-}
-
-/* The year rides along the top as a proper bar — full width of the page,
-   frosted so the photos passing under it stay legible as texture, ruled
-   underneath so it reads as chrome rather than a loose numeral floating
-   over the pictures. */
-.albumYear {
-  position: sticky;
-  top: 0;
-  z-index: 4;
-  display: flex;
-  justify-content: flex-start;
-  align-items: center;
-  margin: 0 calc(-1 * var(--margin)) 0 calc(-1 * var(--margin));
-  padding: 8px var(--margin) 8px var(--margin);
-}
-/* the band: frosted ground and hairline, drawn on a layer so it can wait
-   until the bar is actually stuck (see the motion block) */
-.albumYear::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: color-mix(in srgb, var(--surface-primary) 86%, transparent);
-  -webkit-backdrop-filter: blur(16px) saturate(120%);
-  backdrop-filter: blur(16px) saturate(120%);
-  border-bottom: 1px solid var(--surface-tertiary);
-  z-index: -1;
-}
-/* the spine runs straight through the bar: by the time the bar is stuck,
-   everything above the middle of the screen has been read, so it's ink */
-.albumYear::after {
-  content: "";
-  position: absolute;
-  left: calc(50% - 1px);
-  top: 0;
-  bottom: 0;
-  width: 2px;
-  background: var(--surface-brand-primary);
-}
-@supports not (backdrop-filter: blur(1px)) {
-  .albumYear::before {
-    background: var(--surface-primary);
-  }
-}
-/* the running head: the year at column 1, like a folio in the margin,
-   so the spine passes through the bar's centre untouched */
-.albumYearNumeral {
-  font-size: 24px;
-  line-height: 32px;
-  letter-spacing: -0.01em;
-  color: var(--content-secondary);
 }
 
 /* The year opens at display scale, set on the first column, scrolls up
@@ -1087,24 +1040,7 @@ button.recRow:hover {
       animation-range: cover calc(50vh - 12px) cover 50vh;
     }
 
-    /* the bar's band and spine appear only as it sticks (the opener is
-       48px below it, so: the opener's top reaching 48px from the top
-       of the viewport). In the flow it is invisible, so there is one
-       hairline on screen, never two. */
-    .albumYear::before,
-    .albumYear::after {
-      animation: barIn linear both;
-      animation-timeline: --opener;
-      animation-range: cover calc(100vh - 72px) cover calc(100vh - 48px);
-    }
-    /* the bar's year only appears once the big numeral has scrolled out,
-       so the two never read as a duplicate */
-    .albumYearNumeral {
-      animation: barYearIn linear both;
-      animation-timeline: --opener;
-      animation-range: exit 20% exit 100%;
-    }
-    /* year opener: parallax up, fades as it reaches the bar */
+    /* year opener: parallax up, fades as it leaves the top */
     .albumOpenerNumeral {
       animation: openerDrift linear both;
       animation-timeline: view();
@@ -1167,24 +1103,6 @@ button.recRow:hover {
   to {
     opacity: 0.1;
     transform: translateY(-48px);
-  }
-}
-@keyframes barIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-@keyframes barYearIn {
-  from {
-    opacity: 0;
-    transform: translateY(8px);
-  }
-  to {
-    opacity: 1;
-    transform: none;
   }
 }
 @keyframes fillDown {
@@ -1428,8 +1346,7 @@ button.recRow:hover {
   .albumSpine,
   .albumSpineFill,
   .albumDot,
-  .albumDotSmall,
-  .albumYear::after {
+  .albumDotSmall {
     display: none !important;
   }
   .albumHero {
@@ -1454,14 +1371,6 @@ button.recRow:hover {
   .albumStatValue {
     font-size: 40px;
     line-height: 40px;
-  }
-  .albumYear {
-    padding-top: 8px;
-    padding-bottom: 6px;
-  }
-  .albumYearNumeral {
-    font-size: 24px;
-    line-height: 24px;
   }
   .albumOpener {
     height: auto;
