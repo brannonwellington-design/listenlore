@@ -116,7 +116,13 @@ function layoutChunk(chunkX: number, chunkY: number, tiles: Tile[]): Placed[] {
   return out;
 }
 
-export default function GridView({ data }: { data: TimelineData }) {
+export default function GridView({
+  data,
+  drift = false,
+}: {
+  data: TimelineData;
+  drift?: boolean;
+}) {
   const tiles = useMemo(() => collect(data), [data]);
   const wrapRef = useRef<HTMLDivElement>(null);
   const [size, setSize] = useState({ w: 0, h: 0 });
@@ -233,6 +239,18 @@ export default function GridView({ data }: { data: TimelineData }) {
     e.preventDefault();
     setOffset((o) => ({ x: o.x + d[0], y: o.y + d[1] }));
   };
+
+  // On the tour the plane wanders by itself, slowly, up and to the left.
+  useEffect(() => {
+    if (!drift) return;
+    let id = 0;
+    const step = () => {
+      setOffset((o) => ({ x: o.x - 0.45, y: o.y - 0.3 }));
+      id = requestAnimationFrame(step);
+    };
+    id = requestAnimationFrame(step);
+    return () => cancelAnimationFrame(id);
+  }, [drift]);
 
   // Native wheel listener so preventDefault works (React's is passive).
   useEffect(() => {

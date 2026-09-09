@@ -1,22 +1,17 @@
 import "server-only";
 import { serviceClient } from "./supabase/service";
+import {
+  EMPTY_SCRIPT,
+  sanitizeScript,
+  type WalkthroughScript,
+} from "./walkthrough-script";
+
+export type { ScriptItem, WalkthroughScript } from "./walkthrough-script";
 
 // The walkthrough script lives as one JSON document in the media bucket,
-// beside the narration track, so it needs no schema change: which events
-// the tour stops on, when in the recording each one begins, and what is
-// said there.
-export interface WalkthroughStop {
-  id: string; // milestone id
-  at: number; // seconds into the narration
-  text: string;
-}
-
-export interface WalkthroughScript {
-  version: 1;
-  audioPath: string | null;
-  stops: WalkthroughStop[];
-}
-
+// beside the narration track, so it needs no schema change: the ordered
+// list of what the tour does (stops on events, wanders through other
+// views, waits), and when in the recording each stop begins.
 export interface Walkthrough extends WalkthroughScript {
   audioUrl: string | null;
 }
@@ -24,35 +19,14 @@ export interface Walkthrough extends WalkthroughScript {
 export const SCRIPT_PATH = "walkthrough/script.json";
 export const AUDIO_PREFIX = "walkthrough/";
 
-const EMPTY: WalkthroughScript = { version: 1, audioPath: null, stops: [] };
-
-function sanitize(raw: unknown): WalkthroughScript {
-  if (!raw || typeof raw !== "object") return EMPTY;
-  const r = raw as Partial<WalkthroughScript>;
-  const stops = Array.isArray(r.stops)
-    ? r.stops
-        .filter((s) => s && typeof s.id === "string")
-        .map((s) => ({
-          id: String(s.id),
-          at: Number.isFinite(Number(s.at)) ? Math.max(0, Number(s.at)) : 0,
-          text: typeof s.text === "string" ? s.text.slice(0, 2000) : "",
-        }))
-    : [];
-  const audioPath =
-    typeof r.audioPath === "string" && r.audioPath.startsWith(AUDIO_PREFIX)
-      ? r.audioPath
-      : null;
-  return { version: 1, audioPath, stops };
-}
-
 export async function getWalkthrough(): Promise<Walkthrough> {
   const db = serviceClient();
-  let script = EMPTY;
+  let script = EMPTY_SCRIPT;
   try {
     const { data } = await db.storage.from("media").download(SCRIPT_PATH);
-    if (data) script = sanitize(JSON.parse(await data.text()));
+    if (data) script = sanitizeScript(JSON.parse(await data.text()), AUDIO_PREFIX);
   } catch {
-    script = EMPTY;
+    script = EMPTY_SCRIPT;
   }
   let audioUrl: string | null = null;
   if (script.audioPath) {
@@ -64,11 +38,9 @@ export async function getWalkthrough(): Promise<Walkthrough> {
   return { ...script, audioUrl };
 }
 
-export async function saveWalkthrough(
-  script: WalkthroughScript
-): Promise<{ error?: string }> {
+export async function saveWalkthrough(raw: unknown): Promise<{ error?: string }> {
   const db = serviceClient();
-  const clean = sanitize(script);
+  const clean = sanitizeScript(raw, AUDIO_PREFIX);
   const body = new Blob([JSON.stringify(clean)], { type: "application/json" });
   const { error } = await db.storage
     .from("media")
