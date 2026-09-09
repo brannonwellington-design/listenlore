@@ -166,7 +166,11 @@ export async function getTimelineData(): Promise<TimelineData> {
     floatingMoments: moments
       .filter((m) => !m.milestone_id)
       .sort((a, b) => (a.event_date ?? "").localeCompare(b.event_date ?? "")),
-    counts: { milestones: milestones.length, moments: moments.length },
+    counts: {
+      milestones: milestones.length,
+      moments: moments.length,
+      people: personName.size,
+    },
     yearRange,
   };
 }
