@@ -111,8 +111,8 @@ export default function RecordView({
         </div>
         <div style={{ gridColumn: "8 / 13", alignSelf: "end" }}>
           <p className={s.sectionNote}>
-            A complete index of company history — milestones and free-floating
-            moments in one ledger. Open a milestone to read the moments
+            A complete index of company history — subcategories and free-floating
+            moments in one ledger. Open a subcategory to read the moments
             underneath it.
           </p>
         </div>

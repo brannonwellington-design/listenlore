@@ -198,12 +198,12 @@ export default function RegisterView({
           <h1 className={s.heroTitle}>The Story So Far</h1>
           <p className={s.heroLead}>
             Every milestone that got us here, and the moments people remember
-            around them. Milestones are curated; moments belong to everyone.
+            around them. Subcategories are curated; moments belong to everyone.
           </p>
         </div>
         <div className={`${s.heroStats} num`} style={{ gridColumn: "10 / 13" }}>
           <div className={s.heroStatRow}>
-            <span>Milestones</span>
+            <span>Subcategories</span>
             <span className={s.heroStatValue}>{data.counts.milestones}</span>
           </div>
           <div className={s.heroStatRow}>
@@ -257,7 +257,7 @@ export default function RegisterView({
         <section style={{ marginTop: 96 }}>
           <h3 className={s.sectionTitle}>Awaiting Their Place in Time</h3>
           <p className={s.sectionNote}>
-            Milestones we know happened — dates coming soon. Their moments are
+            Subcategories we know happened — dates coming soon. Their moments are
             already gathering.
           </p>
           {undated
