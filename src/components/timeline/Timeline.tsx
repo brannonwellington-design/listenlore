@@ -168,7 +168,7 @@ export default function Timeline({
   };
 
   return (
-    <div className="wrap">
+    <div className={`wrap ${s.shell}`}>
       <GridOverlay />
       <header className={s.header}>
         <div className={s.wordmark}>
