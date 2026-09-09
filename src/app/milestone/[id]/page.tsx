@@ -111,7 +111,7 @@ export default async function MilestonePage({
               textDecoration: "underline",
             }}
           >
-            Add a Moment to this one
+            Add a Moment
           </Link>
         </p>
       )}
