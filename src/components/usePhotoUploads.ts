@@ -47,19 +47,33 @@ async function heicToJpeg(file: File): Promise<File | null> {
   }
 }
 
-// Read the capture date out of a photo's EXIF before any conversion
-// strips it. Loads the parser lazily; returns YYYY-MM-DD or null.
+function ymd(d: Date): string {
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+}
+
+// Read the best available date out of a photo before any conversion
+// strips it: camera capture time, else the file's own EXIF modify time
+// (scanners write this), else the file's last-modified — but only when
+// that is old enough to mean something; a fresh one is usually just the
+// download timestamp. Loads the parser lazily; returns YYYY-MM-DD or null.
 async function readCaptureDate(file: File): Promise<string | null> {
   try {
     const exifr = (await import("exifr")).default;
-    const parsed = await exifr.parse(file, ["DateTimeOriginal", "CreateDate"]);
-    const d: Date | undefined = parsed?.DateTimeOriginal ?? parsed?.CreateDate;
-    if (!d || Number.isNaN(d.getTime())) return null;
-    const pad = (n: number) => String(n).padStart(2, "0");
-    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
-  } catch {
-    return null;
+    const parsed = await exifr.parse(file, [
+      "DateTimeOriginal",
+      "CreateDate",
+      "ModifyDate",
+    ]);
+    const d: Date | undefined =
+      parsed?.DateTimeOriginal ?? parsed?.CreateDate ?? parsed?.ModifyDate;
+    if (d && !Number.isNaN(d.getTime())) return ymd(d);
+  } catch {}
+  const TWO_WEEKS = 14 * 24 * 60 * 60 * 1000;
+  if (file.lastModified && Date.now() - file.lastModified > TWO_WEEKS) {
+    return ymd(new Date(file.lastModified));
   }
+  return null;
 }
 
 // Owns the whole client upload pipeline: validate, mint tickets, PUT
