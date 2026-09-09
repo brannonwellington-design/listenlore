@@ -468,23 +468,99 @@ button.recRow:hover {
   color: var(--content-disabled);
 }
 
-/* ---- album view ---- */
+/* ---- album view ----
+   Everything places by column line on the 12-col grid; every vertical
+   measure is a multiple of the 8px baseline; photo frames take fixed
+   heights that are multiples of the 24px leading. ---- */
+.album {
+  position: relative;
+}
+
+/* hero: masthead left, lead right, big numerals underneath */
 .albumHero {
-  padding: 120px 0 96px 0;
-  text-align: center;
+  padding: 96px 0 72px 0;
+  row-gap: 0;
+  align-items: end;
+}
+.albumKicker {
+  grid-column: 1 / 13;
+  font-size: 12px;
+  line-height: 16px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--content-secondary);
+  margin-bottom: 24px;
 }
 .albumTitle {
-  font-size: 96px;
-  line-height: 100px;
-  margin-top: 16px;
+  grid-column: 1 / 7;
+  font-size: 200px;
+  line-height: 176px;
+  letter-spacing: -0.03em;
+  margin-bottom: 0;
 }
 .albumLead {
+  grid-column: 8 / 12;
   font-size: 18px;
   line-height: 28px;
   color: var(--content-secondary);
-  max-width: 480px;
-  margin: 24px auto 0 auto;
+  padding-bottom: 8px;
 }
+.albumStats {
+  margin-top: 72px;
+  padding-top: 24px;
+  border-top: 1px solid var(--content-primary);
+}
+.albumStat {
+  grid-column: span 2;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.albumStat:first-child {
+  grid-column: 1 / 3;
+}
+.albumStatValue {
+  font-size: 72px;
+  line-height: 72px;
+  letter-spacing: -0.02em;
+}
+.albumStatLabel {
+  font-size: 12px;
+  line-height: 16px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--content-secondary);
+}
+.motionPick {
+  grid-column: 10 / 13;
+  justify-self: end;
+  align-self: end;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: var(--surface-secondary);
+  border-radius: 8px;
+  padding: 4px;
+  margin-top: 24px;
+}
+.motionPickLabel {
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--content-secondary);
+  padding: 0 8px 0 8px;
+}
+.motionBtn {
+  font-size: 12px;
+  line-height: 16px;
+  padding: 6px 12px;
+  border-radius: 4px;
+  color: var(--content-secondary);
+}
+.motionBtnActive {
+  background: var(--surface-highlight);
+  color: var(--content-primary);
+}
+
 .albumBody {
   position: relative;
 }
@@ -496,6 +572,24 @@ button.recRow:hover {
   width: 2px;
   background: var(--surface-tertiary);
 }
+.albumYearSection {
+  position: relative;
+}
+/* the spine fills with ink as far as you've read: each year's segment
+   scales in as the section crosses the middle of the viewport */
+.albumSpineFill {
+  display: none;
+  position: absolute;
+  left: calc(50% - 1px);
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: var(--surface-brand-primary);
+  transform-origin: top;
+  transform: scaleY(0);
+  z-index: 1;
+}
+
 /* The year rides along the top as a proper bar — full width of the page,
    frosted so the photos passing under it stay legible as texture, ruled
    underneath so it reads as chrome rather than a loose numeral floating
@@ -503,12 +597,12 @@ button.recRow:hover {
 .albumYear {
   position: sticky;
   top: 0;
-  z-index: 3;
+  z-index: 4;
   display: flex;
   justify-content: center;
   align-items: center;
-  margin: 0 calc(-1 * var(--margin)) 56px calc(-1 * var(--margin));
-  padding: 10px var(--margin) 8px var(--margin);
+  margin: 0 calc(-1 * var(--margin)) 0 calc(-1 * var(--margin));
+  padding: 8px var(--margin) 8px var(--margin);
   background: color-mix(in srgb, var(--surface-primary) 86%, transparent);
   -webkit-backdrop-filter: blur(16px) saturate(120%);
   backdrop-filter: blur(16px) saturate(120%);
@@ -520,10 +614,143 @@ button.recRow:hover {
   }
 }
 .albumYearNumeral {
-  font-size: 40px;
-  line-height: 44px;
+  font-size: 32px;
+  line-height: 32px;
   letter-spacing: -0.01em;
   color: var(--content-secondary);
+}
+
+/* The year opens at display scale, set on the first column. In editorial
+   it scrolls up and hands off to the bar; in cinematic it pins faintly
+   behind the year's entries. */
+.albumOpener {
+  position: relative;
+  height: 264px;
+  padding-top: 48px;
+  z-index: 0;
+}
+.albumOpenerNumeral {
+  display: block;
+  font-size: 200px;
+  line-height: 176px;
+  letter-spacing: -0.04em;
+  color: var(--content-primary);
+}
+/* cinematic: the opener is a full-height layer behind the year's entries
+   and the numeral pins inside it, so it holds while they scroll past and
+   leaves exactly when the year does */
+.album[data-motion="cinematic"] .albumOpener {
+  position: absolute;
+  inset: 0;
+  height: auto;
+  padding: 0;
+  pointer-events: none;
+  z-index: 0;
+}
+.album[data-motion="cinematic"] .albumOpenerNumeral {
+  position: sticky;
+  top: 64px;
+  display: block;
+  height: 312px;
+  font-size: 312px;
+  line-height: 312px;
+  letter-spacing: -0.05em;
+  color: var(--surface-tertiary);
+}
+/* the first entry of a year starts under where the numeral first shows */
+.album[data-motion="cinematic"] .albumYear + .albumOpener + * {
+  padding-top: 120px;
+}
+
+/* entries: photo six columns, text five, one column of air by the spine */
+.albumEntry {
+  position: relative;
+  padding: 48px 0 72px 0;
+  z-index: 1;
+}
+.albumDot {
+  position: absolute;
+  left: calc(50% - 8px);
+  top: 56px;
+  width: 16px;
+  height: 16px;
+  border-radius: 8px;
+  background: var(--surface-brand-primary);
+  box-shadow: 0 0 0 0 var(--surface-brand-secondary);
+  z-index: 2;
+}
+.albumFigure {
+  margin: 0;
+}
+.albumFigureLeft {
+  grid-column: 1 / 7;
+}
+.albumFigureRight {
+  grid-column: 7 / 13;
+}
+.frame {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  border-radius: 12px;
+  background: var(--surface-secondary);
+}
+.frame_landscape {
+  height: 432px;
+}
+.frame_square {
+  height: 480px;
+}
+.frame_portrait {
+  height: 552px;
+}
+/* a video in a frame: the media element wraps it in a span for its play
+   badge, so the span has to fill the frame for the badge to centre */
+.frame > span,
+.spreadFrame > span {
+  position: absolute !important;
+  inset: 0;
+}
+.framePhoto {
+  position: absolute;
+  left: 0;
+  top: -8%;
+  width: 100%;
+  height: 116%;
+  object-fit: cover;
+}
+.frameSmall {
+  border-radius: 8px;
+}
+.frameSmall.frame_landscape {
+  height: 240px;
+}
+.frameSmall.frame_square {
+  height: 288px;
+}
+.frameSmall.frame_portrait {
+  height: 336px;
+}
+.albumCaption {
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--content-secondary);
+  margin-top: 16px;
+}
+.albumText {
+  padding-top: 8px;
+}
+.albumTextLeft {
+  grid-column: 1 / 6;
+}
+.albumTextRight {
+  grid-column: 8 / 13;
+}
+.albumEntryTitle {
+  font-size: 56px;
+  line-height: 56px;
+  letter-spacing: -0.02em;
+  margin-top: 16px;
 }
 .albumEntryLink {
   color: inherit;
@@ -532,11 +759,23 @@ button.recRow:hover {
   color: var(--content-brand);
   text-decoration: none;
 }
+.albumMetaLine {
+  font-size: 14px;
+  line-height: 24px;
+  color: var(--content-secondary);
+}
+.albumBlurb {
+  font-size: 16px;
+  line-height: 24px;
+  color: var(--content-secondary);
+  margin-top: 24px;
+  max-width: 400px;
+}
 .albumOpen {
   display: inline-block;
-  margin-top: 16px;
+  margin-top: 24px;
   font-size: 14px;
-  line-height: 20px;
+  line-height: 24px;
   color: var(--content-brand);
 }
 .albumInviteLink {
@@ -546,75 +785,104 @@ button.recRow:hover {
   text-decoration: none;
   color: var(--content-brand-contrast-secondary);
 }
-.albumEntry {
-  padding-bottom: 96px;
+
+/* cinematic spreads: full-bleed photo, words set low on the grid */
+.spread {
   position: relative;
+  margin: 48px calc(-1 * var(--margin)) 0 calc(-1 * var(--margin));
+  height: calc(100vh - 96px);
+  min-height: 600px;
+  max-height: 912px;
+  overflow: hidden;
+  z-index: 1;
+  background: var(--content-primary);
 }
-.albumDot {
+.spreadFrame {
   position: absolute;
-  left: calc(50% - 8px);
-  top: 8px;
-  width: 16px;
-  height: 16px;
-  border-radius: 8px;
-  background: var(--surface-brand-primary);
+  inset: 0;
 }
-.albumFigure {
-  margin: 0;
-}
-.albumFigureLeft {
-  grid-column: 1 / 6;
-}
-.albumFigureRight {
-  grid-column: 8 / 13;
-}
-.albumPhoto {
+.spreadPhoto {
+  position: absolute;
+  left: 0;
+  top: -10%;
   width: 100%;
+  height: 120%;
   object-fit: cover;
-  border-radius: 12px;
 }
-.albumCaption {
+.spreadScrim {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to top,
+    rgba(18, 15, 8, 0.78) 0%,
+    rgba(18, 15, 8, 0.32) 40%,
+    rgba(18, 15, 8, 0) 70%
+  );
+}
+.spreadText {
+  position: absolute;
+  left: var(--margin);
+  right: var(--margin);
+  bottom: 48px;
+  align-items: end;
+}
+.spreadBody {
+  grid-column: 1 / 9;
+  color: var(--content-brand-contrast);
+}
+.spreadMeta {
+  font-size: 14px;
+  line-height: 24px;
+  color: var(--content-brand-contrast-secondary);
+}
+.spreadTitle {
+  font-size: 96px;
+  line-height: 96px;
+  letter-spacing: -0.03em;
+  margin-top: 8px;
+}
+.spreadLink {
+  color: inherit;
+}
+.spreadLink:hover {
+  text-decoration: none;
+  opacity: 0.85;
+}
+.spreadBlurb {
+  font-size: 18px;
+  line-height: 28px;
+  margin-top: 16px;
+  max-width: 520px;
+  color: var(--content-brand-contrast);
+  opacity: 0.85;
+}
+.spreadOpen {
+  display: inline-block;
+  margin-top: 16px;
+  font-size: 14px;
+  line-height: 24px;
+  color: var(--content-brand-contrast);
+  border-bottom: 1px solid currentColor;
+}
+.spreadOpen:hover {
+  text-decoration: none;
+  opacity: 0.85;
+}
+.spreadCaption {
+  grid-column: 10 / 13;
   font-size: 12px;
   line-height: 16px;
-  color: var(--content-secondary);
-  margin-top: 12px;
-}
-.albumText {
-  padding-top: 48px;
-}
-.albumTextLeft {
-  grid-column: 1 / 6;
+  color: var(--content-brand-contrast-secondary);
   text-align: right;
 }
-.albumTextLeft .albumBlurb {
-  margin-left: auto;
-}
-.albumTextRight {
-  grid-column: 8 / 13;
-}
-.albumEntryTitle {
-  font-size: 48px;
-  line-height: 52px;
-  margin-top: 12px;
-}
-.albumMetaLine {
-  font-size: 14px;
-  line-height: 20px;
-  color: var(--content-secondary);
-}
-.albumBlurb {
-  font-size: 16px;
-  line-height: 24px;
-  color: var(--content-secondary);
-  margin-top: 16px;
-  max-width: 400px;
-}
+
 .albumStrip {
-  display: flex;
-  gap: 16px;
-  justify-content: center;
-  padding-bottom: 120px;
   position: relative;
+  display: flex;
+  gap: 24px;
+  justify-content: center;
+  padding-bottom: 96px;
+  z-index: 1;
 }
 .albumStripThumb {
   width: 120px;
@@ -698,7 +966,7 @@ button.recRow:hover {
 }
 .albumStripMoreCount {
   font-size: 24px;
-  line-height: 28px;
+  line-height: 24px;
   color: var(--content-primary);
 }
 
@@ -708,6 +976,7 @@ button.recRow:hover {
   display: flex;
   justify-content: center;
   padding-bottom: 96px;
+  z-index: 1;
 }
 .albumDotSmall {
   position: absolute;
@@ -718,6 +987,7 @@ button.recRow:hover {
   border-radius: 8px;
   background: var(--surface-primary);
   border: 2px solid var(--surface-brand-primary);
+  z-index: 2;
 }
 .albumFloatCard {
   display: flex;
@@ -734,11 +1004,6 @@ button.recRow:hover {
 }
 .albumFloatCard:hover .albumCaption {
   color: var(--content-brand);
-}
-.albumFloatPhoto {
-  width: 100%;
-  object-fit: cover;
-  border-radius: 8px;
 }
 .albumFloatQuote {
   font-size: 18px;
@@ -769,36 +1034,221 @@ button.recRow:hover {
   flex-wrap: wrap;
   justify-content: center;
   align-items: flex-start;
-  gap: 20px;
+  gap: 24px;
   max-width: 800px;
   background: var(--surface-primary);
   padding: 8px 16px;
 }
 
-/* ---- experiential: content rises as it enters the viewport (CSS-only,
-   progressive enhancement, off for reduced motion) ---- */
+/* ---- experiential: scroll-driven, CSS-only, progressive enhancement.
+   Browsers without scroll timelines get the finished layout; reduced
+   motion turns it all off. ---- */
 @supports (animation-timeline: view()) {
   @media (prefers-reduced-motion: no-preference) {
-    .band,
-    .upcomingPanel,
-    .albumEntry,
-    .albumFloatEntry,
+    /* the hero lifts away as the first year arrives */
+    .albumHero {
+      animation: heroExit linear both;
+      animation-timeline: scroll(root);
+      animation-range: 0 70vh;
+    }
+    .album[data-motion="cinematic"] .albumHero {
+      animation-name: heroExitCinematic;
+    }
+
+    /* spine fill: from this section's top crossing the middle of the
+       viewport to its bottom crossing it */
+    .albumSpineFill {
+      display: block;
+      animation: fillDown linear both;
+      animation-timeline: view();
+      animation-range: cover 50vh cover calc(100% - 50vh);
+    }
+    /* dots light the instant they cross the middle */
+    .albumDot {
+      animation: dotOn linear both;
+      animation-timeline: view();
+      animation-range: cover calc(50vh - 16px) cover 50vh;
+    }
+    .albumDotSmall {
+      animation: dotSmallOn linear both;
+      animation-timeline: view();
+      animation-range: cover calc(50vh - 12px) cover 50vh;
+    }
+
+    /* year opener: parallax up, fades as it reaches the bar (editorial) */
+    .album[data-motion="editorial"] .albumOpenerNumeral {
+      animation: openerDrift linear both;
+      animation-timeline: view();
+      animation-range: entry 0% exit 100%;
+    }
+    /* cinematic: it pins, so it only breathes in */
+    .album[data-motion="cinematic"] .albumOpenerNumeral {
+      animation: openerIn linear both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 100%;
+    }
+
+    /* entries: photo and text arrive from opposite sides, text a beat
+       later, captions and strips last */
+    .albumFigureLeft {
+      animation: fromLeft linear both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 45%;
+    }
+    .albumFigureRight {
+      animation: fromRight linear both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 45%;
+    }
+    .albumTextLeft {
+      animation: fromLeft linear both;
+      animation-timeline: view();
+      animation-range: entry 15% entry 60%;
+    }
+    .albumTextRight {
+      animation: fromRight linear both;
+      animation-timeline: view();
+      animation-range: entry 15% entry 60%;
+    }
+    .albumCaption {
+      animation: riseIn linear both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 100%;
+    }
     .albumStrip,
+    .albumFloatEntry,
     .albumInvite {
       animation: riseIn linear both;
       animation-timeline: view();
-      animation-range: entry 0% entry 36%;
+      animation-range: entry 0% entry 40%;
     }
+    /* photos drift inside their frames the whole way across the viewport */
+    .framePhoto {
+      animation: parallax linear both;
+      animation-timeline: view();
+      animation-range: cover 0% cover 100%;
+    }
+    .spreadPhoto {
+      animation: parallaxDeep linear both;
+      animation-timeline: view();
+      animation-range: cover 0% cover 100%;
+    }
+    .spreadBody {
+      animation: riseIn linear both;
+      animation-timeline: view();
+      animation-range: entry 30% entry 90%;
+    }
+  }
+}
+@keyframes heroExit {
+  to {
+    opacity: 0.1;
+    transform: translateY(-48px);
+  }
+}
+@keyframes heroExitCinematic {
+  to {
+    opacity: 0;
+    transform: translateY(-64px) scale(0.94);
+  }
+}
+@keyframes fillDown {
+  from {
+    transform: scaleY(0);
+  }
+  to {
+    transform: scaleY(1);
+  }
+}
+@keyframes dotOn {
+  from {
+    background: var(--surface-tertiary);
+    box-shadow: 0 0 0 0 var(--surface-brand-secondary);
+  }
+  to {
+    background: var(--surface-brand-primary);
+    box-shadow: 0 0 0 8px var(--surface-brand-secondary);
+  }
+}
+@keyframes dotSmallOn {
+  from {
+    border-color: var(--surface-tertiary);
+  }
+  to {
+    border-color: var(--surface-brand-primary);
+  }
+}
+@keyframes openerDrift {
+  from {
+    transform: translateY(72px);
+    opacity: 0;
+  }
+  35% {
+    opacity: 1;
+    transform: translateY(24px);
+  }
+  70% {
+    opacity: 1;
+  }
+  to {
+    transform: translateY(-72px);
+    opacity: 0;
+  }
+}
+@keyframes openerIn {
+  from {
+    opacity: 0;
+    transform: translateY(48px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes fromLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-40px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes fromRight {
+  from {
+    opacity: 0;
+    transform: translateX(40px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
   }
 }
 @keyframes riseIn {
   from {
-    opacity: 0.3;
+    opacity: 0;
     transform: translateY(24px);
   }
   to {
     opacity: 1;
     transform: none;
+  }
+}
+@keyframes parallax {
+  from {
+    transform: translateY(-6%);
+  }
+  to {
+    transform: translateY(6%);
+  }
+}
+@keyframes parallaxDeep {
+  from {
+    transform: translateY(-8%) scale(1.04);
+  }
+  to {
+    transform: translateY(8%) scale(1);
   }
 }
 @media (prefers-reduced-motion: no-preference) {
@@ -944,51 +1394,125 @@ button.recRow:hover {
     padding: 40px 0 8px 0;
   }
 
-  /* album view: single column, no spine */
+}
+
+
+/* ---- album on phones: one column, no spine, no pinned numerals ---- */
+@media (max-width: 760px) {
   .albumSpine,
-  .albumDot {
-    display: none;
+  .albumSpineFill,
+  .albumDot,
+  .albumDotSmall {
+    display: none !important;
   }
   .albumHero {
-    padding: 64px 0 48px 0;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    padding: 48px 0 40px 0;
+    gap: 0;
   }
   .albumTitle {
-    font-size: 56px;
-    line-height: 60px;
+    font-size: 96px;
+    line-height: 88px;
+  }
+  .albumLead {
+    padding: 24px 0 0 0;
+    font-size: 16px;
+    line-height: 24px;
+  }
+  .albumStats {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    margin-top: 40px;
+  }
+  .albumStat,
+  .albumStat:first-child {
+    grid-column: auto;
+  }
+  .albumStatValue {
+    font-size: 48px;
+    line-height: 48px;
+  }
+  .motionPick {
+    align-self: flex-start;
+    margin-top: 32px;
+  }
+  .albumYear {
+    padding-top: 8px;
+    padding-bottom: 6px;
+  }
+  .albumYearNumeral {
+    font-size: 24px;
+    line-height: 24px;
+  }
+  .albumOpener,
+  .album[data-motion="cinematic"] .albumOpener {
+    position: relative;
+    top: auto;
+    height: auto;
+    margin-bottom: 0;
+    padding: 32px 0 8px 0;
+  }
+  .albumOpenerNumeral,
+  .album[data-motion="cinematic"] .albumOpenerNumeral {
+    font-size: 96px;
+    line-height: 88px;
+    color: var(--content-primary);
   }
   .albumEntry {
     display: flex;
     flex-direction: column;
     gap: 8px;
-    padding-bottom: 56px;
-  }
-  .albumText {
-    padding-top: 8px;
-  }
-  .albumTextLeft {
-    text-align: left;
-  }
-  .albumTextLeft .albumBlurb {
-    margin-left: 0;
-  }
-  .albumEntryTitle {
-    font-size: 32px;
-    line-height: 36px;
+    padding: 24px 0 40px 0;
   }
   .albumFigure {
     order: -1;
   }
-  .albumPhoto {
+  .frame_landscape {
+    height: 240px;
+  }
+  .frame_square {
+    height: 288px;
+  }
+  .frame_portrait {
+    height: 360px;
+  }
+  .frame {
     border-radius: 8px;
   }
-  .albumYear {
-    margin-bottom: 32px;
-    padding-top: 8px;
-    padding-bottom: 6px;
+  .albumText {
+    padding-top: 16px;
   }
-  .albumYearNumeral {
-    font-size: 28px;
-    line-height: 32px;
+  .albumEntryTitle {
+    font-size: 36px;
+    line-height: 40px;
+  }
+  .spread {
+    margin: 24px calc(-1 * var(--margin)) 0 calc(-1 * var(--margin));
+    height: 72vh;
+    min-height: 480px;
+  }
+  .spreadText {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    left: var(--margin);
+    right: var(--margin);
+    bottom: 24px;
+  }
+  .spreadTitle {
+    font-size: 40px;
+    line-height: 40px;
+  }
+  .spreadCaption {
+    text-align: left;
+  }
+  .albumStrip {
+    flex-wrap: wrap;
+    gap: 16px;
+    padding-bottom: 48px;
   }
   .albumStripMore {
     width: 100%;
@@ -997,9 +1521,8 @@ button.recRow:hover {
     justify-content: center;
     gap: 8px;
   }
-  .albumStrip {
-    flex-wrap: wrap;
-    padding-bottom: 56px;
+  .albumFloatCard {
+    width: 88%;
   }
   .albumInvite {
     padding: 40px 24px;
@@ -1007,15 +1530,21 @@ button.recRow:hover {
   }
   .albumInviteTitle {
     font-size: 40px;
-    line-height: 44px;
+    line-height: 40px;
   }
 }
 
-/* ---- nodes view (live connected graph, Paper light) ---- */
+/* ---- nodes view (live connected graph, Paper light) ----
+   The sky fills the viewport; years are hairline rules with big numerals
+   so the graph reads as plotted on time; a dot grid on the leading ties
+   it to the page grid. ---- */
 .skyWrap {
   position: relative;
   margin: 24px 0 96px 0;
-  background: var(--surface-highlight);
+  background-color: var(--surface-highlight);
+  background-image: radial-gradient(var(--surface-tertiary) 1px, transparent 1.5px);
+  background-size: var(--lh) var(--lh);
+  background-position: center;
   border: 1px solid var(--surface-tertiary);
   border-radius: 16px;
   overflow: hidden;
@@ -1023,8 +1552,8 @@ button.recRow:hover {
 .skyLegend {
   position: absolute;
   top: 16px;
-  left: 20px;
-  right: 20px;
+  left: 24px;
+  right: 24px;
   display: flex;
   gap: 24px;
   align-items: center;
@@ -1059,21 +1588,34 @@ button.recRow:hover {
 .sky {
   display: block;
   width: 100%;
-  height: min(76vh, 760px);
+  height: calc(100vh - 232px);
+  min-height: 560px;
+  max-height: 960px;
   cursor: grab;
   touch-action: none;
 }
 .sky:active {
   cursor: grabbing;
 }
+.skyYear {
+  cursor: pointer;
+}
 .skyYearLine {
   stroke: var(--surface-tertiary);
   stroke-width: 1;
+  transition: stroke 0.3s ease;
 }
 .skyYearText {
   fill: var(--content-disabled);
-  font-size: 20px;
-  font-variant-numeric: tabular-nums;
+  font-size: 64px;
+  letter-spacing: -0.02em;
+  transition: fill 0.3s ease;
+}
+.skyYearActive .skyYearLine {
+  stroke: var(--content-brand);
+}
+.skyYearActive .skyYearText {
+  fill: var(--content-brand);
 }
 .skyEdge {
   stroke: var(--content-primary);
@@ -1085,8 +1627,53 @@ button.recRow:hover {
   stroke-opacity: 0.9;
   stroke-width: 1.75;
 }
+/* entrance: edges draw themselves in behind the settling nodes */
+.skyEdgeDraw {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 0;
+  transition:
+    stroke-dashoffset 0.9s ease,
+    opacity 0.3s ease,
+    stroke 0.3s ease,
+    stroke-opacity 0.3s ease;
+}
+.skyWrap[data-intro="pending"] .skyEdgeDraw,
+.skyWrap[data-intro="playing"] .skyEdgeDraw {
+  stroke-dashoffset: 1;
+  transition: none;
+}
+.skyWrap[data-intro="pending"] .skyNode,
+.skyWrap[data-intro="playing"] .skyNode {
+  opacity: 0;
+  transition: none;
+}
+.skyWrap[data-intro="pending"] .skyLabel,
+.skyWrap[data-intro="playing"] .skyLabel {
+  opacity: 0;
+  transition: none;
+}
 .skyNode {
   cursor: pointer;
+  transition:
+    transform 1s cubic-bezier(0.2, 0.8, 0.2, 1),
+    opacity 0.6s ease;
+}
+.nodeScale {
+  transition: transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1);
+  transform-origin: center;
+  transform-box: fill-box;
+}
+.skyLit .nodeScale {
+  transform: scale(1.15);
+}
+.skyNode[data-kind="moment"].skyLit .nodeScale {
+  transform: scale(1.7);
+}
+.skyFaded {
+  opacity: 0.14 !important;
+}
+.skyHidden {
+  opacity: 0;
 }
 .skyMilestone {
   fill: var(--surface-brand-secondary);
@@ -1128,6 +1715,22 @@ button.recRow:hover {
   stroke: var(--surface-highlight);
   stroke-width: 4px;
   pointer-events: none;
+  transition: opacity 0.4s ease;
+}
+/* moment titles surface only inside a focused cluster */
+.skyMomentLabel {
+  fill: var(--content-primary);
+  font-size: 11px;
+  text-anchor: middle;
+  paint-order: stroke;
+  stroke: var(--surface-highlight);
+  stroke-width: 4px;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+.skyNode[data-hovered] .skyMomentLabel {
+  opacity: 1;
 }
 .skyMomentRing {
   fill: var(--surface-highlight);
@@ -1164,6 +1767,13 @@ button.recRow:hover {
   stroke-dasharray: 1 5;
   stroke-linecap: round;
 }
+.skyEdgeAuthor.skyEdgeDraw,
+.skyEdgePerson.skyEdgeDraw {
+  stroke-dasharray: 3 4;
+}
+.skyEdgeAuthor.skyEdgeDraw {
+  stroke-dasharray: 1 5;
+}
 .skyDotPerson {
   width: 10px;
   height: 10px;
@@ -1175,10 +1785,89 @@ button.recRow:hover {
 .skyMomentDot {
   fill: var(--content-primary);
 }
+
+/* the rail under the sky: one year at a time */
+.skyRail {
+  position: relative;
+  padding: 8px 0 16px 0;
+  border-top: 1px solid var(--surface-tertiary);
+  background: color-mix(in srgb, var(--surface-highlight) 80%, transparent);
+}
+.skyRailTrack {
+  position: relative;
+  flex: 1;
+  height: 48px;
+  cursor: ew-resize;
+  touch-action: none;
+  user-select: none;
+}
+.skyRailLine {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 15px;
+  height: 1px;
+  background: var(--surface-tertiary);
+}
+.skyRailTick {
+  position: absolute;
+  top: 0;
+  transform: translateX(-50%);
+  padding-top: 24px;
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--content-secondary);
+  white-space: nowrap;
+}
+.skyRailTick::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 8px;
+  width: 1px;
+  height: 14px;
+  background: var(--content-disabled);
+}
+.skyRailTick:hover,
+.skyRailTickActive {
+  color: var(--content-brand);
+}
+.skyRailTickActive::before {
+  background: var(--content-brand);
+}
+.skyRailHandle {
+  position: absolute;
+  top: 9px;
+  width: 12px;
+  height: 12px;
+  border-radius: 6px;
+  background: var(--surface-brand-primary);
+  box-shadow: 0 0 0 4px var(--surface-brand-secondary);
+  transform: translateX(-50%);
+  transition: left 0.2s ease;
+  pointer-events: none;
+}
+.skyRailAll {
+  position: absolute;
+  right: 24px;
+  top: 12px;
+  font-size: 12px;
+  line-height: 16px;
+  padding: 6px 12px;
+  border-radius: 4px;
+  color: var(--content-secondary);
+  background: var(--surface-secondary);
+  white-space: nowrap;
+}
+.skyRailAllActive {
+  color: var(--content-primary);
+  background: var(--surface-highlight);
+  border: 1px solid var(--surface-tertiary);
+}
 .skyCard {
   position: absolute;
-  right: 20px;
-  bottom: 20px;
+  right: 24px;
+  bottom: 96px;
   width: 300px;
   background: var(--surface-highlight);
   border: 1px solid var(--surface-tertiary);
@@ -1232,22 +1921,45 @@ button.recRow:hover {
     }
   }
 }
+@media (prefers-reduced-motion: reduce) {
+  .skyNode,
+  .skyEdgeDraw,
+  .nodeScale {
+    transition: none;
+  }
+}
 
 @media (max-width: 760px) {
   .skyWrap {
     margin: 16px -16px 48px -16px;
     border-radius: 0;
   }
+  .sky {
+    height: 64vh;
+    min-height: 420px;
+  }
   .skyCard {
     left: 16px;
     right: 16px;
+    bottom: 88px;
     width: auto;
   }
   .skyLegend {
     flex-wrap: wrap;
     gap: 12px;
+    left: 16px;
+    right: 16px;
   }
   .skyHint {
-    margin-left: 0;
+    display: none;
+  }
+  .skyYearText {
+    font-size: 40px;
+  }
+  .skyRail {
+    padding: 8px 0 12px 0;
+  }
+  .skyRailAll {
+    right: 12px;
   }
 }

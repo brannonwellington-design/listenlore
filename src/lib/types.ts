@@ -48,6 +48,6 @@ export interface Milestone {
 export interface TimelineData {
   milestones: Milestone[];
   floatingMoments: Moment[];
-  counts: { milestones: number; moments: number };
+  counts: { milestones: number; moments: number; people: number };
   yearRange: string;
 }

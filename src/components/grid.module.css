@@ -1,0 +1,74 @@
+/* G-key overlay: numbered column fields, baseline (major every --lh,
+   minor every --bl), and margin lines. Sits inside .wrap. */
+.guides {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 60;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  background-image:
+    repeating-linear-gradient(
+      to bottom,
+      rgba(0, 33, 204, 0.16) 0 1px,
+      transparent 1px var(--lh)
+    ),
+    repeating-linear-gradient(
+      to bottom,
+      rgba(0, 33, 204, 0.05) 0 1px,
+      transparent 1px var(--bl)
+    );
+}
+.guides[data-on] {
+  opacity: 1;
+}
+.cols {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: var(--margin);
+  right: var(--margin);
+  display: grid;
+  grid-template-columns: repeat(var(--cols), minmax(0, 1fr));
+  column-gap: var(--gutter);
+}
+.col {
+  background: rgba(0, 33, 204, 0.05);
+  border-left: 1px solid rgba(0, 33, 204, 0.28);
+  border-right: 1px solid rgba(0, 33, 204, 0.28);
+  position: relative;
+}
+.colNum {
+  position: fixed;
+  top: 4px;
+  font-size: 10px;
+  line-height: 16px;
+  color: var(--content-brand);
+  padding-left: 4px;
+}
+.marginLine {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 0;
+  border-left: 1px dashed rgba(0, 33, 204, 0.5);
+}
+.marginLeft {
+  left: var(--margin);
+}
+.marginRight {
+  right: var(--margin);
+}
+.legend {
+  position: fixed;
+  right: 16px;
+  bottom: 16px;
+  display: flex;
+  gap: 16px;
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--content-brand-contrast);
+  background: var(--surface-brand-primary);
+  border-radius: 4px;
+  padding: 8px 12px;
+}

@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import type { TimelineData } from "@/lib/types";
+import GridOverlay from "../GridOverlay";
 import s from "../timeline.module.css";
 import AlbumView from "./AlbumView";
 import ConstellationView from "./ConstellationView";
@@ -131,6 +132,7 @@ export default function Timeline({
 
   return (
     <div className="wrap">
+      <GridOverlay />
       <header className={s.header}>
         <div className={s.wordmark}>
           <span>Listen Labs</span>

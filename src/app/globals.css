@@ -13,10 +13,14 @@
   --surface-brand-primary: #0021cc;
   --surface-brand-secondary: #d9ddf2;
 
-  /* Müller-Brockmann grid */
+  /* Müller-Brockmann grid: one source of truth. Content and the G-key
+     overlay both read these, so they can never drift apart. */
+  --cols: 12;
   --gutter: 24px;
   --margin: 96px;
   --maxw: 1440px;
+  --bl: 8px; /* baseline unit */
+  --lh: 24px; /* body leading = 3 × baseline */
 }
 
 html {
@@ -79,6 +83,7 @@ img {
 }
 
 .wrap {
+  position: relative;
   max-width: var(--maxw);
   margin: 0 auto;
   padding: 0 var(--margin);
@@ -86,8 +91,23 @@ img {
 
 .grid12 {
   display: grid;
-  grid-template-columns: repeat(12, minmax(0, 1fr));
+  grid-template-columns: repeat(var(--cols), minmax(0, 1fr));
   column-gap: var(--gutter);
+}
+
+/* A band spans all columns and re-exposes them, so children place by
+   column line (grid-column: 1 / 7) and snap to the same lines everywhere. */
+.band {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: subgrid;
+  column-gap: var(--gutter);
+  align-items: start;
+}
+@supports not (grid-template-columns: subgrid) {
+  .band {
+    grid-template-columns: repeat(var(--cols), minmax(0, 1fr));
+  }
 }
 
 .num {
