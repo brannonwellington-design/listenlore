@@ -7,11 +7,17 @@ import { createMoment } from "./actions";
 
 export const dynamic = "force-dynamic";
 
-export default async function AddMomentPage() {
+export default async function AddMomentPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ milestone?: string }>;
+}) {
   const viewer = await getViewer();
   if (!viewer) redirect("/login?next=/add");
 
   const options = await formOptions();
+  const { milestone } = await searchParams;
+  const preselected = options.milestones.find((m) => m.id === milestone);
 
   return (
     <div className="wrap" style={{ paddingTop: 48, paddingBottom: 96 }}>
@@ -44,6 +50,7 @@ export default async function AddMomentPage() {
         categories={options.categories}
         milestones={options.milestones}
         people={options.people}
+        defaults={preselected ? { milestone_id: preselected.id } : {}}
         submitLabel="Add to the timeline"
       />
     </div>

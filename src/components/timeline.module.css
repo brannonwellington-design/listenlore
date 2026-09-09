@@ -268,7 +268,8 @@
   color: inherit;
 }
 .momentTitleLink:hover {
-  text-decoration: underline;
+  color: var(--content-brand);
+  text-decoration: none;
 }
 /* jump-to-moment lands clear of the stuck year banner */
 .band,
