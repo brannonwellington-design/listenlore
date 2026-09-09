@@ -282,7 +282,7 @@ export default function ConstellationView({ data }: { data: TimelineData }) {
     <div className={s.skyWrap}>
       <div className={s.skyLegend}>
         <span>
-          <span className={s.skyDotMilestone} /> Milestones
+          <span className={s.skyDotMilestone} /> Subcategories
         </span>
         <span>
           <span className={s.skyDotMoment} /> Moments
@@ -302,7 +302,7 @@ export default function ConstellationView({ data }: { data: TimelineData }) {
         onPointerUp={onPointerUp}
         onPointerLeave={onPointerUp}
         role="img"
-        aria-label="Connected graph of milestones and moments"
+        aria-label="Connected graph of subcategories and moments"
       >
         <defs>
           {nodes

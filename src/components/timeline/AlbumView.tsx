@@ -57,11 +57,15 @@ function AlbumEntry({ ms, side }: { ms: Milestone; side: "left" | "right" }) {
     >
       <div className={`${s.albumMetaLine} num`}>
         {fmtDate(ms)}
-        {ms.date_precision === "approx" && ms.date_start ? " ≈" : ""}
+        
         {ms.location ? ` · ${ms.location}` : ""}
         {ms.category ? ` · ${ms.category}` : ""}
       </div>
-      <h2 className={s.albumEntryTitle}>{ms.title}</h2>
+      <h2 className={s.albumEntryTitle}>
+        <Link href={`/milestone/${ms.id}`} className={s.momentTitleLink}>
+          {ms.title}
+        </Link>
+      </h2>
       {ms.blurb && <p className={s.albumBlurb}>{ms.blurb}</p>}
     </div>
   );
