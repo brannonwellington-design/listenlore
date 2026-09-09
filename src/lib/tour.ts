@@ -17,7 +17,7 @@ const BEATS: { start: number; paths: string[] }[] = [
   },
   // Cold open: Harvard, Be Fake
   {
-    start: 14.9,
+    start: 12.9,
     paths: [
       "seed/team_originstory_06-24-2025-1.jpg",
       "seed/team_originstory_01-02-2026-2.jpg",
@@ -26,7 +26,7 @@ const BEATS: { start: number; paths: string[] }[] = [
   },
   // San Francisco: hacker house, employee one, the toilet
   {
-    start: 34.7,
+    start: 30.1,
     paths: [
       "seed/team_oldoffice_05-26-2026-2.jpg",
       "seed/team_oldoffice_05-26-2026-1.jpg",
@@ -34,7 +34,7 @@ const BEATS: { start: number; paths: string[] }[] = [
   },
   // The break: pitch wins, Sequoia, the billboard
   {
-    start: 50.8,
+    start: 44.1,
     paths: [
       "seed/events_sequoiaaiascent2025_05-08-2025-1.jpg",
       "seed/brand_billboardno1_09-02-2025-4.jpg",
@@ -44,7 +44,7 @@ const BEATS: { start: number; paths: string[] }[] = [
   },
   // Series B day
   {
-    start: 71.9,
+    start: 62.4,
     paths: [
       "seed/brand_seriesbvideo_12-13-2025-1.jpg",
       "seed/brand_seriesbvideo_12-13-2025-2.jpg",
@@ -53,7 +53,7 @@ const BEATS: { start: number; paths: string[] }[] = [
   },
   // Summer of New York
   {
-    start: 89.3,
+    start: 77.5,
     paths: [
       "seed/team_nycoffice_08-20-2026-1.jpg",
       "seed/events_quirksnyc2025_07-28-2025-3.jpg",
@@ -63,7 +63,7 @@ const BEATS: { start: number; paths: string[] }[] = [
   },
   // 100 people, four offices, Hawaii (and Maddie's reminder)
   {
-    start: 119.0,
+    start: 103.3,
     paths: [
       "seed/team_100listeners_08-24-2026-1.jpg",
       "seed/team_londonoffice_06-23-2026-1.jpg",
@@ -72,7 +72,7 @@ const BEATS: { start: number; paths: string[] }[] = [
   },
   // Add yours
   {
-    start: 132.7,
+    start: 115.1,
     paths: [
       "seed/team_fikas_05-26-2026-1.jpg",
       "seed/team_firstmerch_05-26-2026.jpg",
@@ -81,7 +81,7 @@ const BEATS: { start: number; paths: string[] }[] = [
   },
 ];
 
-export const TOUR_DURATION = 148.8;
+export const TOUR_DURATION = 129.1;
 
 export interface TourBeat {
   start: number;
