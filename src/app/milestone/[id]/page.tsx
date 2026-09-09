@@ -3,6 +3,8 @@ import { notFound } from "next/navigation";
 import { getTimelineData } from "@/lib/data";
 import { getViewer } from "@/lib/auth";
 import { MomentCard } from "@/components/timeline/shared";
+import AddPhotos from "@/components/AddPhotos";
+import { MAX_PHOTOS_PER_MOMENT } from "@/lib/upload";
 import s from "@/components/timeline.module.css";
 
 export const dynamic = "force-dynamic";
@@ -123,7 +125,15 @@ export default async function MilestonePage({
           </h2>
           <div className={s.momentGrid} style={{ gridTemplateColumns: "repeat(3, minmax(0, 1fr))" }}>
             {milestone.moments.map((m) => (
-              <MomentCard key={m.id} m={m} viewer={viewer} />
+              <div key={m.id}>
+                <MomentCard m={m} viewer={viewer} />
+                {viewer && (
+                  <AddPhotos
+                    momentId={m.id}
+                    remaining={MAX_PHOTOS_PER_MOMENT - m.media.length}
+                  />
+                )}
+              </div>
             ))}
           </div>
         </div>

@@ -447,6 +447,7 @@ export async function addPhotosToMoment(
 
   revalidatePath("/");
   revalidatePath(`/moment/${momentId}`);
+  revalidatePath("/milestone/[id]", "page");
   return { ok: true };
 }
 
