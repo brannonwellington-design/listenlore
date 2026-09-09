@@ -2,7 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getTimelineData } from "@/lib/data";
 import { getViewer } from "@/lib/auth";
-import { MomentCard } from "@/components/timeline/shared";
+import { MediaEl, MomentCard } from "@/components/timeline/shared";
 import s from "@/components/timeline.module.css";
 
 export const dynamic = "force-dynamic";
@@ -117,10 +117,10 @@ export default async function MilestonePage({
       )}
       <div style={{ display: "flex", flexDirection: "column", gap: 24, marginTop: 40 }}>
         {milestone.media.map((m) => (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
+          <MediaEl
             key={m.id}
-            src={m.url}
+            media={m}
+            controls
             alt={m.caption ?? milestone.title}
             style={{
               width: "100%",

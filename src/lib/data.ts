@@ -1,5 +1,6 @@
 import "server-only";
 import { serviceClient } from "./supabase/service";
+import { VIDEO_EXTENSIONS } from "./upload";
 import type {
   DatePrecision,
   MediaItem,
@@ -76,6 +77,7 @@ export async function getTimelineData(): Promise<TimelineData> {
     list.push({
       id: m.id,
       url,
+      kind: VIDEO_EXTENSIONS.test(m.storage_path) ? "video" : "image",
       caption: m.caption,
       sort: m.sort,
       width: m.width,

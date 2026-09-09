@@ -12,6 +12,7 @@ import {
   fmtDate,
   fmtMomentDate,
   groupTimelineByYear,
+  MediaEl,
   MomentCard,
   MomentRow,
   undatedFloating,
@@ -94,12 +95,11 @@ function RegisterMilestone({
       </div>
       {!expanded && hero && (
         <figure className={s.bandFigure}>
-          <img
+          <MediaEl
+            media={hero}
             className={s.bandPhoto}
             style={{ aspectRatio: aspect(hero, 3 / 4, 3 / 2) }}
-            src={hero.url}
             alt={ms.title}
-            loading="lazy"
           />
         </figure>
       )}
@@ -131,12 +131,10 @@ function FloatingMomentBand({
         </Link>
         {m.media[0] ? (
           <Link href={`/moment/${m.id}`}>
-            <img
+            <MediaEl
+              media={m.media[0]}
               className={s.floatBandPhoto}
               style={{ aspectRatio: aspect(m.media[0]) }}
-              src={m.media[0].url}
-              alt=""
-              loading="lazy"
             />
           </Link>
         ) : (

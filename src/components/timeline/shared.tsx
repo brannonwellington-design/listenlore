@@ -182,6 +182,47 @@ export function excerpt(m: Moment, maxChars = 160): string | null {
   return text.length > maxChars ? `${text.slice(0, maxChars).trimEnd()}…` : text;
 }
 
+// One element for any media item: images stay <img>; videos render muted
+// and inline so they behave like living thumbnails wherever a photo goes.
+// Pass controls for detail pages where playback matters.
+export function MediaEl({
+  media,
+  alt,
+  className,
+  style,
+  controls = false,
+}: {
+  media: { url: string; kind: "image" | "video" };
+  alt?: string;
+  className?: string;
+  style?: React.CSSProperties;
+  controls?: boolean;
+}) {
+  if (media.kind === "video") {
+    return (
+      <video
+        src={media.url}
+        className={className}
+        style={style}
+        controls={controls}
+        muted={!controls}
+        playsInline
+        preload="metadata"
+      />
+    );
+  }
+  // eslint-disable-next-line @next/next/no-img-element
+  return (
+    <img
+      src={media.url}
+      alt={alt ?? ""}
+      className={className}
+      style={style}
+      loading="lazy"
+    />
+  );
+}
+
 // The one card for a moment in a grid: photo or quote up top, then title
 // and the full meta line. Used by milestone grids and floating clusters alike.
 export function MomentCard({
@@ -196,12 +237,10 @@ export function MomentCard({
     <div className={s.momentCard} data-moment-id={m.id}>
       {m.media[0] ? (
         <Link href={`/moment/${m.id}`}>
-          <img
+          <MediaEl
+            media={m.media[0]}
             className={s.momentCardPhoto}
             style={{ aspectRatio: aspect(m.media[0]) }}
-            src={m.media[0].url}
-            alt=""
-            loading="lazy"
           />
         </Link>
       ) : (
@@ -236,7 +275,7 @@ export function MomentRow({
     <div className={s.momentRow} data-moment-id={m.id}>
       {m.media[0] && (
         <Link href={`/moment/${m.id}`}>
-          <img className={s.momentThumb} src={m.media[0].url} alt="" loading="lazy" />
+          <MediaEl media={m.media[0]} className={s.momentThumb} />
         </Link>
       )}
       <div>

@@ -1,7 +1,7 @@
 "use client";
 
 import s from "./form.module.css";
-import { ACCEPTED_IMAGE_TYPES } from "@/lib/upload";
+import { ACCEPTED_IMAGE_TYPES, ACCEPTED_VIDEO_TYPES } from "@/lib/upload";
 import type { usePhotoUploads } from "./usePhotoUploads";
 
 // Photo input with live direct-to-storage uploads: previews, per-photo
@@ -18,19 +18,31 @@ export default function PhotoPicker({
   return (
     <div className={s.field}>
       <span className={s.label}>
-        Photos (optional — up to {maxCount}, JPEG/PNG/WebP/GIF/HEIC)
+        Photos &amp; videos (optional — up to {maxCount}; JPEG/PNG/WebP/GIF/HEIC,
+        MP4/MOV/WebM up to 50 MB)
       </span>
       {uploads.entries.length > 0 && (
         <div className={s.previewGrid}>
           {uploads.entries.map((e) => (
             <div key={e.key} className={s.previewItem}>
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={e.previewUrl}
-                alt={e.name}
-                className={s.previewImg}
-                style={e.status !== "done" ? { opacity: 0.55 } : undefined}
-              />
+              {e.kind === "video" ? (
+                <video
+                  src={e.previewUrl}
+                  muted
+                  playsInline
+                  preload="metadata"
+                  className={s.previewImg}
+                  style={e.status !== "done" ? { opacity: 0.55 } : undefined}
+                />
+              ) : (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={e.previewUrl}
+                  alt={e.name}
+                  className={s.previewImg}
+                  style={e.status !== "done" ? { opacity: 0.55 } : undefined}
+                />
+              )}
               {e.status === "uploading" && (
                 <span className={s.previewStatus}>
                   Uploading… {Math.round(e.progress * 100)}%
@@ -52,7 +64,7 @@ export default function PhotoPicker({
       )}
       <input
         type="file"
-        accept={`${Object.keys(ACCEPTED_IMAGE_TYPES).join(",")},image/heic,image/heif,.heic,.heif`}
+        accept={`${Object.keys(ACCEPTED_IMAGE_TYPES).join(",")},${Object.keys(ACCEPTED_VIDEO_TYPES).join(",")},image/heic,image/heif,.heic,.heif`}
         multiple
         className={s.input}
         onChange={(e) => {

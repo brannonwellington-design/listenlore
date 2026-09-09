@@ -4,7 +4,9 @@ import { useCallback, useRef, useState } from "react";
 import { requestUploadTickets } from "@/app/add/actions";
 import {
   ACCEPTED_IMAGE_TYPES,
+  ACCEPTED_VIDEO_TYPES,
   MAX_FILE_BYTES,
+  MAX_VIDEO_BYTES,
   type UploadedPhoto,
 } from "@/lib/upload";
 import { readImageSize, uploadToStorage } from "@/lib/upload-client";
@@ -12,6 +14,7 @@ import { readImageSize, uploadToStorage } from "@/lib/upload-client";
 export interface UploadEntry {
   key: string;
   name: string;
+  kind: "image" | "video";
   previewUrl: string;
   progress: number;
   status: "uploading" | "done" | "error";
@@ -79,14 +82,17 @@ export function usePhotoUploads(maxCount: number) {
           }
           file = converted;
         }
-        if (!ACCEPTED_IMAGE_TYPES[file.type]) {
+        const isVideo = !!ACCEPTED_VIDEO_TYPES[file.type];
+        if (!ACCEPTED_IMAGE_TYPES[file.type] && !isVideo) {
           setWarning(
-            `“${file.name}” isn’t a supported image (JPEG, PNG, WebP, GIF, or HEIC).`
+            `“${file.name}” isn’t supported (photos: JPEG, PNG, WebP, GIF, HEIC; videos: MP4, MOV, WebM).`
           );
           continue;
         }
-        if (file.size > MAX_FILE_BYTES) {
-          setWarning(`“${file.name}” is over 10 MB.`);
+        if (isVideo ? file.size > MAX_VIDEO_BYTES : file.size > MAX_FILE_BYTES) {
+          setWarning(
+            `“${file.name}” is over ${isVideo ? "50" : "10"} MB.`
+          );
           continue;
         }
         accepted.push(file);
@@ -96,6 +102,7 @@ export function usePhotoUploads(maxCount: number) {
       const fresh: UploadEntry[] = accepted.map((file) => ({
         key: `u${counter.current++}`,
         name: file.name,
+        kind: ACCEPTED_VIDEO_TYPES[file.type] ? ("video" as const) : ("image" as const),
         previewUrl: URL.createObjectURL(file),
         progress: 0,
         status: "uploading" as const,
@@ -121,7 +128,9 @@ export function usePhotoUploads(maxCount: number) {
           const entry = fresh[i];
           const ticket = ticketRes.tickets[i];
           try {
-            const dims = await readImageSize(file);
+            const dims = ACCEPTED_VIDEO_TYPES[file.type]
+              ? { width: null, height: null }
+              : await readImageSize(file);
             await uploadToStorage(ticket, file, (fraction) =>
               patch(entry.key, { progress: fraction })
             );
