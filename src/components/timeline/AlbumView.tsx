@@ -301,6 +301,11 @@ function isBigBeat(ms: Milestone): boolean {
   return hasPhoto && (ms.moments.length >= 3 || ms.media.length > 0);
 }
 
+// The walkthrough's narration is Alfred's voice, and he asked for it to
+// come off the site. Hidden rather than removed so the tour can return
+// with a new track.
+const SHOW_WALKTHROUGH = false;
+
 export default function AlbumView({
   data,
   tour,
@@ -342,12 +347,14 @@ export default function AlbumView({
             Scroll down through time. The big events hold the small ones that
             made them worth remembering.
           </h1>
-          <WalkthroughControls
-            stopCount={tour.stopCount}
-            narrated={tour.narrated}
-            canEdit={canEdit}
-            onPlay={tour.onPlay}
-          />
+          {SHOW_WALKTHROUGH && (
+            <WalkthroughControls
+              stopCount={tour.stopCount}
+              narrated={tour.narrated}
+              canEdit={canEdit}
+              onPlay={tour.onPlay}
+            />
+          )}
         </div>
         <div className={s.albumStats}>
           {[
